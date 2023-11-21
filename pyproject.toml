@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "davdam"
+version = "0.1.0"
+description = ""
+authors = ["Satyuel <stockmann89@mail.ru>"]
+readme = "README.md"
+packages = [{include = "davdam"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^4.2.7"
+django-oscar = {extras = ["sorl-thumbnail"], version = "^3.2.2"}
+django-oscar-api = "^3.2.4"
+pillow = "^10.1.0"
+drf-spectacular = "^0.26.5"
+aiogram = "^3.1.1"
+python-dotenv = "^1.0.0"
+psycopg = "^3.1.12"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.11.0"
+ruff = "^0.1.6"
+pre-commit = "^3.5.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
