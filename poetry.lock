@@ -1160,6 +1160,20 @@ files = [
 six = "*"
 
 [[package]]
+name = "pycountry"
+version = "22.3.5"
+description = "ISO country, subdivision, language, currency and script definitions and their translations"
+category = "dev"
+optional = false
+python-versions = ">=3.6, <4"
+files = [
+    {file = "pycountry-22.3.5.tar.gz", hash = "sha256:b2163a246c585894d808f18783e19137cb70a0c18fb36748dc01fc6f109c1646"},
+]
+
+[package.dependencies]
+setuptools = "*"
+
+[[package]]
 name = "pydantic"
 version = "2.3.0"
 description = "Data validation using Python type hints"
@@ -1764,4 +1778,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "4b181e630f865c42905b6bb94d136e1fb0fc66c2f6d59a08281757aab64903af"
+content-hash = "127b1d81d78053004dd83c55a42a2a2bf6fd0142767fe917a87f56cf3f89baf9"
