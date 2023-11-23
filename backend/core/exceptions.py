@@ -4,3 +4,7 @@ class AppError(Exception):
 
 class InvalidProductError(AppError):
     pass
+
+
+class DifferentSellersError(AppError):
+    pass
