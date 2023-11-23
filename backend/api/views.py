@@ -64,6 +64,7 @@ class CheckoutAPIView(CoreCheckoutView):
             raise InvalidProductError(serializer.errors)
 
         self.serializer = serializer
+        self.request.basket.flush()
         self._fill_basket()
 
         basket_url = self.request.build_absolute_uri(
