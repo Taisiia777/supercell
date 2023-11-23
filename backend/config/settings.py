@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "oscar.apps.catalogue.reviews.apps.CatalogueReviewsConfig",
     "oscar.apps.communication.apps.CommunicationConfig",
     "shop.partner.apps.PartnerConfig",
-    "oscar.apps.basket.apps.BasketConfig",
+    "shop.basket.apps.BasketConfig",
     "shop.payment.apps.PaymentConfig",
     "oscar.apps.offer.apps.OfferConfig",
     "shop.order.apps.OrderConfig",
