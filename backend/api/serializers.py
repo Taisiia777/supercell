@@ -11,14 +11,6 @@ CoreCheckoutSerializer = get_api_class("serializers.checkout", "CheckoutSerializ
 CoreOrderSerializer = get_api_class("serializers.checkout", "OrderSerializer")
 
 
-class ProductListSerializer(serializers.ModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name="product-detail")
-
-    class Meta:
-        model = Product
-        fields = ["id", "url", "title", "images"]
-
-
 class SellerSerializer(serializers.ModelSerializer):
     products_url = serializers.HyperlinkedIdentityField(
         view_name="seller-products", lookup_url_kwarg="seller_id"

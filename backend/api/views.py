@@ -14,6 +14,7 @@ CoreProductList = get_api_class("views.product", "ProductList")
 CoreProductDetail = get_api_class("views.product", "ProductDetail")
 CoreCheckoutView = get_api_class("views.checkout", "CheckoutView")
 CoreOrderSerializer = get_api_class("serializers.checkout", "OrderSerializer")
+CoreProductLinkSerializer = get_api_class("serializers.product", "ProductLinkSerializer")
 Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
 
@@ -24,7 +25,7 @@ class SellersListView(generics.ListAPIView):
 
 
 class SellerProductsListView(CoreProductList):
-    serializer_class = serializers.ProductListSerializer
+    serializer_class = CoreProductLinkSerializer
 
     def get_queryset(self):
         qs = super().get_queryset()
