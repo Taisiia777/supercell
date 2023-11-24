@@ -25,6 +25,8 @@ services:
       - "./backend/media:/app/media"
     ports:
       - "127.0.0.1:8009:8000"
+    depends_on:
+      - postgres
 
 volumes:
   pg_data: {}
