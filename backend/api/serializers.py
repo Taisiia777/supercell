@@ -20,9 +20,13 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 
 class SellerSerializer(serializers.ModelSerializer):
+    products_url = serializers.HyperlinkedIdentityField(
+        view_name="seller-products", lookup_url_kwarg="seller_id"
+    )
+
     class Meta:
         model = Seller
-        fields = ["id", "name", "image"]
+        fields = ["id", "name", "image", "products_url"]
 
 
 class BasketProductSerializer(serializers.Serializer):
