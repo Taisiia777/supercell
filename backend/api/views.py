@@ -5,6 +5,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from oscar.apps.partner.strategy import Selector
 
 from api import serializers
 from core.exceptions import InvalidProductError, AppError
@@ -83,3 +84,24 @@ class CheckoutAPIView(CoreCheckoutView):
             return Response({"success": False, "message": str(err)}, status=400)
 
         return super().post(request, *args, **kwargs)
+
+
+class ProductAllocationTestView(APIView):
+    serializer_class = serializers.BasketProductSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if not serializer.is_valid():
+            return Response({"success": False, "message": serializer.errors}, status=400)
+
+        try:
+            product_id = serializer.validated_data["product_id"]
+            qnt = serializer.validated_data["quantity"]
+            product = Product.objects.get(id=product_id)
+        except (Product.DoesNotExist, ValueError) as err:
+            return Response({"success": False, "message": str(err)}, status=400)
+
+        strategy = Selector().strategy()
+        info = strategy.fetch_for_product(product)
+        result = info.availability.is_purchase_permitted(qnt)
+        return Response({"success": True, "message": result})
