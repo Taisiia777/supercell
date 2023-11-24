@@ -35,7 +35,10 @@ class PaymentView(APIView):
     @staticmethod
     def get(request, *args, **kwargs):
         return Response(
-            {"success": False, "message": "not implemented"},
+            {
+                "payment_method_code": "enot",
+                "url": "<payment provider url will be here>",
+            },
             status=status.HTTP_418_IM_A_TEAPOT,
         )
 
@@ -47,6 +50,7 @@ class ProductDetailView(CoreProductDetail):
 class CheckoutAPIView(CoreCheckoutView):
     permission_classes = [IsAuthenticated]
     products_serializer_class = serializers.APICheckoutSerializer
+    order_serializer_class = serializers.OrderSerializer
     serializer = None
 
     def _fill_basket(self):
