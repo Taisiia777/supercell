@@ -11,5 +11,20 @@ services:
     volumes:
       - "pg_data:/var/lib/postgresql/data"
 
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    command: gunicorn config.wsgi:application -w ${DJANGO_WORKERS_COUNT:-1}
+    environment:
+      BOT_TOKEN: $BOT_TOKEN
+      DB_HOST: postgres
+      DB_NAME: $POSTGRES_DB
+      DB_USER: $POSTGRES_USER
+      DB_PASSWORD: $POSTGRES_PASSWORD
+    volumes:
+      - "./backend/media:/app/media"
+    ports:
+      - "127.0.0.1:8009:8000"
+
 volumes:
   pg_data: {}
