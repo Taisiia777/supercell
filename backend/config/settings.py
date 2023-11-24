@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "oscarapi",
     "drf_spectacular",
+    "corsheaders",
     "core",
     "api",
 ]
@@ -84,6 +85,7 @@ SITE_ID = 1
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -230,5 +232,7 @@ OSCAR_DEFAULT_CURRENCY = "RUB"
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 AUTH_USER_MODEL = "core.User"
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 from oscar.defaults import *  # noqa

@@ -16,6 +16,7 @@ drf-spectacular = "^0.26.5"
 aiogram = "^3.1.1"
 python-dotenv = "^1.0.0"
 psycopg = "^3.1.12"
+django-cors-headers = "^4.3.1"
 
 
 [tool.poetry.group.dev.dependencies]
