@@ -1,4 +1,5 @@
 from django.urls import reverse
+from drf_spectacular.utils import extend_schema, OpenApiExample
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 from rest_framework import generics, status
@@ -49,6 +50,10 @@ class ProductDetailView(CoreProductDetail):
     pass
 
 
+@extend_schema(
+    request=serializers.APICheckoutSerializer,
+    responses=serializers.OrderSerializer,
+)
 class CheckoutAPIView(CoreCheckoutView):
     permission_classes = [IsAuthenticated]
     products_serializer_class = serializers.APICheckoutSerializer
@@ -93,7 +98,9 @@ class ProductAllocationTestView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
-            return Response({"success": False, "message": serializer.errors}, status=400)
+            return Response(
+                {"success": False, "message": serializer.errors}, status=400
+            )
 
         try:
             product_id = serializer.validated_data["product_id"]

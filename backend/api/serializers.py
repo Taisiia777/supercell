@@ -1,9 +1,12 @@
 import warnings
 
 from django.urls import reverse, NoReverseMatch
+from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 from rest_framework import serializers
+
+from api import examples
 
 Product = get_model("catalogue", "Product")
 Seller = get_model("partner", "Seller")
@@ -26,6 +29,9 @@ class BasketProductSerializer(serializers.Serializer):
     quantity = serializers.IntegerField(min_value=1, max_value=10)
 
 
+@extend_schema_serializer(
+    examples=[OpenApiExample("Создание заказа", examples.CheckoutExample)]
+)
 class APICheckoutSerializer(serializers.Serializer):
     products = BasketProductSerializer(many=True)
 
