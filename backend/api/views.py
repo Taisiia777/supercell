@@ -1,3 +1,5 @@
+import logging
+
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema
 from oscar.apps.partner.strategy import Selector
@@ -10,6 +12,9 @@ from rest_framework.views import APIView
 
 from api import serializers
 from core.exceptions import InvalidProductError, AppError
+
+
+logger = logging.getLogger(__name__)
 
 CoreProductList = get_api_class("views.product", "ProductList")
 CoreProductDetail = get_api_class("views.product", "ProductDetail")
@@ -74,6 +79,9 @@ class CheckoutAPIView(CoreCheckoutView):
                 self.request.basket.add_product(product, qnt)
             except (Product.DoesNotExist, ValueError) as err:
                 raise InvalidProductError(str(err)) from err
+            except Exception as err:
+                logger.exception(err)
+                raise AppError(str(err)) from err
 
     def _parse_products_and_fill_basket(self):
         serializer = self.products_serializer_class(data=self.request.data)

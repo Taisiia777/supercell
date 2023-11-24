@@ -1,12 +1,22 @@
+import logging
+
 from oscar.apps.basket.abstract_models import AbstractBasket
 
-from core.exceptions import DifferentSellersError
+from core import exceptions as exc
+
+logger = logging.getLogger(__name__)
 
 
 class Basket(AbstractBasket):
     def _get_product_seller(self, product, options):
-        info = self.get_stock_info(product, options)
-        return info.stockrecord.partner
+        try:
+            info = self.get_stock_info(product, options)
+            return info.stockrecord.partner
+        except Exception:
+            logger.warning("No seller for product %s", product.pk)
+            raise exc.NoSellerFoundError(
+                f"Не найден поставщик продукта {product.title}"
+            )
 
     def _get_seller(self, options):
         for line in self.all_lines()[:1]:
@@ -16,7 +26,7 @@ class Basket(AbstractBasket):
         product_seller = self._get_product_seller(product, options)
         basket_seller = self._get_seller(options)
         if basket_seller is not None and product_seller != basket_seller:
-            raise DifferentSellersError("Product does not belong to this seller")
+            raise exc.DifferentSellersError("Product does not belong to this seller")
 
         return super().add_product(product, quantity, options)
 
