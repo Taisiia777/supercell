@@ -1,12 +1,12 @@
 from django.urls import reverse
-from drf_spectacular.utils import extend_schema, OpenApiExample
+from drf_spectacular.utils import extend_schema
+from oscar.apps.partner.strategy import Selector
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from oscar.apps.partner.strategy import Selector
 
 from api import serializers
 from core.exceptions import InvalidProductError, AppError
@@ -15,16 +15,20 @@ CoreProductList = get_api_class("views.product", "ProductList")
 CoreProductDetail = get_api_class("views.product", "ProductDetail")
 CoreCheckoutView = get_api_class("views.checkout", "CheckoutView")
 CoreOrderSerializer = get_api_class("serializers.checkout", "OrderSerializer")
-CoreProductLinkSerializer = get_api_class("serializers.product", "ProductLinkSerializer")
+CoreProductLinkSerializer = get_api_class(
+    "serializers.product", "ProductLinkSerializer"
+)
 Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
 
 
+@extend_schema(tags=["shop"])
 class SellersListView(generics.ListAPIView):
     serializer_class = serializers.SellerSerializer
     queryset = Seller.objects.all()
 
 
+@extend_schema(tags=["shop"])
 class SellerProductsListView(CoreProductList):
     serializer_class = CoreProductLinkSerializer
 
@@ -46,11 +50,13 @@ class PaymentView(APIView):
         )
 
 
+@extend_schema(tags=["shop"])
 class ProductDetailView(CoreProductDetail):
     pass
 
 
 @extend_schema(
+    tags=["shop"],
     request=serializers.APICheckoutSerializer,
     responses=serializers.OrderSerializer,
 )
