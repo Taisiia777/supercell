@@ -23,10 +23,22 @@ services:
       DB_PASSWORD: $POSTGRES_PASSWORD
     volumes:
       - "./backend/media:/app/media"
-    ports:
-      - "127.0.0.1:8009:8000"
     depends_on:
       - postgres
+
+  nginx:
+    image: nginx:1.22-alpine-slim
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8009:80"
+    environment:
+      NGINX_SERVER_NAME: $NGINX_SERVER_NAME
+    depends_on:
+      - backend
+    volumes:
+      - "./nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro"
+      - "${DJANGO_MEDIA_VOLUME:-./backend/media}:/var/www/mediafiles:ro"
+      - "${DJANGO_STATIC_VOLUME:-./backend/static}:/var/www/staticfiles:ro"
 
 volumes:
   pg_data: {}
