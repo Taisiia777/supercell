@@ -19,10 +19,6 @@ logger = logging.getLogger(__name__)
 CoreProductList = get_api_class("views.product", "ProductList")
 CoreProductDetail = get_api_class("views.product", "ProductDetail")
 CoreCheckoutView = get_api_class("views.checkout", "CheckoutView")
-CoreOrderSerializer = get_api_class("serializers.checkout", "OrderSerializer")
-CoreProductLinkSerializer = get_api_class(
-    "serializers.product", "ProductLinkSerializer"
-)
 Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
 
@@ -35,7 +31,7 @@ class SellersListView(generics.ListAPIView):
 
 @extend_schema(tags=["shop"])
 class SellerProductsListView(CoreProductList):
-    serializer_class = CoreProductLinkSerializer
+    serializer_class = serializers.ProductLinkSerializer
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -57,7 +53,7 @@ class PaymentView(APIView):
 
 @extend_schema(tags=["shop"])
 class ProductDetailView(CoreProductDetail):
-    pass
+    serializer_class = serializers.ProductSerializer
 
 
 @extend_schema(

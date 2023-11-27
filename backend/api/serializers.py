@@ -2,16 +2,23 @@ import warnings
 
 from django.urls import reverse, NoReverseMatch
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
-from oscar.core.loading import get_model
+from oscar.core.loading import get_model, get_class
 from oscarapi.utils.loading import get_api_class
+from oscarapi import settings
 from rest_framework import serializers
 
 from api import examples
 
+Selector = get_class("partner.strategy", "Selector")
 Product = get_model("catalogue", "Product")
 Seller = get_model("partner", "Seller")
 CoreCheckoutSerializer = get_api_class("serializers.checkout", "CheckoutSerializer")
 CoreOrderSerializer = get_api_class("serializers.checkout", "OrderSerializer")
+CoreProductSerializer = get_api_class("serializers.product", "ProductSerializer")
+PriceSerializer = get_api_class("serializers.checkout", "PriceSerializer")
+CoreProductLinkSerializer = get_api_class(
+    "serializers.product", "ProductLinkSerializer"
+)
 
 
 class SellerSerializer(serializers.ModelSerializer):
@@ -50,3 +57,32 @@ class OrderSerializer(CoreOrderSerializer):
             )
             warnings.warn(msg, stacklevel=2)
             return None
+
+
+class ProductLinkSerializer(CoreProductLinkSerializer):
+    price = serializers.SerializerMethodField()
+
+    def get_price(self, product):
+        request = self.context["request"]
+        strategy = Selector().strategy(request=request, user=request.user)
+        ser = PriceSerializer(
+            strategy.fetch_for_product(product).price, context={"request": request}
+        )
+        return ser.data
+    class Meta(CoreProductLinkSerializer.Meta):
+        fields = settings.PRODUCT_FIELDS
+
+
+class ProductSerializer(CoreProductSerializer):
+    price = serializers.SerializerMethodField()
+
+    def get_price(self, product):
+        request = self.context["request"]
+        strategy = Selector().strategy(request=request, user=request.user)
+        ser = PriceSerializer(
+            strategy.fetch_for_product(product).price, context={"request": request}
+        )
+        return ser.data
+
+    class Meta(CoreProductSerializer.Meta):
+        fields = settings.PRODUCTDETAIL_FIELDS
