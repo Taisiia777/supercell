@@ -22,7 +22,8 @@ services:
       DB_USER: $POSTGRES_USER
       DB_PASSWORD: $POSTGRES_PASSWORD
     volumes:
-      - "./backend/media:/app/media"
+      - "${DJANGO_MEDIA_VOLUME:-./backend/media}:/app/media"
+      - "${DJANGO_STATIC_VOLUME:-./backend/static}:/app/media"
     depends_on:
       - postgres
 
