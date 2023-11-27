@@ -5,3 +5,4 @@ __pycache__
 docker-compose.yml
 .git
 backend/media
+backend/static
