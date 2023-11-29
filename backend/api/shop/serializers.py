@@ -69,6 +69,7 @@ class ProductLinkSerializer(CoreProductLinkSerializer):
             strategy.fetch_for_product(product).price, context={"request": request}
         )
         return ser.data
+
     class Meta(CoreProductLinkSerializer.Meta):
         fields = settings.PRODUCT_FIELDS
 
@@ -86,3 +87,8 @@ class ProductSerializer(CoreProductSerializer):
 
     class Meta(CoreProductSerializer.Meta):
         fields = settings.PRODUCTDETAIL_FIELDS
+
+
+class CategorySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()

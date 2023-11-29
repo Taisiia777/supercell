@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 CoreProductList = get_api_class("views.product", "ProductList")
 CoreProductDetail = get_api_class("views.product", "ProductDetail")
 CoreCheckoutView = get_api_class("views.checkout", "CheckoutView")
+CoreCategoryList = get_api_class("views.product", "CategoryList")
 Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
 
@@ -123,3 +124,7 @@ class ProductAllocationTestView(APIView):
         info = strategy.fetch_for_product(product)
         result = info.availability.is_purchase_permitted(qnt)
         return Response({"success": True, "message": result})
+
+
+class CategoryList(CoreCategoryList):
+    serializer_class = serializers.CategorySerializer
