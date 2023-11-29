@@ -37,6 +37,11 @@ class SellerProductsListView(CoreProductList):
     def get_queryset(self):
         qs = super().get_queryset()
         qs = qs.filter(stockrecords__partner_id=self.kwargs["seller_id"])
+
+        category_id = self.request.query_params.get("category", "")
+        if category_id and category_id.isdigit():
+            qs = qs.filter(categories__id=category_id)
+
         return qs
 
 
