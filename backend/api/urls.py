@@ -1,16 +1,10 @@
-from django.urls import path
+from django.urls import path, include
 
 from api import views
 
 urlpatterns = [
-    path("sellers/", views.SellersListView.as_view()),
-    path(
-        "seller/<int:seller_id>/products/",
-        views.SellerProductsListView.as_view(),
-        name="seller-products",
-    ),
-    path("product/<int:pk>/", views.ProductDetailView.as_view(), name="product-detail"),
-    path("checkout/", views.CheckoutAPIView.as_view()),
-    path("payment/<int:pk>/", views.PaymentView.as_view(), name="api-payment"),
-    path("test_allocation/", views.ProductAllocationTestView.as_view()),
+    path("shop/", include("api.shop.urls")),
+    path("seller/", include("api.seller.urls")),
+    path("davdamer/", include("api.davdamer.urls")),
+    path("customer/", include("api.customer.urls")),
 ]
