@@ -229,7 +229,15 @@ LOGGING = {
 }
 
 OSCARAPI_BLOCK_ADMIN_API_ACCESS = False
-OSCARAPI_PRODUCT_FIELDS = ["id", "url", "title", "images", "price", "categories"]
+OSCARAPI_PRODUCT_FIELDS = [
+    "id",
+    "url",
+    "title",
+    "description",
+    "images",
+    "price",
+    "categories",
+]
 OSCAR_DEFAULT_CURRENCY = "RUB"
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
