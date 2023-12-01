@@ -3,6 +3,7 @@ import warnings
 from django.urls import reverse, NoReverseMatch
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from oscar.core.loading import get_model, get_class
+from oscarapi.serializers.checkout import CheckoutSerializer as CoreCheckoutSerializer
 from oscarapi.utils.loading import get_api_class
 from oscarapi import settings
 from rest_framework import serializers
@@ -12,7 +13,6 @@ from api import examples
 Selector = get_class("partner.strategy", "Selector")
 Product = get_model("catalogue", "Product")
 Seller = get_model("partner", "Seller")
-CoreCheckoutSerializer = get_api_class("serializers.checkout", "CheckoutSerializer")
 CoreOrderSerializer = get_api_class("serializers.checkout", "OrderSerializer")
 CoreProductSerializer = get_api_class("serializers.product", "ProductSerializer")
 PriceSerializer = get_api_class("serializers.checkout", "PriceSerializer")
@@ -41,6 +41,10 @@ class BasketProductSerializer(serializers.Serializer):
 )
 class APICheckoutSerializer(serializers.Serializer):
     products = BasketProductSerializer(many=True)
+
+
+class CheckoutSerializer(CoreCheckoutSerializer):
+    pass
 
 
 class OrderSerializer(CoreOrderSerializer):

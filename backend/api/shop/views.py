@@ -5,9 +5,12 @@ from drf_spectacular.utils import extend_schema
 from oscar.apps.partner.strategy import Selector
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
+from oscarapi.views.checkout import CheckoutView as CoreCheckoutView
+
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.reverse import reverse_lazy
 from rest_framework.views import APIView
 
 from api.shop import serializers
@@ -18,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 CoreProductList = get_api_class("views.product", "ProductList")
 CoreProductDetail = get_api_class("views.product", "ProductDetail")
-CoreCheckoutView = get_api_class("views.checkout", "CheckoutView")
 CoreCategoryList = get_api_class("views.product", "CategoryList")
 Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
@@ -71,7 +73,10 @@ class CheckoutAPIView(CoreCheckoutView):
     permission_classes = [IsAuthenticated]
     products_serializer_class = serializers.APICheckoutSerializer
     order_serializer_class = serializers.OrderSerializer
+    serializer_class = serializers.CheckoutSerializer
     serializer = None
+
+    default_country = reverse_lazy("country-detail", kwargs={"pk": "RU"})
 
     def _fill_basket(self):
         for product_data in self.serializer.validated_data["products"]:
@@ -99,12 +104,17 @@ class CheckoutAPIView(CoreCheckoutView):
         )
         self.request.data["basket"] = basket_url
 
+    def _set_default_request_data(self):
+        if "shipping_address" in self.request.data:
+            self.request.data["shipping_address"]["country"] = self.default_country
+
     def post(self, request, *args, **kwargs):
         try:
             self._parse_products_and_fill_basket()
         except AppError as err:
             return Response({"success": False, "message": str(err)}, status=400)
 
+        self._set_default_request_data()
         return super().post(request, *args, **kwargs)
 
 
