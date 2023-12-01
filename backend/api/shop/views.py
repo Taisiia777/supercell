@@ -6,6 +6,7 @@ from oscar.apps.partner.strategy import Selector
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 from oscarapi.views.checkout import CheckoutView as CoreCheckoutView
+from oscarapi.views.product import ProductList as CoreProductList
 
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
@@ -19,7 +20,6 @@ from core.exceptions import InvalidProductError, AppError
 
 logger = logging.getLogger(__name__)
 
-CoreProductList = get_api_class("views.product", "ProductList")
 CoreProductDetail = get_api_class("views.product", "ProductDetail")
 CoreCategoryList = get_api_class("views.product", "CategoryList")
 Seller = get_model("partner", "Seller")
@@ -35,6 +35,7 @@ class SellersListView(generics.ListAPIView):
 @extend_schema(tags=["shop"])
 class SellerProductsListView(CoreProductList):
     serializer_class = serializers.ProductLinkSerializer
+    queryset = Product.objects.browsable()
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -81,7 +82,7 @@ class CheckoutAPIView(CoreCheckoutView):
     def _fill_basket(self):
         for product_data in self.serializer.validated_data["products"]:
             try:
-                product = Product.objects.get(id=product_data["product_id"])
+                product = Product.objects.public().get(id=product_data["product_id"])
                 qnt = product_data["quantity"]
                 self.request.basket.add_product(product, qnt)
             except (Product.DoesNotExist, ValueError) as err:
