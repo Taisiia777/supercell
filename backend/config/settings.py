@@ -193,15 +193,20 @@ AUTHENTICATION_BACKENDS = (
 OSCAR_INITIAL_ORDER_STATUS = "Pending"
 OSCAR_INITIAL_LINE_STATUS = "Pending"
 OSCAR_ORDER_STATUS_PIPELINE = {
-    "Pending": (
-        "Being processed",
-        "Cancelled",
+    "NEW": ("PROCESSING", "CANCELLED"),
+    "PAID": (
+        "PROCESSING",
+        "SENT",
+        "CANCELLED",
     ),
-    "Being processed": (
-        "Processed",
-        "Cancelled",
+    "PROCESSING": (
+        "SENT",
+        "DELIVERED",
+        "CANCELLED",
     ),
-    "Cancelled": (),
+    "SENT": ("REFUND", "DELIVERED"),
+    "DELIVERED": ("REFUND",),
+    "CANCELLED": (),
 }
 SKIP_PAYMENT_CHOICES = True
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
