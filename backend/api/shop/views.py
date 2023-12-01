@@ -1,5 +1,6 @@
 import logging
 
+from django.db.models import Q
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from oscar.apps.partner.strategy import Selector
@@ -7,7 +8,6 @@ from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 from oscarapi.views.checkout import CheckoutView as CoreCheckoutView
 from oscarapi.views.product import ProductList as CoreProductList
-
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -17,19 +17,29 @@ from rest_framework.views import APIView
 from api.shop import serializers
 from core.exceptions import InvalidProductError, AppError
 
-
 logger = logging.getLogger(__name__)
 
 CoreProductDetail = get_api_class("views.product", "ProductDetail")
-CoreCategoryList = get_api_class("views.product", "CategoryList")
 Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
+Category = get_model("catalogue", "Category")
 
 
 @extend_schema(tags=["shop"])
 class SellersListView(generics.ListAPIView):
     serializer_class = serializers.SellerSerializer
     queryset = Seller.objects.all()
+
+
+@extend_schema(tags=["shop"])
+class SellerProductCategoriesListView(generics.ListAPIView):
+    serializer_class = serializers.CategorySerializer
+
+    def get_queryset(self):
+        seller_id = self.kwargs["seller_id"]
+        return Category.objects.filter(
+            Q(product__stockrecords__partner_id=seller_id)
+        ).distinct()
 
 
 @extend_schema(
@@ -142,7 +152,3 @@ class ProductAllocationTestView(APIView):
         info = strategy.fetch_for_product(product)
         result = info.availability.is_purchase_permitted(qnt)
         return Response({"success": True, "message": result})
-
-
-class CategoryList(CoreCategoryList):
-    serializer_class = serializers.CategorySerializer
