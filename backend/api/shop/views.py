@@ -42,6 +42,29 @@ class SellerProductCategoriesListView(generics.ListAPIView):
         ).distinct()
 
 
+@extend_schema(tags=["shop"])
+class ProductCategoriesListView(generics.ListAPIView):
+    serializer_class = serializers.CategorySerializer
+    queryset = Category.objects.all()
+
+
+@extend_schema(
+    tags=["shop"], parameters=[OpenApiParameter(name="category_id", type=int)]
+)
+class ProductListView(CoreProductList):
+    serializer_class = serializers.ProductLinkSerializer
+    queryset = Product.objects.browsable()
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        category_id = self.request.query_params.get("category_id", "")
+        if category_id and category_id.isdigit():
+            qs = qs.filter(categories__id=category_id)
+
+        return qs
+
+
 @extend_schema(
     tags=["shop"], parameters=[OpenApiParameter(name="category_id", type=int)]
 )
