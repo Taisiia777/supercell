@@ -249,6 +249,7 @@ BOT_TOKEN = os.environ["BOT_TOKEN"]
 AUTH_USER_MODEL = "core.User"
 
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 from oscar.defaults import *  # noqa
