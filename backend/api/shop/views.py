@@ -25,13 +25,11 @@ Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
 
 
-@extend_schema(tags=["shop"])
 class SellersListView(generics.ListAPIView):
     serializer_class = serializers.SellerSerializer
     queryset = Seller.objects.all()
 
 
-@extend_schema(tags=["shop"])
 class SellerProductCategoriesListView(generics.ListAPIView):
     serializer_class = serializers.CategorySerializer
 
@@ -42,15 +40,12 @@ class SellerProductCategoriesListView(generics.ListAPIView):
         ).distinct()
 
 
-@extend_schema(tags=["shop"])
 class ProductCategoriesListView(generics.ListAPIView):
     serializer_class = serializers.CategorySerializer
     queryset = Category.objects.all()
 
 
-@extend_schema(
-    tags=["shop"], parameters=[OpenApiParameter(name="category_id", type=int)]
-)
+@extend_schema(parameters=[OpenApiParameter(name="category_id", type=int)])
 class ProductListView(CoreProductList):
     serializer_class = serializers.ProductLinkSerializer
     queryset = Product.objects.browsable()
@@ -65,9 +60,7 @@ class ProductListView(CoreProductList):
         return qs
 
 
-@extend_schema(
-    tags=["shop"], parameters=[OpenApiParameter(name="category_id", type=int)]
-)
+@extend_schema(parameters=[OpenApiParameter(name="category_id", type=int)])
 class SellerProductsListView(CoreProductList):
     serializer_class = serializers.ProductLinkSerializer
     queryset = Product.objects.browsable()
@@ -83,6 +76,7 @@ class SellerProductsListView(CoreProductList):
         return qs
 
 
+@extend_schema(tags=["in-development"])
 class PaymentView(APIView):
     @staticmethod
     def get(request, *args, **kwargs):
@@ -95,13 +89,11 @@ class PaymentView(APIView):
         )
 
 
-@extend_schema(tags=["shop"])
 class ProductDetailView(CoreProductDetail):
     serializer_class = serializers.ProductSerializer
 
 
 @extend_schema(
-    tags=["shop"],
     request=serializers.APICheckoutSerializer,
     responses=serializers.OrderSerializer,
 )
@@ -154,6 +146,7 @@ class CheckoutAPIView(CoreCheckoutView):
         return super().post(request, *args, **kwargs)
 
 
+@extend_schema(tags=["in-development"])
 class ProductAllocationTestView(APIView):
     serializer_class = serializers.BasketProductSerializer
 
