@@ -2,6 +2,13 @@ from django.contrib.auth import get_user_model
 from oscar.core.loading import get_model
 from rest_framework import serializers
 
+from api.customer.serializers import (
+    OrderSerializer as CustomerOrderSerializer,
+    OrderDetailSerializer as CustomerOrderDetailSerializer,
+    CustomerSerializer,
+)
+
+
 Seller = get_model("partner", "Seller")
 User = get_user_model()
 
@@ -29,3 +36,12 @@ class SellerResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
         fields = ["id", "name", "phone_number"]
+
+
+class OrderSerializer(CustomerOrderSerializer):
+    seller = SellerResponseSerializer(required=False)
+    user = CustomerSerializer()
+
+
+class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
+    pass
