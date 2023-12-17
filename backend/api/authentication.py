@@ -1,10 +1,12 @@
 import logging
+from typing import Union, List
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from rest_framework.authentication import BaseAuthentication
 from django.conf import settings
 from aiogram.utils.web_app import safe_parse_webapp_init_data, WebAppInitData
+from drf_spectacular.extensions import OpenApiAuthenticationExtension
 
 logger = logging.getLogger(__name__)
 User: AbstractUser = get_user_model()
@@ -48,3 +50,14 @@ class WebAppAuthentication(BaseAuthentication):
         except Exception as err:
             logger.exception(err)
             return None
+
+
+class OpenApiWebAppAuthentication(OpenApiAuthenticationExtension):
+    target_class = WebAppAuthentication
+    name = "WebAppAuthentication"
+
+    def get_security_definition(self, auto_schema) -> Union[dict, List[dict]]:
+        return {
+            "type": "http",
+            "scheme": "bearer",
+        }
