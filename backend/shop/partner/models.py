@@ -10,6 +10,7 @@ class Partner(AbstractPartner):  # this is a Seller
         "core.DavDamer", on_delete=models.PROTECT, related_name="sellers"
     )
     image = models.ImageField(upload_to="images/sellers", blank=True, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
         verbose_name = "Продавец"
