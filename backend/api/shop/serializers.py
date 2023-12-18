@@ -90,6 +90,16 @@ class ProductLinkSerializer(CoreProductLinkSerializer):
 
 class ProductSerializer(CoreProductSerializer):
     price = serializers.SerializerMethodField()
+    seller = serializers.SerializerMethodField()
+
+    def get_seller(self, product):
+        try:
+            strategy = Selector().strategy()
+            info = strategy.fetch_for_product(product)
+            seller = info.stockrecord.partner
+            return SellerSerializer(seller, context=self.context).data
+        except Exception:
+            return None
 
     def get_price(self, product):
         request = self.context["request"]
