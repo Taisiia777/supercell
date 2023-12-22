@@ -7,6 +7,7 @@ from core.models import DavDamer
 
 class Product(AbstractProduct):
     davdamer = ForeignKey(DavDamer, on_delete=models.PROTECT, null=True)
+    seller = ForeignKey("partner.Seller", on_delete=models.PROTECT, null=True)
 
 
 from oscar.apps.catalogue.models import *  # noqa
