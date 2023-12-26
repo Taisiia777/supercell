@@ -45,3 +45,20 @@ class OrderSerializer(CustomerOrderSerializer):
 
 class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
     pass
+
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(
+        write_only=True, trim_whitespace=False, style={"input_type": "password"}
+    )
+
+
+class SuccessLogin(serializers.Serializer):
+    access_token = serializers.CharField()
+    user = CustomerSerializer()
+
+
+class ErrorLogin(serializers.Serializer):
+    username = serializers.ListField(child=serializers.CharField(), required=False)
+    password = serializers.ListField(child=serializers.CharField(), required=False)

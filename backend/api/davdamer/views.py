@@ -1,9 +1,11 @@
+from django.contrib.auth import authenticate
 from drf_spectacular.utils import extend_schema
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 from rest_framework import generics, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from . import serializers
 from api.permissions import IsDavDamer, IsSellerOwner
@@ -77,3 +79,32 @@ class SellerProductsListView(generics.ListAPIView):
     def get_queryset(self):
         seller_id = self.kwargs["seller_id"]
         return Product.objects.filter(seller_id=seller_id, parent=None)
+
+
+class DavdamerLoginView(generics.GenericAPIView):
+    serializer_class = serializers.LoginSerializer
+
+    @extend_schema(
+        responses={
+            200: serializers.SuccessLogin,
+            400: serializers.ErrorLogin,
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = authenticate(
+            username=serializer.validated_data["username"],
+            password=serializer.validated_data["password"],
+        )
+        if user is None:
+            return Response({"password": ["Неправильный логин или пароль"]}, status=400)
+
+        refresh = RefreshToken.for_user(user)
+        data = {
+            "access_token": str(refresh.access_token),
+            "user": user,
+        }
+        response_serializer = serializers.SuccessLogin(data)
+        return Response(response_serializer.data)
