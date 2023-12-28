@@ -11,6 +11,9 @@ class Partner(AbstractPartner):  # this is a Seller
     )
     image = models.ImageField(upload_to="images/sellers", blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
+    rating = models.DecimalField(max_digits=3, decimal_places=2, null=True)
+    description = models.TextField(null=True)
+    address = models.CharField(max_length=255, null=True)
 
     class Meta:
         verbose_name = "Продавец"
