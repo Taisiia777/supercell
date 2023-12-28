@@ -126,7 +126,9 @@ class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
 
 
 class CreateProductSerializer(AdminProductSerializer):
-    price = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True)
+    price = serializers.DecimalField(
+        max_digits=10, decimal_places=2, write_only=True, min_value=10, max_value=100000
+    )
 
     def create(self, validated_data):
         sku = uuid.uuid4().hex[:6].upper()
@@ -140,7 +142,10 @@ class CreateProductSerializer(AdminProductSerializer):
             "partner": seller,
         }
         validated_data["stockrecords"] = [stockrecord]
-        return super().create(validated_data)
+        product = super().create(validated_data)
+        product.seller = seller
+        product.save(update_fields=["seller"])
+        return product
 
     class Meta:
         model = Product

@@ -1,7 +1,9 @@
 from django.contrib.auth import authenticate
 from drf_spectacular.utils import extend_schema
 from oscar.core.loading import get_model
+from oscarapi.utils.loading import get_api_class
 from rest_framework import generics, status
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -12,6 +14,9 @@ from . import serializers
 Seller = get_model("partner", "Seller")
 Order = get_model("order", "Order")
 Product = get_model("catalogue", "Product")
+CoreProductClassAdminList = get_api_class(
+    "views.admin.product", "ProductClassAdminList"
+)
 
 
 @extend_schema(
@@ -106,6 +111,13 @@ class DavdamerLoginView(generics.GenericAPIView):
         return Response(response_serializer.data)
 
 
+class ProductClassAdminList(CoreProductClassAdminList):
+    @extend_schema(exclude=True)
+    def post(self, request, *args, **kwargs):
+        raise MethodNotAllowed("POST")
+
+
 class CreateProductView(generics.CreateAPIView):
     serializer_class = serializers.CreateProductSerializer
     queryset = Product.objects.get_queryset()
+    permission_classes = [IsDavDamer, IsSellerOwner]
