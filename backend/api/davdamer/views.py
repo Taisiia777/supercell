@@ -6,8 +6,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from . import serializers
 from api.permissions import IsDavDamer, IsSellerOwner
+from . import serializers
 
 Seller = get_model("partner", "Seller")
 Order = get_model("order", "Order")
@@ -104,3 +104,8 @@ class DavdamerLoginView(generics.GenericAPIView):
         }
         response_serializer = serializers.SuccessLogin(data)
         return Response(response_serializer.data)
+
+
+class CreateProductView(generics.CreateAPIView):
+    serializer_class = serializers.CreateProductSerializer
+    queryset = Product.objects.get_queryset()

@@ -1,5 +1,8 @@
+import uuid
+
 from django.contrib.auth import get_user_model
 from oscar.core.loading import get_model, get_class
+from oscarapi.serializers.admin.product import AdminProductSerializer
 from oscarapi.utils.loading import get_api_class
 from rest_framework import serializers
 
@@ -120,3 +123,32 @@ class ProductSerializer(CoreProductSerializer):
 
 class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
     pass
+
+
+class CreateProductSerializer(AdminProductSerializer):
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True)
+
+    def create(self, validated_data):
+        sku = uuid.uuid4().hex[:6].upper()
+        seller_id = self.context["view"].kwargs["seller_id"]
+        seller = Seller.objects.get(id=seller_id)
+
+        stockrecord = {
+            "partner_sku": sku,
+            "price_currency": "RUB",
+            "price": validated_data.pop("price"),
+            "partner": seller,
+        }
+        validated_data["stockrecords"] = [stockrecord]
+        return super().create(validated_data)
+
+    class Meta:
+        model = Product
+        fields = [
+            "product_class",
+            "title",
+            "description",
+            "upc",
+            "price",
+            "stockrecords",
+        ]
