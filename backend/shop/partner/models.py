@@ -15,6 +15,9 @@ class Partner(AbstractPartner):  # this is a Seller
     description = models.TextField(null=True)
     address = models.CharField(max_length=255, null=True)
 
+    registered_dt = models.DateTimeField(auto_now_add=True, null=True)
+    updated_dt = models.DateTimeField(auto_now=True, null=True)
+
     class Meta:
         verbose_name = "Продавец"
         verbose_name_plural = "Продавцы"
