@@ -73,15 +73,6 @@ class SellerResponseSerializer(serializers.ModelSerializer):
         ]
 
 
-class OrderSerializer(CustomerOrderSerializer):
-    seller = SellerResponseSerializer(required=False)
-    user = CustomerSerializer()
-
-
-class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
-    pass
-
-
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(
@@ -109,6 +100,11 @@ class SellerSerializer(serializers.ModelSerializer):
         ]
 
 
+class OrderSerializer(CustomerOrderSerializer):
+    seller = SellerSerializer(required=False)
+    user = CustomerSerializer()
+
+
 class ProductSerializer(CoreProductSerializer):
     seller = SellerSerializer()
     price = serializers.SerializerMethodField()
@@ -120,3 +116,7 @@ class ProductSerializer(CoreProductSerializer):
             strategy.fetch_for_product(product).price, context={"request": request}
         )
         return ser.data
+
+
+class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
+    pass

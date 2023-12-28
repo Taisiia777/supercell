@@ -1,12 +1,14 @@
 from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema_field
 from oscar.core.loading import get_model
+from oscarapi.utils.loading import get_api_class
 from rest_framework import serializers
 
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
 Product = get_model("catalogue", "Product")
 ShippingAddress = get_model("order", "ShippingAddress")
+CoreProductSerializer = get_api_class("serializers.product", "ProductSerializer")
 User = get_user_model()
 
 
@@ -43,10 +45,9 @@ class CustomerOrderListSerializer(CustomerMixin, serializers.Serializer):
     orders = OrderSerializer(many=True)
 
 
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = ["id", "title"]
+class ProductSerializer(CoreProductSerializer):
+    class Meta(CoreProductSerializer.Meta):
+        fields = ["id", "title", "images", "categories"]
 
 
 class OrderLineSerializer(serializers.ModelSerializer):
