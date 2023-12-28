@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
-from oscar.core.loading import get_model
+from oscar.core.loading import get_model, get_class
+from oscarapi.utils.loading import get_api_class
 from rest_framework import serializers
 
 from api.customer.serializers import (
@@ -12,6 +13,11 @@ from core.models import DavDamer
 Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
 User = get_user_model()
+CoreProductSerializer = get_api_class(
+    "serializers.admin.product", "AdminProductSerializer"
+)
+PriceSerializer = get_api_class("serializers.checkout", "PriceSerializer")
+Selector = get_class("partner.strategy", "Selector")
 
 
 class CreateSellerSerializer(serializers.ModelSerializer):
@@ -91,3 +97,26 @@ class SuccessLogin(serializers.Serializer):
 class ErrorLogin(serializers.Serializer):
     username = serializers.ListField(child=serializers.CharField(), required=False)
     password = serializers.ListField(child=serializers.CharField(), required=False)
+
+
+class SellerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Seller
+        fields = [
+            "id",
+            "name",
+            "rating",
+        ]
+
+
+class ProductSerializer(CoreProductSerializer):
+    seller = SellerSerializer()
+    price = serializers.SerializerMethodField()
+
+    def get_price(self, product):
+        request = self.context["request"]
+        strategy = Selector().strategy(request=request, user=request.user)
+        ser = PriceSerializer(
+            strategy.fetch_for_product(product).price, context={"request": request}
+        )
+        return ser.data

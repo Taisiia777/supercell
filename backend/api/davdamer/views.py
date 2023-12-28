@@ -1,7 +1,6 @@
 from django.contrib.auth import authenticate
 from drf_spectacular.utils import extend_schema
 from oscar.core.loading import get_model
-from oscarapi.utils.loading import get_api_class
 from rest_framework import generics, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -13,9 +12,6 @@ from api.permissions import IsDavDamer, IsSellerOwner
 Seller = get_model("partner", "Seller")
 Order = get_model("order", "Order")
 Product = get_model("catalogue", "Product")
-AdminProductSerializer = get_api_class(
-    "serializers.admin.product", "AdminProductSerializer"
-)
 
 
 @extend_schema(
@@ -74,7 +70,7 @@ class OrderDetailView(generics.RetrieveAPIView):
 
 class SellerProductsListView(generics.ListAPIView):
     permission_classes = [IsDavDamer, IsSellerOwner]
-    serializer_class = AdminProductSerializer
+    serializer_class = serializers.ProductSerializer
 
     def get_queryset(self):
         seller_id = self.kwargs["seller_id"]
