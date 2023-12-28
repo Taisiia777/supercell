@@ -7,7 +7,7 @@ from api.customer.serializers import (
     OrderDetailSerializer as CustomerOrderDetailSerializer,
     CustomerSerializer,
 )
-
+from core.models import DavDamer
 
 Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
@@ -33,8 +33,18 @@ class CreateSellerSerializer(serializers.ModelSerializer):
         fields = ["name", "telegram_chat_id", "phone_number"]
 
 
+class DavDamerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DavDamer
+        fields = ["id", "name"]
+
+
 class SellerResponseSerializer(serializers.ModelSerializer):
     products_amount = serializers.SerializerMethodField()
+    country = serializers.ReadOnlyField(default="Россия")
+    city = serializers.ReadOnlyField(default="Москва")
+    market = serializers.ReadOnlyField(default="Садовод")
+    davdamer = DavDamerSerializer()
 
     def get_products_amount(self, seller):
         return Product.objects.filter(seller=seller).count()
@@ -45,10 +55,15 @@ class SellerResponseSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "phone_number",
+            "country",
+            "city",
+            "market",
             "address",
+            "davdamer",
             "description",
             "products_amount",
             "rating",
+            "registered_dt",
         ]
 
 
