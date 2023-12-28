@@ -10,6 +10,7 @@ from api.customer.serializers import (
 
 
 Seller = get_model("partner", "Seller")
+Product = get_model("catalogue", "Product")
 User = get_user_model()
 
 
@@ -33,9 +34,22 @@ class CreateSellerSerializer(serializers.ModelSerializer):
 
 
 class SellerResponseSerializer(serializers.ModelSerializer):
+    products_amount = serializers.SerializerMethodField()
+
+    def get_products_amount(self, seller):
+        return Product.objects.filter(seller=seller).count()
+
     class Meta:
         model = Seller
-        fields = ["id", "name", "phone_number"]
+        fields = [
+            "id",
+            "name",
+            "phone_number",
+            "address",
+            "description",
+            "products_amount",
+            "rating",
+        ]
 
 
 class OrderSerializer(CustomerOrderSerializer):
