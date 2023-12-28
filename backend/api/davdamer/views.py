@@ -121,3 +121,11 @@ class CreateProductView(generics.CreateAPIView):
     serializer_class = serializers.CreateProductSerializer
     queryset = Product.objects.get_queryset()
     permission_classes = [IsDavDamer, IsSellerOwner]
+
+
+@extend_schema(tags=["in-development"])
+class UpdateProductView(generics.UpdateAPIView):
+    serializer_class = serializers.CreateProductSerializer
+    queryset = Product.objects.get_queryset()
+    permission_classes = [IsDavDamer, IsSellerOwner]
+    lookup_url_kwarg = "product_id"
