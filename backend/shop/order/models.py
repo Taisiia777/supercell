@@ -10,6 +10,7 @@ class Order(AbstractOrder):
     seller = models.ForeignKey(
         "partner.Seller", on_delete=models.CASCADE, blank=True, null=True
     )
+    updated_dt = models.DateTimeField(auto_now=True, blank=True, null=True)
 
 
 from oscar.apps.order.models import *  # noqa
