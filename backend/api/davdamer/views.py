@@ -137,9 +137,12 @@ class CreateProductView(generics.CreateAPIView):
     permission_classes = [IsDavDamer, IsSellerOwner]
 
 
-@extend_schema(tags=["in-development"])
 class UpdateProductView(generics.UpdateAPIView):
     serializer_class = serializers.CreateProductSerializer
     queryset = Product.objects.get_queryset()
     permission_classes = [IsDavDamer, IsProductOwner]
     lookup_url_kwarg = "product_id"
+
+    @extend_schema(exclude=True)
+    def put(self, request, *args, **kwargs):
+        return MethodNotAllowed("PUT")

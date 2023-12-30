@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from django.contrib.auth import get_user_model
@@ -12,6 +13,8 @@ from api.customer.serializers import (
     CustomerSerializer,
 )
 from core.models import DavDamer
+
+logger = logging.getLogger(__name__)
 
 Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
@@ -134,6 +137,7 @@ class CreateProductSerializer(AdminProductSerializer):
     )
 
     def create(self, validated_data):
+        validated_data.pop("stockrecords", None)
         sku = uuid.uuid4().hex[:6].upper()
         seller_id = self.context["view"].kwargs["seller_id"]
         seller = Seller.objects.get(id=seller_id)
@@ -150,6 +154,26 @@ class CreateProductSerializer(AdminProductSerializer):
         product.save(update_fields=["seller"])
         return product
 
+    @staticmethod
+    def _update_product_price(product, price):
+        strategy = Selector().strategy()
+        info = strategy.fetch_for_product(product)
+        if info.stockrecord:
+            info.stockrecord.price = price
+            info.stockrecord.save()
+        else:
+            logger.warning("No stockrecord found for product %s", product)
+
+    def update(self, product, validated_data):
+        validated_data.pop("stockrecords", None)
+        price = validated_data.pop("price", None)
+        product = super().update(product, validated_data)
+
+        if price is not None:
+            self._update_product_price(product, price)
+
+        return product
+
     class Meta:
         model = Product
         fields = [
@@ -158,5 +182,6 @@ class CreateProductSerializer(AdminProductSerializer):
             "description",
             "upc",
             "price",
+            "is_public",
             "stockrecords",
         ]
