@@ -41,7 +41,7 @@ class SellerAddView(generics.CreateAPIView):
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
-        chat_id = serializer.validated_data.pop("telegram_chat_id")
+        chat_id = serializer.validated_data.pop("telegram_chat_id", None)
         seller = serializer.save(davdamer=self.request.user.davdamer)
 
         if chat_id:
