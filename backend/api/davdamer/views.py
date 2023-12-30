@@ -8,7 +8,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api.permissions import IsDavDamer, IsSellerOwner
+from api.permissions import IsDavDamer, IsSellerOwner, IsProductOwner
 from . import serializers
 
 User = get_user_model()
@@ -141,5 +141,5 @@ class CreateProductView(generics.CreateAPIView):
 class UpdateProductView(generics.UpdateAPIView):
     serializer_class = serializers.CreateProductSerializer
     queryset = Product.objects.get_queryset()
-    permission_classes = [IsDavDamer, IsSellerOwner]
+    permission_classes = [IsDavDamer, IsProductOwner]
     lookup_url_kwarg = "product_id"

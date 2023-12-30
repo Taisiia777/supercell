@@ -3,6 +3,7 @@ from rest_framework import permissions
 
 
 Seller = get_model("partner", "Seller")
+Product = get_model("catalogue", "Product")
 
 
 class IsDavDamer(permissions.BasePermission):
@@ -29,3 +30,19 @@ class IsSellerOwner(permissions.BasePermission):
 
     def has_object_permission(self, request, view, seller) -> bool:
         return seller.davdamer == request.user.davdamer
+
+
+class IsProductOwner(permissions.BasePermission):
+    def has_permission(self, request, view):
+        product_id = view.kwargs.get("product_id")
+        if product_id is None:
+            return False
+
+        return Product.objects.filter(
+            pk=product_id, seller__davdamer__user=request.user
+        ).exists()
+
+    def has_object_permission(self, request, view, product) -> bool:
+        return Product.objects.filter(
+            pk=product.pk, seller__davdamer__user=request.user
+        ).exists()
