@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from drf_spectacular.utils import extend_schema
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
@@ -11,6 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from api.permissions import IsDavDamer, IsSellerOwner
 from . import serializers
 
+User = get_user_model()
 Seller = get_model("partner", "Seller")
 Order = get_model("order", "Order")
 Product = get_model("catalogue", "Product")
@@ -40,12 +41,25 @@ class SellerAddView(generics.CreateAPIView):
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
-        serializer.save(davdamer=self.request.user.davdamer)
+        chat_id = serializer.validated_data.pop("telegram_chat_id")
+        seller = serializer.save(davdamer=self.request.user.davdamer)
+
+        if chat_id:
+            self.create_seller_user(seller, chat_id)
+            seller.save()
+
+    @staticmethod
+    def create_seller_user(seller, telegram_chat_id: int):
+        user, _ = User.objects.get_or_create(
+            telegram_chat_id=telegram_chat_id,
+            defaults={"username": "TG:" + str(telegram_chat_id)},
+        )
+        seller.users.add(user)
 
 
 class SellersListView(generics.ListAPIView):
     serializer_class = serializers.SellerResponseSerializer
-    queryset = Seller.objects.all()
+    queryset = Seller.objects.all().order_by("-pk")
     permission_classes = [IsDavDamer]
 
     def get_queryset(self):

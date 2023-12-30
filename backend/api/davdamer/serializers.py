@@ -24,22 +24,20 @@ Selector = get_class("partner.strategy", "Selector")
 
 
 class CreateSellerSerializer(serializers.ModelSerializer):
-    telegram_chat_id = serializers.IntegerField()
-
-    def create(self, validated_data):
-        telegram_chat_id = validated_data.pop("telegram_chat_id")
-        user, _ = User.objects.get_or_create(
-            telegram_chat_id=telegram_chat_id,
-            defaults={"username": "TG:" + str(telegram_chat_id)},
-        )
-        seller = Seller.objects.create(**validated_data)
-        seller.users.add(user)
-
-        return seller
+    telegram_chat_id = serializers.IntegerField(required=False)
 
     class Meta:
         model = Seller
-        fields = ["name", "telegram_chat_id", "phone_number"]
+        fields = [
+            "name",
+            "telegram_chat_id",
+            "phone_number",
+            "country",
+            "city",
+            "market",
+            "address",
+            "description",
+        ]
 
 
 class DavDamerSerializer(serializers.ModelSerializer):
@@ -54,6 +52,10 @@ class SellerResponseSerializer(serializers.ModelSerializer):
     city = serializers.ReadOnlyField(default="Москва")
     market = serializers.ReadOnlyField(default="Садовод")
     davdamer = DavDamerSerializer()
+    full_address = serializers.SerializerMethodField()
+
+    def get_full_address(self, seller):
+        return f"{seller.country}, {seller.city}, {seller.market}"
 
     def get_products_amount(self, seller):
         return Product.objects.filter(seller=seller).count()
@@ -68,6 +70,7 @@ class SellerResponseSerializer(serializers.ModelSerializer):
             "city",
             "market",
             "address",
+            "full_address",
             "davdamer",
             "description",
             "products_amount",
