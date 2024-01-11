@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, get_user_model
 from drf_spectacular.utils import extend_schema
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets, mixins
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -145,4 +145,27 @@ class UpdateProductView(generics.UpdateAPIView, generics.DestroyAPIView):
 
     @extend_schema(exclude=True)
     def put(self, request, *args, **kwargs):
+        return MethodNotAllowed("PUT")
+
+
+class SellerView(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = Seller.objects.get_queryset()
+    permission_classes = [IsDavDamer, IsSellerOwner]
+    lookup_url_kwarg = "seller_id"
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return serializers.SellerResponseSerializer
+        elif self.action == "partial_update":
+            return serializers.UpdateSellerSerializer
+        elif self.action == "destroy":
+            return serializers.SellerResponseSerializer
+
+    @extend_schema(exclude=True)
+    def update(self, request, *args, **kwargs):
         return MethodNotAllowed("PUT")
