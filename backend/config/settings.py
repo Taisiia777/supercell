@@ -259,4 +259,15 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=14),
 }
 
+SENTRY_DSN = os.environ.get("SENTRY_DSN")
+if SENTRY_DSN:
+    import sentry_sdk
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=0.5,
+        profiles_sample_rate=0.2,
+    )
+
+
 from oscar.defaults import *  # noqa

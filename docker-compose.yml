@@ -23,6 +23,7 @@ services:
       DB_PASSWORD: $POSTGRES_PASSWORD
       DJANGO_DEBUG: $DJANGO_DEBUG
       DJANGO_CSRF_TRUSTED_ORIGINS: $DJANGO_CSRF_TRUSTED_ORIGINS
+      SENTRY_DSN: $SENTRY_DSN
     volumes:
       - "${DJANGO_MEDIA_VOLUME:-./backend/media}:/app/media"
       - "${DJANGO_STATIC_VOLUME:-./backend/static}:/app/static"
