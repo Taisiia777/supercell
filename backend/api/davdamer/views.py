@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from api.permissions import IsDavDamer, IsSellerOwner, IsProductOwner
+from core.models import City
 from . import serializers
 
 User = get_user_model()
@@ -42,7 +43,15 @@ class SellerAddView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         chat_id = serializer.validated_data.pop("telegram_chat_id", None)
-        seller = serializer.save(davdamer=self.request.user.davdamer)
+
+        city = None
+        city_name = serializer.validated_data.pop("city", None)
+        if city_name:
+            city, _ = City.objects.get_or_create(
+                name__iexact=city_name, defaults={"name": city_name}
+            )
+
+        seller = serializer.save(davdamer=self.request.user.davdamer, city=city)
 
         if chat_id:
             self.create_seller_user(seller, chat_id)
@@ -187,6 +196,16 @@ class SellerView(
             return serializers.UpdateSellerSerializer
         elif self.action == "destroy":
             return serializers.SellerResponseSerializer
+
+    def perform_update(self, serializer):
+        city_name = serializer.validated_data.pop("city", None)
+        if city_name:
+            city, _ = City.objects.get_or_create(
+                name__iexact=city_name, defaults={"name": city_name}
+            )
+            serializer.save(city=city)
+        else:
+            serializer.save()
 
     @extend_schema(exclude=True)
     def update(self, request, *args, **kwargs):

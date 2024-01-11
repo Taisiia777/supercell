@@ -29,6 +29,7 @@ Selector = get_class("partner.strategy", "Selector")
 
 class CreateSellerSerializer(serializers.ModelSerializer):
     telegram_chat_id = serializers.IntegerField(required=False)
+    city = serializers.CharField(required=False)
 
     class Meta:
         model = Seller
@@ -55,6 +56,10 @@ class SellerResponseSerializer(serializers.ModelSerializer):
     country = serializers.ReadOnlyField(default="Россия")
     davdamer = DavDamerSerializer()
     full_address = serializers.SerializerMethodField()
+    city = serializers.SerializerMethodField()
+
+    def get_city(self, seller):
+        return seller.city.name if seller.city else None
 
     def get_full_address(self, seller):
         return f"{seller.country}, {seller.city}, {seller.market}"
@@ -82,6 +87,8 @@ class SellerResponseSerializer(serializers.ModelSerializer):
 
 
 class UpdateSellerSerializer(serializers.ModelSerializer):
+    city = serializers.CharField(required=False)
+
     class Meta:
         model = Seller
         fields = [
