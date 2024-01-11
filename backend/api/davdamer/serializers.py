@@ -197,3 +197,8 @@ class CreateProductSerializer(AdminProductSerializer):
             "is_public",
             "stockrecords",
         ]
+
+
+class ProductClassSerializer(serializers.Serializer):
+    slug = serializers.CharField()
+    name = serializers.CharField()

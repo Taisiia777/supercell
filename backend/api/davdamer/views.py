@@ -126,6 +126,9 @@ class DavdamerLoginView(generics.GenericAPIView):
 
 
 class ProductClassAdminList(CoreProductClassAdminList):
+    permission_classes = [IsDavDamer]
+    serializer_class = serializers.ProductClassSerializer
+
     @extend_schema(exclude=True)
     def post(self, request, *args, **kwargs):
         raise MethodNotAllowed("POST")
