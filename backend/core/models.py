@@ -14,3 +14,10 @@ class DavDamer(models.Model):
     class Meta:
         verbose_name = "ДавДамер"
         verbose_name_plural = "ДавДамеры"
+
+
+class City(models.Model):
+    name = models.CharField(max_length=128, db_index=True, unique=True)
+
+    def __str__(self):
+        return self.name
