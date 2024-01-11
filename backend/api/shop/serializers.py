@@ -116,3 +116,8 @@ class ProductSerializer(CoreProductSerializer):
 class CategorySerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
+
+
+class CitySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()

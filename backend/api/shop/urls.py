@@ -20,4 +20,5 @@ urlpatterns = [
     path("checkout/", views.CheckoutAPIView.as_view()),
     path("payment/<int:pk>/", views.PaymentView.as_view(), name="api-payment"),
     path("test_allocation/", views.ProductAllocationTestView.as_view()),
+    path("cities/", views.CityListView.as_view()),
 ]

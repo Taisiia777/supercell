@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 
 from api.shop import serializers
 from core.exceptions import InvalidProductError, AppError
+from core.models import City
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,12 @@ class ProductCategoriesListView(generics.ListAPIView):
     queryset = Category.objects.all()
 
 
-@extend_schema(parameters=[OpenApiParameter(name="category_id", type=int)])
+@extend_schema(
+    parameters=[
+        OpenApiParameter(name="category_id", type=int),
+        OpenApiParameter(name="city_id", type=int),
+    ]
+)
 class ProductListView(CoreProductList):
     serializer_class = serializers.ProductLinkSerializer
     queryset = Product.objects.browsable()
@@ -56,6 +62,10 @@ class ProductListView(CoreProductList):
         category_id = self.request.query_params.get("category_id", "")
         if category_id and category_id.isdigit():
             qs = qs.filter(categories__id=category_id)
+
+        city_id = self.request.query_params.get("city_id", "")
+        if city_id and city_id.isdigit():
+            qs = qs.filter(seller__city_id=city_id)
 
         return qs
 
@@ -168,3 +178,8 @@ class ProductAllocationTestView(APIView):
         info = strategy.fetch_for_product(product)
         result = info.availability.is_purchase_permitted(qnt)
         return Response({"success": True, "message": result})
+
+
+class CityListView(generics.ListAPIView):
+    serializer_class = serializers.CitySerializer
+    queryset = City.objects.all().order_by("name")
