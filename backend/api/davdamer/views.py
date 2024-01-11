@@ -137,7 +137,7 @@ class CreateProductView(generics.CreateAPIView):
     permission_classes = [IsDavDamer, IsSellerOwner]
 
 
-class UpdateProductView(generics.UpdateAPIView):
+class UpdateProductView(generics.UpdateAPIView, generics.DestroyAPIView):
     serializer_class = serializers.CreateProductSerializer
     queryset = Product.objects.get_queryset()
     permission_classes = [IsDavDamer, IsProductOwner]
