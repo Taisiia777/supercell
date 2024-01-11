@@ -148,7 +148,7 @@ class UpdateProductView(generics.UpdateAPIView, generics.DestroyAPIView):
 
     @extend_schema(exclude=True)
     def put(self, request, *args, **kwargs):
-        return MethodNotAllowed("PUT")
+        raise MethodNotAllowed("PUT")
 
 
 class SellerView(
@@ -166,9 +166,11 @@ class SellerView(
             return serializers.SellerResponseSerializer
         elif self.action == "partial_update":
             return serializers.UpdateSellerSerializer
+        elif self.action == "update":
+            return serializers.UpdateSellerSerializer
         elif self.action == "destroy":
             return serializers.SellerResponseSerializer
 
     @extend_schema(exclude=True)
     def update(self, request, *args, **kwargs):
-        return MethodNotAllowed("PUT")
+        return super().update(request, *args, **kwargs)
