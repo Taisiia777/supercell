@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
+Order = get_model("order", "Order")
 User = get_user_model()
 CoreProductSerializer = get_api_class(
     "serializers.admin.product", "AdminProductSerializer"
@@ -141,6 +142,12 @@ class ProductSerializer(CoreProductSerializer):
 
 class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
     pass
+
+
+class OrderUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ["status"]
 
 
 class CreateProductSerializer(AdminProductSerializer):

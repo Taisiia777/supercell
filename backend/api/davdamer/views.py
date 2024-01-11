@@ -75,16 +75,33 @@ class OrderListView(generics.ListAPIView):
         return Order.objects.filter(seller__davdamer=davdamer).order_by("-pk")
 
 
-class OrderDetailView(generics.RetrieveAPIView):
-    serializer_class = serializers.OrderDetailSerializer
+class OrderDetailView(
+    mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
+):
     permission_classes = [IsDavDamer]
+    lookup_field = "number"
+    lookup_url_kwarg = "order_number"
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return serializers.OrderDetailSerializer
+        elif self.action == "partial_update":
+            return serializers.OrderUpdateSerializer
 
     def get_object(self):
-        number = self.kwargs["order_number"]
+        number = self.kwargs[self.lookup_url_kwarg]
         davdamer = self.request.user.davdamer
         return get_object_or_404(
             Order.objects.all(), number=number, seller__davdamer=davdamer
         )
+
+    def get_queryset(self):
+        davdamer = self.request.user.davdamer
+        return Order.objects.filter(seller__davdamer=davdamer).order_by("-pk")
+
+    @extend_schema(exclude=True)
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
 
 
 class SellerProductsListView(generics.ListAPIView):

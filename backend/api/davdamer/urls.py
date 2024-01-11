@@ -6,6 +6,7 @@ from . import views
 
 router = DefaultRouter()
 router.register("seller", views.SellerView, basename="seller")
+router.register("order", views.OrderDetailView, basename="order")
 
 urlpatterns = [
     path("productclasses/", views.ProductClassAdminList.as_view()),
@@ -19,6 +20,6 @@ urlpatterns = [
     ),
     path("sellers/", views.SellersListView.as_view()),
     path("orders/", views.OrderListView.as_view()),
-    path("order/<str:order_number>/", views.OrderDetailView.as_view()),
+    # path("order/<str:order_number>/", views.OrderDetailView.as_view()),
     *router.urls,
 ]
