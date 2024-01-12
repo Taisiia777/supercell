@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "core",
     "api",
+    "django_filters",
 ]
 SITE_ID = 1
 
