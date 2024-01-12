@@ -7,10 +7,12 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from django_filters import rest_framework as filters
 
 from api.permissions import IsDavDamer, IsSellerOwner, IsProductOwner
 from core.models import City
 from . import serializers
+from .filtersets import OrderFilter
 
 User = get_user_model()
 Seller = get_model("partner", "Seller")
@@ -78,6 +80,8 @@ class SellersListView(generics.ListAPIView):
 class OrderListView(generics.ListAPIView):
     serializer_class = serializers.OrderSerializer
     permission_classes = [IsDavDamer]
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = OrderFilter
 
     def get_queryset(self):
         davdamer = self.request.user.davdamer
