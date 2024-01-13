@@ -9,10 +9,11 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django_filters import rest_framework as filters
 
-from api.permissions import IsDavDamer, IsSellerOwner, IsProductOwner
+from api.permissions import IsDavDamer, IsSellerOwner
 from core.models import City
 from . import serializers
-from .filtersets import OrderFilter
+from .filtersets import OrderFilter, ProductFilter
+from ..pagination import DefaultPageNumberPagination
 
 User = get_user_model()
 Seller = get_model("partner", "Seller")
@@ -21,51 +22,6 @@ Product = get_model("catalogue", "Product")
 CoreProductClassAdminList = get_api_class(
     "views.admin.product", "ProductClassAdminList"
 )
-
-
-@extend_schema(
-    request=serializers.CreateSellerSerializer,
-    responses=serializers.SellerResponseSerializer,
-)
-class SellerAddView(generics.CreateAPIView):
-    serializer_class = serializers.CreateSellerSerializer
-    response_serializer_class = serializers.SellerResponseSerializer
-    queryset = Seller.objects.all()
-    permission_classes = [IsDavDamer]
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-
-        response_serializer = self.response_serializer_class(
-            instance=serializer.instance
-        )
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-
-    def perform_create(self, serializer):
-        chat_id = serializer.validated_data.pop("telegram_chat_id", None)
-
-        city = None
-        city_name = serializer.validated_data.pop("city", None)
-        if city_name:
-            city, _ = City.objects.get_or_create(
-                name__iexact=city_name, defaults={"name": city_name}
-            )
-
-        seller = serializer.save(davdamer=self.request.user.davdamer, city=city)
-
-        if chat_id:
-            self.create_seller_user(seller, chat_id)
-            seller.save()
-
-    @staticmethod
-    def create_seller_user(seller, telegram_chat_id: int):
-        user, _ = User.objects.get_or_create(
-            telegram_chat_id=telegram_chat_id,
-            defaults={"username": "TG:" + str(telegram_chat_id)},
-        )
-        seller.users.add(user)
 
 
 class SellersListView(generics.ListAPIView):
@@ -170,36 +126,38 @@ class CreateProductView(generics.CreateAPIView):
     permission_classes = [IsDavDamer, IsSellerOwner]
 
 
-class UpdateProductView(generics.UpdateAPIView, generics.DestroyAPIView):
-    serializer_class = serializers.CreateProductSerializer
-    queryset = Product.objects.get_queryset()
-    permission_classes = [IsDavDamer, IsProductOwner]
-    lookup_url_kwarg = "product_id"
-
-    @extend_schema(exclude=True)
-    def put(self, request, *args, **kwargs):
-        raise MethodNotAllowed("PUT")
-
-
-class SellerView(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
-    queryset = Seller.objects.get_queryset()
-    permission_classes = [IsDavDamer, IsSellerOwner]
+class SellerView(viewsets.ModelViewSet):
+    permission_classes = [IsDavDamer]
     lookup_url_kwarg = "seller_id"
 
+    def get_queryset(self):
+        return (
+            Seller.objects.get_queryset()
+            .filter(davdamer__user=self.request.user)
+            .order_by("-pk")
+        )
+
     def get_serializer_class(self):
-        if self.action == "retrieve":
+        if self.action == "create":
+            return serializers.CreateSellerSerializer
+        elif self.action in ("retrieve", "list"):
             return serializers.SellerResponseSerializer
-        elif self.action == "partial_update":
+        elif self.action in ("partial_update", "update"):
             return serializers.UpdateSellerSerializer
-        elif self.action == "update":
-            return serializers.UpdateSellerSerializer
-        elif self.action == "destroy":
-            return serializers.SellerResponseSerializer
+
+    @extend_schema(
+        request=serializers.CreateSellerSerializer,
+        responses=serializers.SellerResponseSerializer,
+    )
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        response_serializer = serializers.SellerResponseSerializer(
+            instance=serializer.instance
+        )
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_update(self, serializer):
         city_name = serializer.validated_data.pop("city", None)
@@ -210,6 +168,57 @@ class SellerView(
             serializer.save(city=city)
         else:
             serializer.save()
+
+    @staticmethod
+    def create_seller_user(seller, telegram_chat_id: int):
+        user, _ = User.objects.get_or_create(
+            telegram_chat_id=telegram_chat_id,
+            defaults={"username": "TG:" + str(telegram_chat_id)},
+        )
+        seller.users.add(user)
+
+    def perform_create(self, serializer):
+        chat_id = serializer.validated_data.pop("telegram_chat_id", None)
+
+        city = None
+        city_name = serializer.validated_data.pop("city", None)
+        if city_name:
+            city, _ = City.objects.get_or_create(
+                name__iexact=city_name, defaults={"name": city_name}
+            )
+
+        seller = serializer.save(davdamer=self.request.user.davdamer, city=city)
+
+        if chat_id:
+            self.create_seller_user(seller, chat_id)
+            seller.save()
+
+    @extend_schema(exclude=True)
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+
+class ProductView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    pagination_class = DefaultPageNumberPagination
+    permission_classes = [IsDavDamer]
+    lookup_url_kwarg = "product_id"
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = ProductFilter
+
+    def get_queryset(self):
+        return Product.objects.filter(seller__davdamer__user=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action in ("retrieve", "list"):
+            return serializers.ProductSerializer
+        elif self.action in ("update", "partial_update"):
+            return serializers.CreateProductSerializer
 
     @extend_schema(exclude=True)
     def update(self, request, *args, **kwargs):
