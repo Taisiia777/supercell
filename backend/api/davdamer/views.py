@@ -96,6 +96,10 @@ class SellerProductsListView(generics.ListAPIView):
         seller_id = self.kwargs["seller_id"]
         return Product.objects.filter(seller_id=seller_id, parent=None)
 
+    @extend_schema(deprecated=True)
+    def get(self, *args, **kwargs):
+        return super().get(*args, **kwargs)
+
 
 class DavdamerLoginView(generics.GenericAPIView):
     serializer_class = serializers.LoginSerializer
