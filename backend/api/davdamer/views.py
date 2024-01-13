@@ -32,6 +32,10 @@ class SellersListView(generics.ListAPIView):
     def get_queryset(self):
         return self.queryset.filter(davdamer=self.request.user.davdamer)
 
+    @extend_schema(deprecated=True)
+    def get(self, *args, **kwargs):
+        return super().get(*args, **kwargs)
+
 
 class OrderListView(generics.ListAPIView):
     serializer_class = serializers.OrderSerializer
@@ -42,6 +46,10 @@ class OrderListView(generics.ListAPIView):
     def get_queryset(self):
         davdamer = self.request.user.davdamer
         return Order.objects.filter(seller__davdamer=davdamer).order_by("-pk")
+
+    @extend_schema(deprecated=True)
+    def get(self, *args, **kwargs):
+        return super().get(*args, **kwargs)
 
 
 class OrderDetailView(
