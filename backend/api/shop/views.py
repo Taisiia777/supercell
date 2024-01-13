@@ -28,7 +28,7 @@ Category = get_model("catalogue", "Category")
 
 class SellersListView(generics.ListAPIView):
     serializer_class = serializers.SellerSerializer
-    queryset = Seller.objects.all()
+    queryset = Seller.objects.filter(stockrecords__isnull=False)
 
 
 class SellerProductCategoriesListView(generics.ListAPIView):
@@ -43,7 +43,9 @@ class SellerProductCategoriesListView(generics.ListAPIView):
 
 class ProductCategoriesListView(generics.ListAPIView):
     serializer_class = serializers.CategorySerializer
-    queryset = Category.objects.all()
+    queryset = (
+        Category.objects.browsable().filter(product__isnull=False).order_by("name")
+    )
 
 
 @extend_schema(
