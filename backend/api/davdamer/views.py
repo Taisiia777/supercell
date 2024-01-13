@@ -45,14 +45,25 @@ class OrderListView(generics.ListAPIView):
 
 
 class OrderDetailView(
-    mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
 ):
     permission_classes = [IsDavDamer]
+    pagination_class = DefaultPageNumberPagination
     lookup_field = "number"
     lookup_url_kwarg = "order_number"
 
+    def get_queryset(self):
+        return Order.objects.filter(seller__davdamer__user=self.request.user).order_by(
+            "-pk"
+        )
+
     def get_serializer_class(self):
-        if self.action == "retrieve":
+        if self.action == "list":
+            return serializers.OrderSerializer
+        elif self.action == "retrieve":
             return serializers.OrderDetailSerializer
         elif self.action == "partial_update":
             return serializers.OrderUpdateSerializer
@@ -63,10 +74,6 @@ class OrderDetailView(
         return get_object_or_404(
             Order.objects.all(), number=number, seller__davdamer=davdamer
         )
-
-    def get_queryset(self):
-        davdamer = self.request.user.davdamer
-        return Order.objects.filter(seller__davdamer=davdamer).order_by("-pk")
 
     @extend_schema(exclude=True)
     def update(self, request, *args, **kwargs):
