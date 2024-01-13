@@ -2,9 +2,11 @@ import logging
 import uuid
 
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from oscar.core.loading import get_model, get_class
 from oscarapi.serializers.admin.product import AdminProductSerializer
 from oscarapi.utils.loading import get_api_class
+from oscarapi.utils.models import fake_autocreated
 from rest_framework import serializers
 
 from api.customer.serializers import (
@@ -193,10 +195,17 @@ class CreateProductSerializer(AdminProductSerializer):
     def update(self, product, validated_data):
         validated_data.pop("stockrecords", None)
         price = validated_data.pop("price", None)
-        product = super().update(product, validated_data)
+        categories = validated_data.pop("categories", None)
 
-        if price is not None:
-            self._update_product_price(product, price)
+        with transaction.atomic():
+            product = super().update(product, validated_data)
+
+            if categories is not None:
+                with fake_autocreated(product.categories) as _categories:
+                    _categories.set(categories)
+
+            if price is not None:
+                self._update_product_price(product, price)
 
         return product
 
@@ -209,6 +218,7 @@ class CreateProductSerializer(AdminProductSerializer):
             "upc",
             "price",
             "is_public",
+            "categories",
             "stockrecords",
         ]
 
