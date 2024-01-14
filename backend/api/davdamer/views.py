@@ -62,6 +62,8 @@ class OrderDetailView(
     pagination_class = DefaultPageNumberPagination
     lookup_field = "number"
     lookup_url_kwarg = "order_number"
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = OrderFilter
 
     def get_queryset(self):
         return Order.objects.filter(seller__davdamer__user=self.request.user).order_by(
