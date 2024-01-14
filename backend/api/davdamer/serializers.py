@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
+ProductImage = get_model("catalogue", "ProductImage")
 Order = get_model("order", "Order")
 User = get_user_model()
 CoreProductSerializer = get_api_class(
@@ -226,3 +227,9 @@ class CreateProductSerializer(AdminProductSerializer):
 class ProductClassSerializer(serializers.Serializer):
     slug = serializers.CharField()
     name = serializers.CharField()
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ["original"]

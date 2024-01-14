@@ -16,5 +16,10 @@ urlpatterns = [
     path("seller/<int:seller_id>/add_product/", views.CreateProductView.as_view()),
     path("sellers/", views.SellersListView.as_view()),
     path("orders/", views.OrderListView.as_view()),
+    path("product/<int:product_id>/image/", views.UploadProductImageView.as_view()),
+    path(
+        "product/<int:product_id>/image/<int:image_id>/",
+        views.DeleteProductImageView.as_view(),
+    ),
     *router.urls,
 ]

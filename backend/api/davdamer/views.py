@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, get_user_model
+from django.db.models import Max
 from drf_spectacular.utils import extend_schema
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
@@ -22,6 +23,7 @@ Product = get_model("catalogue", "Product")
 CoreProductClassAdminList = get_api_class(
     "views.admin.product", "ProductClassAdminList"
 )
+ProductImage = get_model("catalogue", "ProductImage")
 
 
 class SellersListView(generics.ListAPIView):
@@ -244,3 +246,47 @@ class ProductView(
     @extend_schema(exclude=True)
     def update(self, request, *args, **kwargs):
         return super().update(request, *args, **kwargs)
+
+
+class UploadProductImageView(generics.CreateAPIView):
+    permission_classes = [IsDavDamer]
+    serializer_class = serializers.ProductImageSerializer
+
+    def perform_create(self, serializer):
+        product = get_object_or_404(
+            Product,
+            pk=self.kwargs["product_id"],
+            seller__davdamer__user=self.request.user,
+        )
+
+        max_display_order = product.images.all().aggregate(Max("display_order"))[
+            "display_order__max"
+        ]
+        display_order = 0 if max_display_order is None else max_display_order + 1
+        serializer.save(product=product, display_order=display_order)
+
+    @extend_schema(
+        summary="Добавление фотографии товара",
+        description="В теле запроса в поле original передается сама фотография "
+        "бинарником",
+        request=None,
+        responses={201: None, 404: None},
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+class DeleteProductImageView(generics.DestroyAPIView):
+    permission_classes = [IsDavDamer]
+
+    def get_object(self):
+        return get_object_or_404(
+            ProductImage,
+            pk=self.kwargs["image_id"],
+            product_id=self.kwargs["product_id"],
+            product__seller__davdamer__user=self.request.user,
+        )
+
+    @extend_schema(responses={204: None, 404: None})
+    def delete(self, request, *args, **kwargs):
+        return super().delete(request, *args, **kwargs)
