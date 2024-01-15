@@ -52,6 +52,7 @@ class ProductCategoriesListView(generics.ListAPIView):
     parameters=[
         OpenApiParameter(name="category_id", type=int),
         OpenApiParameter(name="city_id", type=int),
+        OpenApiParameter(name="search", type=str),
     ]
 )
 class ProductListView(CoreProductList):
@@ -68,6 +69,10 @@ class ProductListView(CoreProductList):
         city_id = self.request.query_params.get("city_id", "")
         if city_id and city_id.isdigit():
             qs = qs.filter(seller__city_id=city_id)
+
+        search = self.request.query_params.get("search", "")
+        if search:
+            qs = qs.filter(title__icontains=search)
 
         return qs
 
