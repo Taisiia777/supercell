@@ -9,6 +9,7 @@ class User(AbstractUser):
 class DavDamer(models.Model):
     name = models.CharField(max_length=128, db_index=True)
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name="davdamer")
+    image = models.ImageField(upload_to="images/avatars", null=True, blank=True)
     registered_dt = models.DateTimeField(auto_now_add=True)
 
     class Meta:
