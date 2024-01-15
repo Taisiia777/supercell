@@ -38,6 +38,7 @@ class SellerFilter(filters.FilterSet):
     city = filters.CharFilter(field_name="city__name", lookup_expr="icontains")
     market = filters.CharFilter(lookup_expr="icontains")
     country = filters.CharFilter(lookup_expr="icontains")
+    address = filters.CharFilter(lookup_expr="icontains")
 
     ordering = SellerOrderingFilter(
         fields=(
@@ -51,4 +52,4 @@ class SellerFilter(filters.FilterSet):
 
     class Meta:
         model = Seller
-        fields = ["country", "city", "market"]
+        fields = ["country", "city", "market", "address"]
