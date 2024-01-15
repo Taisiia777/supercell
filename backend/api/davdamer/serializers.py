@@ -53,6 +53,13 @@ class CreateSellerSerializer(serializers.ModelSerializer):
 class DavDamerSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source="user.first_name")
     last_name = serializers.CharField(source="user.last_name")
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, davdamer):
+        request = self.context.get("request")
+        if not davdamer.image:
+            return request.build_absolute_uri("/static/avatars/default.png")
+        return request.build_absolute_uri(davdamer.image.url)
 
     class Meta:
         model = DavDamer
