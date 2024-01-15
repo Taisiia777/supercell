@@ -34,14 +34,14 @@ Selector = get_class("partner.strategy", "Selector")
 
 class CreateSellerSerializer(serializers.ModelSerializer):
     telegram_chat_id = serializers.IntegerField(required=False)
-    city = serializers.CharField(required=False)
+    city = serializers.CharField()
 
     class Meta:
         model = Seller
         fields = [
             "name",
             "telegram_chat_id",
-            "phone_number",
+            "image",
             "country",
             "city",
             "market",
@@ -78,7 +78,7 @@ class SellerResponseSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
-            "phone_number",
+            "image",
             "country",
             "city",
             "market",
@@ -100,7 +100,7 @@ class UpdateSellerSerializer(serializers.ModelSerializer):
         model = Seller
         fields = [
             "name",
-            "phone_number",
+            "image",
             "country",
             "city",
             "market",
