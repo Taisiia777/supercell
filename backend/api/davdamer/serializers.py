@@ -51,9 +51,12 @@ class CreateSellerSerializer(serializers.ModelSerializer):
 
 
 class DavDamerSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="user.first_name")
+    last_name = serializers.CharField(source="user.last_name")
+
     class Meta:
         model = DavDamer
-        fields = ["id", "name"]
+        fields = ["id", "name", "last_name", "image"]
 
 
 class SellerResponseSerializer(serializers.ModelSerializer):

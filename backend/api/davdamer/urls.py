@@ -10,6 +10,7 @@ router.register("order", views.OrderDetailView, basename="order")
 router.register("product", views.ProductView, basename="product")
 
 urlpatterns = [
+    path("me/", views.ProfileView.as_view()),
     path("productclasses/", views.ProductClassAdminList.as_view()),
     path("login/", views.DavdamerLoginView.as_view()),
     path("seller/<int:seller_id>/products/", views.SellerProductsListView.as_view()),

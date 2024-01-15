@@ -292,3 +292,11 @@ class DeleteProductImageView(generics.DestroyAPIView):
     @extend_schema(responses={204: None, 404: None})
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
+
+
+class ProfileView(generics.RetrieveAPIView):
+    permission_classes = [IsDavDamer]
+    serializer_class = serializers.DavDamerSerializer
+
+    def get_object(self):
+        return self.request.user.davdamer
