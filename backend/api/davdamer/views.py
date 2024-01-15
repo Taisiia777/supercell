@@ -13,7 +13,7 @@ from django_filters import rest_framework as filters
 from api.permissions import IsDavDamer, IsSellerOwner
 from core.models import City
 from . import serializers
-from .filtersets import OrderFilter, ProductFilter
+from .filtersets import OrderFilter, ProductFilter, SellerFilter
 from ..pagination import DefaultPageNumberPagination
 
 User = get_user_model()
@@ -152,6 +152,8 @@ class CreateProductView(generics.CreateAPIView):
 class SellerView(viewsets.ModelViewSet):
     permission_classes = [IsDavDamer]
     lookup_url_kwarg = "seller_id"
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = SellerFilter
 
     def get_queryset(self):
         return (
