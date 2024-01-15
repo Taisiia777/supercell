@@ -10,9 +10,21 @@ OrderLine = get_model("order", "Line")
 
 
 class OrderFilter(filters.FilterSet):
+    date = filters.DateFilter(field_name="date_placed", lookup_expr="date")
+
+    ordering = OrderingFilter(
+        fields=(
+            "number",
+            "date_placed",
+            "status",
+            ("user__first_name", "user"),
+            ("total_incl_tax", "total"),
+        )
+    )
+
     class Meta:
         model = Order
-        fields = ["status", "seller"]
+        fields = ["status", "seller", "date"]
 
 
 class ProductOrderingFilter(OrderingFilter):
