@@ -3,6 +3,8 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from oscar.core.loading import get_model, get_class
 from oscarapi.serializers.admin.product import AdminProductSerializer
 from oscarapi.utils.loading import get_api_class
@@ -142,6 +144,12 @@ class OrderSerializer(CustomerOrderSerializer):
 class ProductSerializer(CoreProductSerializer):
     seller = SellerSerializer()
     price = serializers.SerializerMethodField()
+    orders_count = serializers.SerializerMethodField()
+
+    @staticmethod
+    @extend_schema_field(OpenApiTypes.INT)
+    def get_orders_count(product):
+        return Order.objects.filter(lines__product=product).count()
 
     def get_price(self, product):
         request = self.context["request"]

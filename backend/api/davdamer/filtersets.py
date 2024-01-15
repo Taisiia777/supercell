@@ -1,10 +1,12 @@
-from django.db.models import Count, Value
+from django.db import models
+from django.db.models import Count, Value, Subquery, OuterRef
 from django_filters import rest_framework as filters, OrderingFilter
 from oscar.core.loading import get_model
 
 Order = get_model("order", "Order")
 Product = get_model("catalogue", "Product")
 Seller = get_model("partner", "Seller")
+OrderLine = get_model("order", "Line")
 
 
 class OrderFilter(filters.FilterSet):
@@ -13,10 +15,40 @@ class OrderFilter(filters.FilterSet):
         fields = ["status", "seller"]
 
 
+class ProductOrderingFilter(OrderingFilter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.extra["choices"] += [
+            ("orders_count", "Количество заказов"),
+            ("-orders_count", "Количество заказов (descending)"),
+        ]
+
+    def filter(self, qs, value):
+        qs = qs.annotate(
+            orders_count=Subquery(
+                OrderLine.objects.filter(product=OuterRef("pk"))
+                .order_by()
+                .values("product")
+                .annotate(cnt=Count("order", distinct=True))
+                .values("cnt"),
+                output_field=models.IntegerField(),
+            )
+        )
+        return super().filter(qs, value)
+
+
 class ProductFilter(filters.FilterSet):
+    category = filters.CharFilter(
+        field_name="categories__name", lookup_expr="icontains"
+    )
+
+    ordering = ProductOrderingFilter(
+        fields=("title", "description", ("seller__name", "seller")),
+    )
+
     class Meta:
         model = Product
-        fields = ["seller"]
+        fields = ["seller", "category"]
 
 
 class SellerOrderingFilter(OrderingFilter):
