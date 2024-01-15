@@ -80,6 +80,7 @@ class SellerResponseSerializer(serializers.ModelSerializer):
     def get_full_address(self, seller):
         return f"{seller.country}, {seller.city}, {seller.market}"
 
+    @extend_schema_field(OpenApiTypes.INT)
     def get_products_amount(self, seller):
         return Product.objects.filter(seller=seller).count()
 
