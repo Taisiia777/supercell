@@ -57,6 +57,7 @@ class DavDamerSerializer(serializers.ModelSerializer):
 class SellerResponseSerializer(serializers.ModelSerializer):
     products_amount = serializers.SerializerMethodField()
     country = serializers.ReadOnlyField(default="Россия")
+    orders_total = serializers.ReadOnlyField(default=0)
     davdamer = DavDamerSerializer()
     full_address = serializers.SerializerMethodField()
     city = serializers.SerializerMethodField()
@@ -84,6 +85,7 @@ class SellerResponseSerializer(serializers.ModelSerializer):
             "davdamer",
             "description",
             "products_amount",
+            "orders_total",
             "rating",
             "registered_dt",
         ]
