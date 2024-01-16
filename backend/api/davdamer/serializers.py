@@ -4,13 +4,18 @@ import uuid
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.utils import (
+    extend_schema_field,
+    extend_schema_serializer,
+    OpenApiExample,
+)
 from oscar.core.loading import get_model, get_class
 from oscarapi.serializers.admin.product import AdminProductSerializer
 from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.models import fake_autocreated
 from rest_framework import serializers
 
+from api import examples
 from api.customer.serializers import (
     OrderSerializer as CustomerOrderSerializer,
     OrderDetailSerializer as CustomerOrderDetailSerializer,
@@ -181,6 +186,9 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         fields = ["status"]
 
 
+@extend_schema_serializer(
+    examples=[OpenApiExample("Создание товара", examples.CreateProductExample)]
+)
 class CreateProductSerializer(AdminProductSerializer):
     price = serializers.DecimalField(
         max_digits=10, decimal_places=2, write_only=True, min_value=10, max_value=100000
