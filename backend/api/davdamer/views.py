@@ -68,8 +68,10 @@ class OrderDetailView(
     filterset_class = OrderFilter
 
     def get_queryset(self):
-        return Order.objects.filter(seller__davdamer__user=self.request.user).order_by(
-            "-pk"
+        return (
+            Order.objects.filter(seller__davdamer__user=self.request.user)
+            .select_related("user", "shipping_address", "seller")
+            .order_by("-pk")
         )
 
     def get_serializer_class(self):
