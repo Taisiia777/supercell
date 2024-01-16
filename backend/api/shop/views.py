@@ -57,7 +57,11 @@ class ProductCategoriesListView(generics.ListAPIView):
 )
 class ProductListView(CoreProductList):
     serializer_class = serializers.ProductLinkSerializer
-    queryset = Product.objects.browsable()
+    queryset = (
+        Product.objects.browsable()
+        .select_related("seller", "product_class")
+        .prefetch_related("images", "stockrecords", "categories")
+    )
 
     def get_queryset(self):
         qs = super().get_queryset()
