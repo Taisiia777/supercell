@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Count, Value, Subquery, OuterRef
+from django.db.models.functions import Concat
 from django_filters import rest_framework as filters, OrderingFilter
 from oscar.core.loading import get_model
 
@@ -71,10 +72,18 @@ class SellerOrderingFilter(OrderingFilter):
             ("-products_amount", "Количество товаров (descending)"),
             ("orders_total", "Сумма заказов"),
             ("-orders_total", "Сумма заказов (descending)"),
+            ("full_address", "Адрес с точностью до рынка"),
+            ("-full_address", "Адрес с точностью до рынка (descending)"),
         ]
 
     def filter(self, qs, value):
-        queryset = qs.annotate(products_amount=Count("products"), orders_total=Value(0))
+        queryset = qs.annotate(
+            products_amount=Count("products"),
+            orders_total=Value(0),
+            full_address=Concat(
+                "country", Value(", "), "city__name", Value(", "), "market"
+            ),
+        )
         return super().filter(queryset, value)
 
 
