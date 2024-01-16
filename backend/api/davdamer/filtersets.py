@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Count, Value, Subquery, OuterRef
+from django.db.models import Count, Value, Subquery, OuterRef, F
 from django.db.models.functions import Concat
 from django_filters import rest_framework as filters, OrderingFilter
 from oscar.core.loading import get_model
@@ -34,6 +34,8 @@ class ProductOrderingFilter(OrderingFilter):
         self.extra["choices"] += [
             ("orders_count", "Количество заказов"),
             ("-orders_count", "Количество заказов (descending)"),
+            ("price", "Цена"),
+            ("-price", "Цена (descending)"),
         ]
 
     def filter(self, qs, value):
@@ -45,7 +47,8 @@ class ProductOrderingFilter(OrderingFilter):
                 .annotate(cnt=Count("order", distinct=True))
                 .values("cnt"),
                 output_field=models.IntegerField(),
-            )
+            ),
+            price=F("stockrecords__price"),
         )
         return super().filter(qs, value)
 
