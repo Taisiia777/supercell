@@ -263,11 +263,17 @@ SIMPLE_JWT = {
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
 if SENTRY_DSN:
     import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
 
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         traces_sample_rate=0.5,
         profiles_sample_rate=0.2,
+        integrations=[
+            DjangoIntegration(
+                transaction_style="url",
+            ),
+        ],
     )
 
 
