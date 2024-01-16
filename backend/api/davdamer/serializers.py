@@ -212,10 +212,9 @@ class CreateProductSerializer(AdminProductSerializer):
             info.stockrecord.price = price
             info.stockrecord.save()
         else:
-            logger.warning("No stockrecord found for product %s", product)
+            logger.warning("No stockrecord found for product %s", product.pk)
 
     def update(self, product, validated_data):
-        validated_data.pop("stockrecords", None)
         price = validated_data.pop("price", None)
         categories = validated_data.pop("categories", None)
 
