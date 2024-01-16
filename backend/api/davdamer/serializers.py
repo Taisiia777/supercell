@@ -261,3 +261,9 @@ class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
         fields = ["original"]
+
+
+class AddressOptionsSerializer(serializers.Serializer):
+    countries = serializers.ListSerializer(child=serializers.CharField())
+    cities = serializers.ListSerializer(child=serializers.CharField())
+    markets = serializers.ListSerializer(child=serializers.CharField())

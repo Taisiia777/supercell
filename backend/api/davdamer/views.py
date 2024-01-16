@@ -300,3 +300,31 @@ class ProfileView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user.davdamer
+
+
+class AddressOptionsView(generics.RetrieveAPIView):
+    permission_classes = [IsDavDamer]
+    serializer_class = serializers.AddressOptionsSerializer
+
+    def get_object(self):
+        sellers = Seller.objects.filter(davdamer__user=self.request.user)
+        countries = (
+            sellers.filter(country__isnull=False)
+            .values_list("country", flat=True)
+            .distinct()
+        )
+        cities = (
+            sellers.filter(city__isnull=False)
+            .values_list("city__name", flat=True)
+            .distinct()
+        )
+        markets = (
+            sellers.filter(market__isnull=False)
+            .values_list("market", flat=True)
+            .distinct()
+        )
+        return {
+            "countries": countries,
+            "cities": cities,
+            "markets": markets,
+        }
