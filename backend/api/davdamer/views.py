@@ -161,6 +161,7 @@ class SellerView(viewsets.ModelViewSet):
         return (
             Seller.objects.get_queryset()
             .filter(davdamer__user=self.request.user)
+            .select_related("city", "davdamer__user")
             .order_by("-pk")
         )
 
