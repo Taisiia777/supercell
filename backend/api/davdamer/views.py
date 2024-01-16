@@ -237,7 +237,18 @@ class ProductView(
     filterset_class = ProductFilter
 
     def get_queryset(self):
-        return Product.objects.filter(seller__davdamer__user=self.request.user)
+        return (
+            Product.objects.filter(seller__davdamer__user=self.request.user)
+            .select_related("seller", "product_class")
+            .prefetch_related(
+                "categories",
+                "stockrecords",
+                "attributes",
+                "images",
+                "recommended_products",
+                "children",
+            )
+        )
 
     def get_serializer_class(self):
         if self.action in ("retrieve", "list"):
