@@ -1,5 +1,16 @@
 version: "3"
 
+x-common-envs: &common-env
+  BOT_TOKEN: $BOT_TOKEN
+  SELLER_BOT_TOKEN: $SELLER_BOT_TOKEN
+  DB_HOST: postgres
+  DB_NAME: $POSTGRES_DB
+  DB_USER: $POSTGRES_USER
+  DB_PASSWORD: $POSTGRES_PASSWORD
+  DJANGO_DEBUG: $DJANGO_DEBUG
+  SENTRY_DSN: $SENTRY_DSN
+  CELERY_BROKER_URL: redis://redis/1
+
 services:
   postgres:
     image: postgres:15
@@ -11,19 +22,28 @@ services:
     volumes:
       - "pg_data:/var/lib/postgresql/data"
 
+  redis:
+    image: redis:6-alpine
+    restart: unless-stopped
+
+  celery_worker:
+    image: davdam/backend
+    command: celery -A celery_app:app worker --concurrency=${CELERY_WORKERS_COUNT:-1}
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      <<: *common-env
+
   backend:
     build: ./backend
+    image: davdam/backend
     restart: unless-stopped
     command: gunicorn config.wsgi:application -w ${DJANGO_WORKERS_COUNT:-1}
     environment:
-      BOT_TOKEN: $BOT_TOKEN
-      DB_HOST: postgres
-      DB_NAME: $POSTGRES_DB
-      DB_USER: $POSTGRES_USER
-      DB_PASSWORD: $POSTGRES_PASSWORD
-      DJANGO_DEBUG: $DJANGO_DEBUG
+      <<: *common-env
       DJANGO_CSRF_TRUSTED_ORIGINS: $DJANGO_CSRF_TRUSTED_ORIGINS
-      SENTRY_DSN: $SENTRY_DSN
     volumes:
       - "${DJANGO_MEDIA_VOLUME:-./backend/media}:/app/media"
       - "${DJANGO_STATIC_VOLUME:-./backend/static}:/app/static"
@@ -43,6 +63,17 @@ services:
       - "./nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro"
       - "${DJANGO_MEDIA_VOLUME:-./backend/media}:/var/www/mediafiles:ro"
       - "${DJANGO_STATIC_VOLUME:-./backend/static}:/var/www/staticfiles:ro"
+
+  seller_bot:
+    build: ./seller_bot
+    restart: unless-stopped
+    command: python bot.py
+    depends_on:
+      - redis
+    environment:
+      <<: *common-env
+      BOT_LOGLEVEL_INFO: $BOT_LOGLEVEL_INFO
+
 
 volumes:
   pg_data: {}
