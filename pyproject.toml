@@ -18,6 +18,13 @@ python-dotenv = "^1.0.0"
 psycopg = "^3.1.12"
 django-cors-headers = "^4.3.1"
 djangorestframework-simplejwt = "^5.3.1"
+httpx = "^0.26.0"
+pydantic-settings = "^2.1.0"
+sentry-sdk = {extras = ["django"], version = "^1.39.2"}
+django-filter = "^23.5"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.25"}
+celery = "^5.3.6"
+redis = "^5.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
