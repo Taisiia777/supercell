@@ -44,7 +44,10 @@ class SellerProductCategoriesListView(generics.ListAPIView):
 class ProductCategoriesListView(generics.ListAPIView):
     serializer_class = serializers.CategorySerializer
     queryset = (
-        Category.objects.browsable().filter(product__isnull=False).order_by("name")
+        Category.objects.browsable()
+        .filter(product__isnull=False)
+        .order_by("name")
+        .distinct()
     )
 
 
