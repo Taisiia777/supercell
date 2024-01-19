@@ -127,7 +127,7 @@ class SellerActionHandler:
         elif self.action == "cancel":
             self.order.status = OrderStatus.CANCELLED
 
-        self.order.save(update_fields=["status"])
+        self.order.save(update_fields=["status", "updated_dt"])
 
     def act(self):
         try:
