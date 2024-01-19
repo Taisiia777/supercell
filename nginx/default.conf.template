@@ -46,6 +46,10 @@ server {
         return 200 "User-agent: *\nDisallow: /\n";
     }
 
+    location /private_api/ {
+        return 403;
+    }
+
     location / {
         proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;

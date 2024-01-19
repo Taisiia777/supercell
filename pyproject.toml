@@ -33,6 +33,10 @@ ruff = "^0.1.6"
 pre-commit = "^3.5.0"
 pycountry = "^22.3.5"
 
+[tool.ruff.per-file-ignores]
+"backend/config/settings.py" = ["E501"]
+
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
