@@ -35,6 +35,7 @@ CoreProductSerializer = get_api_class(
 )
 PriceSerializer = get_api_class("serializers.checkout", "PriceSerializer")
 Selector = get_class("partner.strategy", "Selector")
+ProductClass = get_model("catalogue", "ProductClass")
 
 
 class CreateSellerSerializer(serializers.ModelSerializer):
@@ -190,12 +191,17 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
     examples=[OpenApiExample("Создание товара", examples.CreateProductExample)]
 )
 class CreateProductSerializer(AdminProductSerializer):
+    product_class = serializers.SlugRelatedField(
+        slug_field="slug", queryset=ProductClass.objects, required=False
+    )
     price = serializers.DecimalField(
         max_digits=10, decimal_places=2, write_only=True, min_value=10, max_value=100000
     )
 
     def create(self, validated_data):
         validated_data.pop("stockrecords", None)
+        if validated_data.get("product_class") is None:
+            validated_data["product_class"] = ProductClass.objects.first()
         sku = uuid.uuid4().hex[:6].upper()
         seller_id = self.context["view"].kwargs["seller_id"]
         seller = Seller.objects.get(id=seller_id)
