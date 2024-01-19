@@ -10,7 +10,7 @@ from shop.order.enums import OrderStatus
 
 logger = logging.getLogger(__name__)
 
-bot = Bot(token=settings.SELLER_BOT_TOKEN)
+bot = Bot(token=settings.SELLER_BOT_TOKEN, parse_mode="HTML")
 Order = get_model("order", "Order")
 
 
@@ -58,9 +58,14 @@ class SellerNotifier:
             )
 
     def _prepare_message(self):
-        text = f"Новый заказ #{self.order.number}\n\n"
+        text = (
+            f"<b>Новый заказ <code>{self.order.number}</code></b>\n"
+            f"Дата заказа: {self.order.date_placed.strftime('%d.%m.%Y %H:%M:%S')}\n"
+            f"Магазин: {self.order.seller.name}\n\n"
+            f"Товары:\n"
+        )
         for line in self.order.lines.all():
-            text += f"- {line.product.title} - {line.quantity} шт.\n"
+            text += f"- {line.product.title} x {line.quantity} шт.\n"
 
         keyboard = types.InlineKeyboardMarkup(
             inline_keyboard=[
