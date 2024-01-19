@@ -11,6 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django_filters import rest_framework as filters
 
 from api.permissions import IsDavDamer, IsSellerOwner
+from api.shop import serializers as shop_serializers
 from core.models import City
 from . import serializers
 from .filtersets import OrderFilter, ProductFilter, SellerFilter
@@ -24,6 +25,7 @@ CoreProductClassAdminList = get_api_class(
     "views.admin.product", "ProductClassAdminList"
 )
 ProductImage = get_model("catalogue", "ProductImage")
+Category = get_model("catalogue", "Category")
 
 
 class SellersListView(generics.ListAPIView):
@@ -342,3 +344,9 @@ class AddressOptionsView(generics.RetrieveAPIView):
             "cities": cities,
             "markets": markets,
         }
+
+
+class CategoryListView(generics.ListAPIView):
+    permission_classes = [IsDavDamer]
+    serializer_class = shop_serializers.CategorySerializer
+    queryset = Category.objects.browsable().order_by("name").distinct()
