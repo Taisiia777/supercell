@@ -185,7 +185,7 @@ class SellerView(viewsets.ModelViewSet):
         self.perform_create(serializer)
 
         response_serializer = serializers.SellerResponseSerializer(
-            instance=serializer.instance
+            instance=serializer.instance, context=self.get_serializer_context()
         )
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
