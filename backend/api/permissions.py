@@ -29,7 +29,9 @@ class IsSellerOwner(permissions.BasePermission):
         ).exists()
 
     def has_object_permission(self, request, view, seller) -> bool:
-        return seller.davdamer == request.user.davdamer
+        if isinstance(seller, Seller):
+            return seller.davdamer == request.user.davdamer
+        return True
 
 
 class IsProductOwner(permissions.BasePermission):
