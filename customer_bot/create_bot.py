@@ -1,4 +1,5 @@
 from aiogram import Bot, Dispatcher
+from pydantic import HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -6,6 +7,7 @@ class BotConfig(BaseSettings):
     BOT_TOKEN: str
     CELERY_BROKER_URL: str
     REDIS_URL: str | None = None
+    CUSTOMER_WEBAPP_URL: HttpUrl
 
     BOT_LOGLEVEL_INFO: bool = False
     BOT_WEBSERVER_HOST: str = "0.0.0.0"
