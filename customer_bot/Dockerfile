@@ -11,7 +11,6 @@ RUN pip install --no-cache-dir -r /requirements.txt
 WORKDIR /app
 COPY bot.py ./bot.py
 COPY create_bot.py ./create_bot.py
-COPY seller_api ./seller_api
 COPY src ./src
 
 USER bot

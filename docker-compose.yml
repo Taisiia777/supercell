@@ -76,6 +76,14 @@ services:
       BOT_LOGLEVEL_INFO: $BOT_LOGLEVEL_INFO
       API_HOST: http://backend:8000
 
+  customer_bot:
+    build: ./customer_bot
+    restart: unless-stopped
+    command: python bot.py
+    environment:
+      <<: *common-env
+      BOT_LOGLEVEL_INFO: $BOT_LOGLEVEL_INFO
+
 
 volumes:
   pg_data: {}
