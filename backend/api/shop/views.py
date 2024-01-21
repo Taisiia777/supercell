@@ -196,4 +196,8 @@ class ProductAllocationTestView(APIView):
 
 class CityListView(generics.ListAPIView):
     serializer_class = serializers.CitySerializer
-    queryset = City.objects.all().order_by("name")
+    queryset = (
+        City.objects.filter(sellers__stockrecords__isnull=False)
+        .distinct()
+        .order_by("name")
+    )

@@ -14,7 +14,11 @@ class Partner(AbstractPartner):  # this is a Seller
     rating = models.DecimalField(max_digits=3, decimal_places=2, null=True)
     country = models.CharField(max_length=255, null=True, blank=True, default="Россия")
     city = models.ForeignKey(
-        "core.City", on_delete=models.PROTECT, null=True, blank=True
+        "core.City",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="sellers",
     )
     market = models.CharField(max_length=255, null=True, blank=True)
     address = models.CharField(max_length=255, null=True)
