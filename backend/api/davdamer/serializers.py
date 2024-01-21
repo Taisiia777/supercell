@@ -3,6 +3,7 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db.models import Max
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     extend_schema_field,
@@ -197,6 +198,11 @@ class CreateProductSerializer(AdminProductSerializer):
     price = serializers.DecimalField(
         max_digits=10, decimal_places=2, write_only=True, min_value=10, max_value=100000
     )
+    uploaded_images = serializers.ListField(
+        child=serializers.ImageField(allow_empty_file=False, use_url=False),
+        required=False,
+        write_only=True,
+    )
 
     def create(self, validated_data):
         validated_data.pop("stockrecords", None)
@@ -205,6 +211,7 @@ class CreateProductSerializer(AdminProductSerializer):
         sku = uuid.uuid4().hex[:6].upper()
         seller_id = self.context["view"].kwargs["seller_id"]
         seller = Seller.objects.get(id=seller_id)
+        images = validated_data.pop("uploaded_images", None)
 
         stockrecord = {
             "partner_sku": sku,
@@ -216,7 +223,22 @@ class CreateProductSerializer(AdminProductSerializer):
         product = super().create(validated_data)
         product.seller = seller
         product.save(update_fields=["seller"])
+        if images:
+            self._add_product_images(product, images)
         return product
+
+    @staticmethod
+    def _add_product_images(product, images):
+        max_display_order = product.images.all().aggregate(Max("display_order"))[
+            "display_order__max"
+        ]
+        display_order = 0 if max_display_order is None else max_display_order + 1
+
+        for image in images:
+            ProductImage.objects.create(
+                product=product, original=image, display_order=display_order
+            )
+            display_order += 1
 
     @staticmethod
     def _update_product_price(product, price):
@@ -248,6 +270,7 @@ class CreateProductSerializer(AdminProductSerializer):
         model = Product
         fields = [
             "product_class",
+            "uploaded_images",
             "title",
             "description",
             "upc",
