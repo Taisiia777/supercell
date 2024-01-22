@@ -64,8 +64,6 @@ class OrderDetailView(
 ):
     permission_classes = [IsDavDamer]
     pagination_class = DefaultPageNumberPagination
-    lookup_field = "number"
-    lookup_url_kwarg = "order_number"
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = OrderFilter
 
@@ -85,10 +83,10 @@ class OrderDetailView(
             return serializers.OrderUpdateSerializer
 
     def get_object(self):
-        number = self.kwargs[self.lookup_url_kwarg]
+        order_id = self.kwargs["pk"]
         davdamer = self.request.user.davdamer
         return get_object_or_404(
-            Order.objects.all(), number=number, seller__davdamer=davdamer
+            Order.objects.all(), id=order_id, seller__davdamer=davdamer
         )
 
     @extend_schema(exclude=True)
