@@ -48,6 +48,9 @@ class CreateSellerSerializer(serializers.ModelSerializer):
         fields = [
             "name",
             "telegram_chat_id",
+            "enot_shop_id",
+            "enot_secret_key",
+            "enot_webhook_key",
             "image",
             "country",
             "city",
@@ -107,11 +110,13 @@ class SellerResponseSerializer(serializers.ModelSerializer):
             "products_amount",
             "orders_total",
             "rating",
+            "enot_shop_id",
             "registered_dt",
         ]
 
 
 class UpdateSellerSerializer(serializers.ModelSerializer):
+    telegram_chat_id = serializers.IntegerField(required=False)
     city = serializers.CharField(required=False)
 
     class Meta:
@@ -124,6 +129,10 @@ class UpdateSellerSerializer(serializers.ModelSerializer):
             "market",
             "address",
             "description",
+            "telegram_chat_id",
+            "enot_shop_id",
+            "enot_secret_key",
+            "enot_webhook_key",
         ]
 
 
