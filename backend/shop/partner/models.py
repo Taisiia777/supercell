@@ -24,6 +24,18 @@ class Partner(AbstractPartner):  # this is a Seller
     address = models.CharField(max_length=255, null=True)
     description = models.TextField(null=True)
 
+    enot_shop_id = models.CharField(
+        null=True, blank=True, verbose_name="Идентификатор кассы"
+    )
+    enot_secret_key = models.CharField(
+        null=True, blank=True, verbose_name="Секретный ключ кассы"
+    )
+    enot_webhook_key = models.CharField(
+        null=True,
+        blank=True,
+        verbose_name="Дополнительный ключ для проверки подписи в хуках оплаты",
+    )
+
     registered_dt = models.DateTimeField(auto_now_add=True, null=True)
     updated_dt = models.DateTimeField(auto_now=True, null=True)
 
