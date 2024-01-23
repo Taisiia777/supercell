@@ -83,6 +83,7 @@ class SellerResponseSerializer(serializers.ModelSerializer):
     davdamer = DavDamerSerializer()
     full_address = serializers.SerializerMethodField()
     city = serializers.SerializerMethodField()
+    telegram_chat_id = serializers.SerializerMethodField()
 
     def get_city(self, seller):
         return seller.city.name if seller.city else None
@@ -93,6 +94,11 @@ class SellerResponseSerializer(serializers.ModelSerializer):
     @extend_schema_field(OpenApiTypes.INT)
     def get_products_amount(self, seller):
         return Product.objects.filter(seller=seller).count()
+
+    @extend_schema_field(OpenApiTypes.INT)
+    def get_telegram_chat_id(self, seller):
+        user = seller.users.first()
+        return user.telegram_chat_id if user else None
 
     class Meta:
         model = Seller
@@ -111,6 +117,7 @@ class SellerResponseSerializer(serializers.ModelSerializer):
             "orders_total",
             "rating",
             "enot_shop_id",
+            "telegram_chat_id",
             "registered_dt",
         ]
 

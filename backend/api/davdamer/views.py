@@ -187,13 +187,22 @@ class SellerView(viewsets.ModelViewSet):
         )
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
-    def perform_update(self, serializer):
+    def perform_update(self, serializer: serializers.UpdateSellerSerializer):
         city_name = serializer.validated_data.pop("city", None)
+        new_city = None
         if city_name:
-            city, _ = City.objects.get_or_create(
+            new_city, _ = City.objects.get_or_create(
                 name__iexact=city_name, defaults={"name": city_name}
             )
-            serializer.save(city=city)
+
+        telegram_chat_id = serializer.validated_data.pop("telegram_chat_id", None)
+        if telegram_chat_id:
+            seller = serializer.instance
+            seller.users.clear()
+            self.create_seller_user(seller, telegram_chat_id)
+
+        if new_city:
+            serializer.save(city=new_city)
         else:
             serializer.save()
 
