@@ -50,8 +50,9 @@ class ProductImageSerializer(serializers.ModelSerializer):
     original = serializers.SerializerMethodField()
 
     def get_original(self, obj):
-        request = self.context.get("request")
-        return request.build_absolute_uri(obj.original.url)
+        # request = self.context.get("request")
+        # todo: remove hardcoded domain
+        return "https://davdam.ecorp.fyi" + obj.original.url
     
     class Meta:
         model = ProductImage
