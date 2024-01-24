@@ -55,12 +55,12 @@ class ProductImageSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ProductImage
-        fields = ["id", "original", "caption", "display_order"])
+        fields = ["id", "original", "caption", "display_order"]
 
 
 class ProductSerializer(CoreProductSerializer):
     images = serializers.ListSerializer(child=ProductImageSerializer())
-    
+
     class Meta(CoreProductSerializer.Meta):
         fields = ["id", "title", "images", "categories"]
 
