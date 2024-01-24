@@ -7,6 +7,7 @@ from rest_framework import serializers
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
 Product = get_model("catalogue", "Product")
+ProductImage = get_model("catalogue", "ProductImage")
 ShippingAddress = get_model("order", "ShippingAddress")
 CoreProductSerializer = get_api_class("serializers.product", "ProductSerializer")
 User = get_user_model()
@@ -45,7 +46,21 @@ class CustomerOrderListSerializer(CustomerMixin, serializers.Serializer):
     orders = OrderSerializer(many=True)
 
 
+class ProductImageSerializer(serializers.ModelSerializer):
+    original = serializers.SerializerMethodField()
+
+    def get_original(self, obj):
+        request = self.context.get("request")
+        return request.build_absolute_uri(obj.original.url)
+    
+    class Meta:
+        model = ProductImage
+        fields = ["id", "original", "caption", "display_order"])
+
+
 class ProductSerializer(CoreProductSerializer):
+    images = serializers.ListSerializer(child=ProductImageSerializer())
+    
     class Meta(CoreProductSerializer.Meta):
         fields = ["id", "title", "images", "categories"]
 
