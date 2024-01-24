@@ -21,6 +21,7 @@ from api.customer.serializers import (
     OrderSerializer as CustomerOrderSerializer,
     OrderDetailSerializer as CustomerOrderDetailSerializer,
     CustomerSerializer,
+    ShippingAddressSerializer,
 )
 from core.models import DavDamer
 
@@ -199,9 +200,16 @@ class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
 
 
 class OrderUpdateSerializer(serializers.ModelSerializer):
+    shipping_address = ShippingAddressSerializer()
+
+    def update(self, order, validated_data):
+        validated_data.pop("shipping_address", None)
+        order = super().update(order, validated_data)
+        return order
+
     class Meta:
         model = Order
-        fields = ["status"]
+        fields = ["status", "shipping_address"]
 
 
 @extend_schema_serializer(
