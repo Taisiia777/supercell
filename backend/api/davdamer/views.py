@@ -287,7 +287,7 @@ class ProductView(
         if self.action in ("retrieve", "list"):
             return serializers.ProductSerializer
         elif self.action in ("update", "partial_update"):
-            return serializers.CreateProductSerializer
+            return serializers.UpdateProductSerializer
 
     @extend_schema(exclude=True)
     def update(self, request, *args, **kwargs):

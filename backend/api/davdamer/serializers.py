@@ -297,6 +297,26 @@ class CreateProductSerializer(AdminProductSerializer):
         ]
 
 
+class UpdateProductSerializer(CreateProductSerializer):
+    deleted_images = serializers.ListSerializer(child=serializers.IntegerField(), required=False)
+
+    def update(self, product, validated_data):
+        deleted_images = validated_data.pop("deleted_images", None)
+        uploaded_images = validated_data.pop("uploaded_images", None)
+
+        product = super().update(product, validated_data)
+        if uploaded_images:
+            self._add_product_images(product, uploaded_images)
+
+        if deleted_images:
+            product.images.filter(id__in=deleted_images).delete()
+
+        return product
+
+    class Meta(CreateProductSerializer.Meta):
+        fields = CreateProductSerializer.Meta.fields + ["deleted_images"]
+
+
 class ProductClassSerializer(serializers.Serializer):
     slug = serializers.CharField()
     name = serializers.CharField()
