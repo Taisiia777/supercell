@@ -305,6 +305,9 @@ class CreateProductSerializer(AdminProductSerializer):
         ]
 
 
+@extend_schema_serializer(
+    examples=[OpenApiExample("Обновление товара", examples.UpdateProductExample)]
+)
 class UpdateProductSerializer(CreateProductSerializer):
     deleted_images = serializers.ListSerializer(
         child=serializers.IntegerField(), required=False
@@ -340,6 +343,8 @@ class UpdateProductSerializer(CreateProductSerializer):
 
         if info.stockrecord:
             info.stockrecord.partner = seller
+            product.seller = seller
+            product.save(update_fields=["seller"])
             info.stockrecord.save()
         else:
             logger.warning("No stockrecord found for product %s", product.pk)
