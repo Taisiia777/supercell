@@ -317,7 +317,7 @@ class UpdateProductSerializer(CreateProductSerializer):
     def update(self, product, validated_data):
         deleted_images = validated_data.pop("deleted_images", None)
         uploaded_images = validated_data.pop("uploaded_images", None)
-        new_seller_id = validated_data.pop("seller", None)
+        new_seller_id = validated_data.pop("new_seller_id", None)
 
         product = super().update(product, validated_data)
         if uploaded_images:
@@ -350,7 +350,10 @@ class UpdateProductSerializer(CreateProductSerializer):
             logger.warning("No stockrecord found for product %s", product.pk)
 
     class Meta(CreateProductSerializer.Meta):
-        fields = CreateProductSerializer.Meta.fields + ["deleted_images", "seller"]
+        fields = CreateProductSerializer.Meta.fields + [
+            "deleted_images",
+            "new_seller_id",
+        ]
 
 
 class ProductClassSerializer(serializers.Serializer):

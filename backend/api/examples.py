@@ -31,5 +31,5 @@ UpdateProductExample = {
     "categories": ["Одежда"],
     "uploaded_images": [],
     "deleted_images": [1],
-    "seller": 1,
+    "new_seller_id": 1,
 }
