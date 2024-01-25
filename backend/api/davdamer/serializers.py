@@ -306,11 +306,15 @@ class CreateProductSerializer(AdminProductSerializer):
 
 
 class UpdateProductSerializer(CreateProductSerializer):
-    deleted_images = serializers.ListSerializer(child=serializers.IntegerField(), required=False)
+    deleted_images = serializers.ListSerializer(
+        child=serializers.IntegerField(), required=False
+    )
+    seller = serializers.IntegerField(required=False)
 
     def update(self, product, validated_data):
         deleted_images = validated_data.pop("deleted_images", None)
         uploaded_images = validated_data.pop("uploaded_images", None)
+        new_seller_id = validated_data.pop("seller", None)
 
         product = super().update(product, validated_data)
         if uploaded_images:
@@ -319,10 +323,29 @@ class UpdateProductSerializer(CreateProductSerializer):
         if deleted_images:
             product.images.filter(id__in=deleted_images).delete()
 
+        if new_seller_id:
+            self._update_product_seller(product, new_seller_id)
+
         return product
 
+    @staticmethod
+    def _update_product_seller(product, seller_id: int):
+        strategy = Selector().strategy()
+        info = strategy.fetch_for_product(product)
+        try:
+            seller = Seller.objects.get(pk=seller_id)
+        except Seller.DoesNotExist:
+            logger.warning("No seller found for id %s", seller_id)
+            return
+
+        if info.stockrecord:
+            info.stockrecord.partner = seller
+            info.stockrecord.save()
+        else:
+            logger.warning("No stockrecord found for product %s", product.pk)
+
     class Meta(CreateProductSerializer.Meta):
-        fields = CreateProductSerializer.Meta.fields + ["deleted_images"]
+        fields = CreateProductSerializer.Meta.fields + ["deleted_images", "seller"]
 
 
 class ProductClassSerializer(serializers.Serializer):
