@@ -305,13 +305,22 @@ class CreateProductSerializer(AdminProductSerializer):
         ]
 
 
+class FormListIntSerializer(serializers.CharField):
+    def to_internal_value(self, data: str):
+        if len(data) < 3 or data[0] != "[" or data[-1] != "]":
+            return []
+
+        try:
+            return [int(x) for x in data[1:-1].split(",") if x.isdigit()]
+        except ValueError:
+            return []
+
+
 @extend_schema_serializer(
     examples=[OpenApiExample("Обновление товара", examples.UpdateProductExample)]
 )
 class UpdateProductSerializer(CreateProductSerializer):
-    deleted_images = serializers.ListSerializer(
-        child=serializers.IntegerField(), required=False
-    )
+    deleted_images = FormListIntSerializer(required=False)
     new_seller_id = serializers.IntegerField(required=False)
 
     def update(self, product, validated_data):
