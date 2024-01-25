@@ -312,7 +312,7 @@ class UpdateProductSerializer(CreateProductSerializer):
     deleted_images = serializers.ListSerializer(
         child=serializers.IntegerField(), required=False
     )
-    seller = serializers.IntegerField(required=False)
+    new_seller_id = serializers.IntegerField(required=False)
 
     def update(self, product, validated_data):
         deleted_images = validated_data.pop("deleted_images", None)
