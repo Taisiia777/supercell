@@ -13,6 +13,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import sentry_sdk
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -267,18 +269,11 @@ SIMPLE_JWT = {
 
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
 if SENTRY_DSN:
-    import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
-
     sentry_sdk.init(
         dsn=SENTRY_DSN,
+        enable_tracing=True,
         traces_sample_rate=0.5,
         profiles_sample_rate=0.2,
-        integrations=[
-            DjangoIntegration(
-                transaction_style="url",
-            ),
-        ],
     )
 
 
