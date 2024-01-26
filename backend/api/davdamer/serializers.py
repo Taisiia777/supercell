@@ -80,7 +80,7 @@ class DavDamerSerializer(serializers.ModelSerializer):
 class SellerResponseSerializer(serializers.ModelSerializer):
     products_amount = serializers.SerializerMethodField()
     country = serializers.ReadOnlyField(default="Россия")
-    orders_total = serializers.ReadOnlyField(default=0)
+    orders_total = serializers.SerializerMethodField()
     davdamer = DavDamerSerializer()
     full_address = serializers.SerializerMethodField()
     city = serializers.SerializerMethodField()
@@ -100,6 +100,12 @@ class SellerResponseSerializer(serializers.ModelSerializer):
     def get_telegram_chat_id(self, seller):
         user = seller.users.first()
         return user.telegram_chat_id if user else None
+
+    @extend_schema_field(OpenApiTypes.FLOAT)
+    def get_orders_total(self, seller):
+        if hasattr(seller, "orders_total"):
+            return seller.orders_total
+        return seller.get_orders_total()
 
     class Meta:
         model = Seller

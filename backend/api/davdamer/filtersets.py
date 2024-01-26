@@ -1,5 +1,7 @@
+from decimal import Decimal
+
 from django.db import models
-from django.db.models import Count, Value, Subquery, OuterRef, F
+from django.db.models import Count, Value, Subquery, OuterRef, F, Sum
 from django.db.models.functions import Concat, Coalesce
 from django_filters import rest_framework as filters, OrderingFilter
 from oscar.core.loading import get_model
@@ -84,7 +86,16 @@ class SellerOrderingFilter(OrderingFilter):
     def filter(self, qs, value):
         queryset = qs.annotate(
             products_amount=Count("products"),
-            orders_total=Value(0),
+            orders_total=Coalesce(
+                Subquery(
+                    Order.objects.filter(seller=OuterRef("pk"))
+                    .values("seller")
+                    .annotate(total=Sum("total_incl_tax"))
+                    .values("total"),
+                    output_field=models.DecimalField(),
+                ),
+                Decimal(0),
+            ),
             full_address=Concat(
                 "country", Value(", "), "city__name", Value(", "), "market"
             ),
