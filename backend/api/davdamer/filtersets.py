@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import Count, Value, Subquery, OuterRef, F
-from django.db.models.functions import Concat
+from django.db.models.functions import Concat, Coalesce
 from django_filters import rest_framework as filters, OrderingFilter
 from oscar.core.loading import get_model
 
@@ -40,13 +40,15 @@ class ProductOrderingFilter(OrderingFilter):
 
     def filter(self, qs, value):
         qs = qs.annotate(
-            orders_count=Subquery(
-                OrderLine.objects.filter(product=OuterRef("pk"))
-                .order_by()
-                .values("product")
-                .annotate(cnt=Count("order", distinct=True))
-                .values("cnt"),
-                output_field=models.IntegerField(),
+            orders_count=Coalesce(
+                Subquery(
+                    OrderLine.objects.filter(product=OuterRef("pk"))
+                    .values("product")
+                    .annotate(cnt=Count("order", distinct=True))
+                    .values("cnt"),
+                    output_field=models.IntegerField(),
+                ),
+                0,
             ),
             price=F("stockrecords__price"),
         )

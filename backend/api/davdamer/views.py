@@ -280,6 +280,7 @@ class ProductView(
                 "images",
                 "recommended_products",
                 "children",
+                "attribute_values",
             )
         )
 

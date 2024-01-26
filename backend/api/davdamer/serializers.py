@@ -184,7 +184,10 @@ class ProductSerializer(CoreProductSerializer):
     @staticmethod
     @extend_schema_field(OpenApiTypes.INT)
     def get_orders_count(product):
-        return Order.objects.filter(lines__product=product).count()
+        if hasattr(product, "orders_count"):
+            return product.orders_count
+        else:
+            return product.get_orders_count()
 
     def get_price(self, product):
         request = self.context["request"]
