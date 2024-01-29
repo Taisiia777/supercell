@@ -236,6 +236,7 @@ class CreateProductSerializer(AdminProductSerializer):
         required=False,
         write_only=True,
     )
+    is_public = serializers.BooleanField(default=True)
 
     def create(self, validated_data):
         validated_data.pop("stockrecords", None)
