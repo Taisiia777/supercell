@@ -3,6 +3,8 @@ from django.db import models
 from django.db.models import Sum
 from oscar.apps.partner.abstract_models import AbstractPartner
 
+from shop.order.enums import OrderStatus
+
 DjangoUser = get_user_model()
 
 
@@ -41,7 +43,9 @@ class Partner(AbstractPartner):  # this is a Seller
     updated_dt = models.DateTimeField(auto_now=True, null=True)
 
     def get_orders_total(self):
-        return self.orders.aggregate(total=Sum("total_incl_tax"))["total"]
+        return self.orders.filter(status=OrderStatus.DELIVERED).aggregate(
+            total=Sum("total_incl_tax")
+        )["total"]
 
     class Meta:
         verbose_name = "Продавец"

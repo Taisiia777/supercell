@@ -6,6 +6,8 @@ from django.db.models.functions import Concat, Coalesce
 from django_filters import rest_framework as filters, OrderingFilter
 from oscar.core.loading import get_model
 
+from shop.order.enums import OrderStatus
+
 Order = get_model("order", "Order")
 Product = get_model("catalogue", "Product")
 Seller = get_model("partner", "Seller")
@@ -88,7 +90,9 @@ class SellerOrderingFilter(OrderingFilter):
             products_amount=Count("products"),
             orders_total=Coalesce(
                 Subquery(
-                    Order.objects.filter(seller=OuterRef("pk"))
+                    Order.objects.filter(
+                        status=OrderStatus.DELIVERED, seller=OuterRef("pk")
+                    )
                     .values("seller")
                     .annotate(total=Sum("total_incl_tax"))
                     .values("total"),
