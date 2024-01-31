@@ -13,6 +13,7 @@ from django_filters import rest_framework as filters
 from api.permissions import IsDavDamer, IsSellerOwner
 from api.shop import serializers as shop_serializers
 from core.models import City
+from celery_app import app as celery_app
 from . import serializers
 from .filtersets import OrderFilter, ProductFilter, SellerFilter
 from ..pagination import DefaultPageNumberPagination
@@ -88,6 +89,14 @@ class OrderDetailView(
         return get_object_or_404(
             Order.objects.all(), id=order_id, seller__davdamer=davdamer
         )
+
+    def perform_update(self, serializer):
+        old_status = serializer.instance.status
+
+        order = serializer.save()
+
+        if old_status != order.status:
+            celery_app.send_task("api.davdamer.order_status_updated", args=(order.pk,))
 
     @extend_schema(exclude=True)
     def update(self, request, *args, **kwargs):
