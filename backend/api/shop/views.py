@@ -2,6 +2,8 @@ import logging
 
 from django.db.models import Q
 from django.urls import reverse
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from oscar.apps.partner.strategy import Selector
 from oscar.core.loading import get_model
@@ -26,11 +28,13 @@ Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
 
 
+@method_decorator(cache_page(30), name="list")
 class SellersListView(generics.ListAPIView):
     serializer_class = serializers.SellerSerializer
     queryset = Seller.objects.filter(stockrecords__isnull=False)
 
 
+@method_decorator(cache_page(30), name="list")
 class SellerProductCategoriesListView(generics.ListAPIView):
     serializer_class = serializers.CategorySerializer
 
@@ -41,6 +45,7 @@ class SellerProductCategoriesListView(generics.ListAPIView):
         ).distinct()
 
 
+@method_decorator(cache_page(15), name="list")
 class ProductCategoriesListView(generics.ListAPIView):
     serializer_class = serializers.CategorySerializer
     queryset = (
@@ -51,6 +56,7 @@ class ProductCategoriesListView(generics.ListAPIView):
     )
 
 
+@method_decorator(cache_page(15), name="list")
 @extend_schema(
     parameters=[
         OpenApiParameter(name="category_id", type=int),
@@ -84,10 +90,15 @@ class ProductListView(CoreProductList):
         return qs
 
 
+@method_decorator(cache_page(15), "list")
 @extend_schema(parameters=[OpenApiParameter(name="category_id", type=int)])
 class SellerProductsListView(CoreProductList):
     serializer_class = serializers.ProductLinkSerializer
-    queryset = Product.objects.browsable()
+    queryset = (
+        Product.objects.browsable()
+        .select_related("product_class", "seller")
+        .prefetch_related("images", "stockrecords", "categories")
+    )
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -113,7 +124,13 @@ class PaymentView(APIView):
         )
 
 
-class ProductDetailView(CoreProductDetail):
+@method_decorator(cache_page(15), name="retrieve")
+class ProductDetailView(generics.RetrieveAPIView):
+    queryset = (
+        Product.objects.browsable()
+        .select_related("product_class", "seller")
+        .prefetch_related("images", "stockrecords", "categories")
+    )
     serializer_class = serializers.ProductSerializer
 
 
@@ -194,6 +211,7 @@ class ProductAllocationTestView(APIView):
         return Response({"success": True, "message": result})
 
 
+@method_decorator(cache_page(15), name="list")
 class CityListView(generics.ListAPIView):
     serializer_class = serializers.CitySerializer
     queryset = (

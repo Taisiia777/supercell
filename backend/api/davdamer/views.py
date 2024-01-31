@@ -1,5 +1,8 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.db.models import Max
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_headers
 from drf_spectacular.utils import extend_schema
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
@@ -90,6 +93,11 @@ class OrderDetailView(
             Order.objects.all(), id=order_id, seller__davdamer=davdamer
         )
 
+    @method_decorator(cache_page(15))
+    @method_decorator(vary_on_headers("Authorization"))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def perform_update(self, serializer):
         old_status = serializer.instance.status
 
@@ -165,6 +173,11 @@ class SellerView(viewsets.ModelViewSet):
     lookup_url_kwarg = "seller_id"
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = SellerFilter
+
+    @method_decorator(cache_page(15))
+    @method_decorator(vary_on_headers("Authorization"))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         return (
@@ -293,6 +306,11 @@ class ProductView(
                 "attribute_values",
             )
         )
+
+    @method_decorator(cache_page(15))
+    @method_decorator(vary_on_headers("Authorization"))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_serializer_class(self):
         if self.action in ("retrieve", "list"):
