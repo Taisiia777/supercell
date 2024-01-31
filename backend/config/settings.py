@@ -135,6 +135,7 @@ DATABASES = {
         "PASSWORD": os.environ["DB_PASSWORD"],
         "HOST": os.environ["DB_HOST"],
         "CONN_MAX_AGE": 60,
+        "CONN_HEALTH_CHECK": True,
     }
 }
 
