@@ -1,29 +1,17 @@
-import asyncio
 import logging
 
 from aiogram import Bot, types
 from aiogram.filters.callback_data import CallbackData
 from django.conf import settings
-from oscar.core.loading import get_model
 
+from core.services.exceptions import InvalidCommandError
+from core.services.utils import send_message
 from shop.order.enums import OrderStatus
+from shop.order.models import Order
 
 logger = logging.getLogger(__name__)
 
 bot = Bot(token=settings.SELLER_BOT_TOKEN, parse_mode="HTML")
-Order = get_model("order", "Order")
-
-
-def send_message(*args, **kwargs):
-    loop = asyncio.get_event_loop()
-    if loop.is_closed():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-    loop.run_until_complete(bot.send_message(*args, **kwargs))
-
-
-class InvalidCommandError(Exception):
-    pass
 
 
 class SellerActionCf(CallbackData, prefix="slr_act"):
@@ -95,7 +83,9 @@ class SellerNotifier:
 
     def _send_message_to_seller(self):
         text, keyboard = self._prepare_message()
-        send_message(self.seller_profile.telegram_chat_id, text, reply_markup=keyboard)
+        send_message(
+            bot, self.seller_profile.telegram_chat_id, text, reply_markup=keyboard
+        )
 
     def notify(self):
         try:
