@@ -264,6 +264,13 @@ SPECTACULAR_SETTINGS = {
     "PREPROCESSING_HOOKS": ["api.spectacular_hooks.filter_endpoints"],
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": os.environ["DJANGO_REDIS_URL"],
+    }
+}
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=14),
 }
