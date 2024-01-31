@@ -94,7 +94,7 @@ class SellerResponseSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(OpenApiTypes.INT)
     def get_products_amount(self, seller):
-        return Product.objects.filter(seller=seller).count()
+        return seller.products.count()
 
     @extend_schema_field(OpenApiTypes.INT)
     def get_telegram_chat_id(self, seller):

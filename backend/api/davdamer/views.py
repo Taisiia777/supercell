@@ -171,6 +171,7 @@ class SellerView(viewsets.ModelViewSet):
             Seller.objects.get_queryset()
             .filter(davdamer__user=self.request.user)
             .select_related("city", "davdamer__user")
+            .prefetch_related("products")
             .order_by("-pk")
         )
 
