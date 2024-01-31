@@ -206,6 +206,7 @@ OSCAR_ORDER_STATUS_PIPELINE = {
         "CANCELLED",
     ),
     "PROCESSING": (
+        "READY",
         "SENT",
         "DELIVERED",
         "CANCELLED",
