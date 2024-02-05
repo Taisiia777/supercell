@@ -47,8 +47,8 @@ class WebAppAuthentication(BaseAuthentication):
             return user, None
         except ValueError:
             # todo: remove this
-            referer: str = request.META.get("HTTP_REFERER", "")
-            if not referer.startswith("https://davdamer-admin.netlify.app"):
+            origin: str = request.META.get("HTTP_ORIGIN", "")
+            if not origin.startswith("https://davdamer-admin.netlify.app"):
                 return None
             try:
                 user = User.objects.get(pk=2)
