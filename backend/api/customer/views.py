@@ -14,7 +14,11 @@ class OrdersListView(APIView):
     serializer_class = serializers.CustomerOrderListSerializer
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user).order_by("-pk")
+        return (
+            Order.objects.filter(user=self.request.user)
+            .prefetch_related("lines")
+            .order_by("-pk")
+        )
 
     def get(self, request):
         queryset = self.get_queryset()
@@ -30,7 +34,12 @@ class OrderDetailView(APIView):
 
     def get_queryset(self):
         number = self.kwargs.get("order_number")
-        return Order.objects.filter(user=self.request.user, number=number).first()
+        return (
+            Order.objects.filter(user=self.request.user, number=number)
+            .select_related("shipping_address")
+            .prefetch_related("lines")
+            .first()
+        )
 
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()

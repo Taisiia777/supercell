@@ -41,11 +41,6 @@ class CustomerMixin:
         return ret
 
 
-class CustomerOrderListSerializer(CustomerMixin, serializers.Serializer):
-    user = CustomerSerializer()
-    orders = OrderSerializer(many=True)
-
-
 class ProductImageSerializer(serializers.ModelSerializer):
     original = serializers.SerializerMethodField()
 
@@ -53,7 +48,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
         # request = self.context.get("request")
         # todo: remove hardcoded domain
         return "https://davdam.ecorp.fyi" + obj.original.url
-    
+
     class Meta:
         model = ProductImage
         fields = ["id", "original", "caption", "display_order"]
@@ -81,6 +76,11 @@ class OrderDetailSerializer(OrderSerializer):
     def get_lines(self, order):
         lines = order.lines.all()
         return OrderLineSerializer(lines, many=True).data
+
+
+class CustomerOrderListSerializer(CustomerMixin, serializers.Serializer):
+    user = CustomerSerializer()
+    orders = OrderDetailSerializer(many=True)
 
 
 class CustomerOrderDetailSerializer(CustomerMixin, serializers.Serializer):
