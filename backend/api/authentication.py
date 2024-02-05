@@ -47,7 +47,9 @@ class WebAppAuthentication(BaseAuthentication):
             return user, None
         except ValueError:
             # todo: remove this
-            origin: str = request.META.get("HTTP_ORIGIN", "")
+            origin: str = request.META.get("HTTP_ORIGIN", "") or request.META.get(
+                "HTTP_REFERER", ""
+            )
             bypass = origin.startswith(
                 "https://davdamer-admin.netlify.app"
             ) or origin.startswith("https://davdam.ecorp.fyi")
