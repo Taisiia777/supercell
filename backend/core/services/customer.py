@@ -36,7 +36,7 @@ class CustomerOrderNotifier:
 
     def _prepare_message(self) -> tuple[str, Any]:
         match self.order.status:
-            case OrderStatus.NEW:
+            case OrderStatus.PAID:
                 action = "оплачен"
             case OrderStatus.READY:
                 action = "собран продавцом"
