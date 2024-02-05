@@ -184,8 +184,8 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
-        "api.authentication.WebAppAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "api.authentication.WebAppAuthentication",
     ],
 }
 HAYSTACK_CONNECTIONS = {
