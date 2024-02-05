@@ -20,7 +20,7 @@ class WebAppAuthentication(BaseAuthentication):
         if not header:
             raise ValueError("No token provided")
         auth_info = header.split()
-        if len(auth_info) != 2 and auth_info[0] != "Bearer":
+        if len(auth_info) != 2 or auth_info[0] != "Bearer":
             raise ValueError("Invalid token format")
         return auth_info[1]
 
