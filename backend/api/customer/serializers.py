@@ -16,7 +16,16 @@ User = get_user_model()
 class ShippingAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingAddress
-        fields = ["first_name", "last_name", "line1", "state", "phone_number", "notes"]
+        fields = [
+            "first_name",
+            "last_name",
+            "line1",
+            "state",
+            "phone_number",
+            "date",
+            "time",
+            "notes",
+        ]
 
 
 class OrderSerializer(serializers.ModelSerializer):

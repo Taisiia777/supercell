@@ -2,6 +2,8 @@ import logging
 
 from django.db.models import Q
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -177,13 +179,27 @@ class CheckoutAPIView(CoreCheckoutView):
         if "shipping_address" in self.request.data:
             self.request.data["shipping_address"]["country"] = self.default_country
 
+    def _validate_order_data(self):
+        today = timezone.now().date()
+        if "shipping_address" in self.request.data:
+            str_date = self.request.data["shipping_address"]["date"]
+            shipping_date = parse_date(str_date)
+            if shipping_date is None:
+                raise AppError("Неверный формат даты")
+            if shipping_date <= today:
+                raise AppError("Недоступная для доставки дата")
+
     def post(self, request, *args, **kwargs):
         try:
             self._parse_products_and_fill_basket()
+            self._set_default_request_data()
+            self._validate_order_data()
         except AppError as err:
             return Response({"success": False, "message": str(err)}, status=400)
+        except Exception as err:
+            logger.exception(f"Uncaught checkout error: {err}")
+            return Response({"success": False, "message": "Server error"}, status=500)
 
-        self._set_default_request_data()
         return super().post(request, *args, **kwargs)
 
 
