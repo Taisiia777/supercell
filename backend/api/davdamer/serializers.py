@@ -12,6 +12,7 @@ from drf_spectacular.utils import (
 )
 from oscar.core.loading import get_model, get_class
 from oscarapi.serializers.admin.product import AdminProductSerializer
+from oscarapi.serializers.product import ProductAttributeValueSerializer
 from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.models import fake_autocreated
 from rest_framework import serializers
@@ -222,10 +223,23 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         fields = ["status", "shipping_address"]
 
 
+class CustomProductAttributeValueSerializer(ProductAttributeValueSerializer):
+    def to_internal_value(self, data):
+        product_class = ProductClass.objects.first()
+        data["product_class"] = product_class.slug
+        result = super().to_internal_value(data)
+        return result
+
+
 @extend_schema_serializer(
     examples=[OpenApiExample("Создание товара", examples.CreateProductExample)]
 )
 class CreateProductSerializer(AdminProductSerializer):
+    attributes = CustomProductAttributeValueSerializer(
+        many=True,
+        required=False,
+        source="attribute_values",
+    )
     product_class = serializers.SlugRelatedField(
         slug_field="slug", queryset=ProductClass.objects, required=False
     )
@@ -255,11 +269,12 @@ class CreateProductSerializer(AdminProductSerializer):
             "partner": seller,
         }
         validated_data["stockrecords"] = [stockrecord]
-        product = super().create(validated_data)
-        product.seller = seller
-        product.save(update_fields=["seller"])
-        if images:
-            self._add_product_images(product, images)
+        with transaction.atomic():
+            product = super().create(validated_data)
+            product.seller = seller
+            product.save(update_fields=["seller"])
+            if images:
+                self._add_product_images(product, images)
         return product
 
     @staticmethod
@@ -313,6 +328,7 @@ class CreateProductSerializer(AdminProductSerializer):
             "is_public",
             "categories",
             "stockrecords",
+            "attributes",
         ]
 
 

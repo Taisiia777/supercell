@@ -14,21 +14,21 @@ CheckoutExample = {
 }
 
 CreateProductExample = {
-    "product_class": "u0422u0438u043f-u0442u043eu0432u0430u0440u0430-1",
     "title": "Куртка",
     "description": "Описание",
     "price": 1500.99,
     "is_public": True,
     "categories": ["Одежда"],
+    "attributes": [{"code": "size", "value": "XS"}],
 }
 
 UpdateProductExample = {
-    "product_class": "u0422u0438u043f-u0442u043eu0432u0430u0440u0430-1",
     "title": "Куртка",
     "description": "Описание",
     "price": 1500.99,
     "is_public": True,
     "categories": ["Одежда"],
+    "attributes": [{"code": "size", "value": "XXL"}],
     "uploaded_images": [],
     "deleted_images": [1],
     "new_seller_id": 1,
