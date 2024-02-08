@@ -12,6 +12,7 @@ router.register("product", views.ProductView, basename="product")
 urlpatterns = [
     path("enums/address/", views.AddressOptionsView.as_view()),
     path("enums/category/", views.CategoryListView.as_view()),
+    path("enums/attribute/", views.ProductAttributeListView.as_view()),
     path("me/", views.ProfileView.as_view()),
     path("productclasses/", views.ProductClassAdminList.as_view()),
     path("login/", views.DavdamerLoginView.as_view()),

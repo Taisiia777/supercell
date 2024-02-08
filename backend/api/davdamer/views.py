@@ -30,6 +30,8 @@ CoreProductClassAdminList = get_api_class(
 )
 ProductImage = get_model("catalogue", "ProductImage")
 Category = get_model("catalogue", "Category")
+ProductAttribute = get_model("catalogue", "ProductAttribute")
+ProductClass = get_model("catalogue", "ProductClass")
 
 
 class SellersListView(generics.ListAPIView):
@@ -389,6 +391,7 @@ class ProfileView(generics.RetrieveAPIView):
         return self.request.user.davdamer
 
 
+@method_decorator(cache_page(60), name="get")
 class AddressOptionsView(generics.RetrieveAPIView):
     permission_classes = [IsDavDamer]
     serializer_class = serializers.AddressOptionsSerializer
@@ -417,7 +420,22 @@ class AddressOptionsView(generics.RetrieveAPIView):
         }
 
 
+@method_decorator(cache_page(60), name="get")
 class CategoryListView(generics.ListAPIView):
     permission_classes = [IsDavDamer]
     serializer_class = shop_serializers.CategorySerializer
     queryset = Category.objects.browsable().order_by("name").distinct()
+
+
+@method_decorator(cache_page(60), name="get")
+class ProductAttributeListView(generics.ListAPIView):
+    permission_classes = [IsDavDamer]
+    serializer_class = serializers.ProductAttributeSerializer
+
+    def get_queryset(self):
+        product_class = ProductClass.objects.first()
+        return (
+            ProductAttribute.objects.filter(product_class=product_class)
+            .order_by("name")
+            .distinct()
+        )

@@ -38,6 +38,7 @@ CoreProductSerializer = get_api_class(
 PriceSerializer = get_api_class("serializers.checkout", "PriceSerializer")
 Selector = get_class("partner.strategy", "Selector")
 ProductClass = get_model("catalogue", "ProductClass")
+ProductAttribute = get_model("catalogue", "ProductAttribute")
 
 
 class CreateSellerSerializer(serializers.ModelSerializer):
@@ -390,3 +391,9 @@ class AddressOptionsSerializer(serializers.Serializer):
     countries = serializers.ListSerializer(child=serializers.CharField())
     cities = serializers.ListSerializer(child=serializers.CharField())
     markets = serializers.ListSerializer(child=serializers.CharField())
+
+
+class ProductAttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductAttribute
+        fields = ["code", "name"]
