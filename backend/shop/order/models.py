@@ -1,4 +1,5 @@
 from django.db import models
+from oscar.apps.address.abstract_models import AbstractShippingAddress
 from oscar.apps.order.abstract_models import AbstractOrder
 
 from shop.order.enums import OrderStatus
@@ -15,6 +16,11 @@ class Order(AbstractOrder):
         related_name="orders",
     )
     updated_dt = models.DateTimeField(auto_now=True, blank=True, null=True)
+
+
+class ShippingAddress(AbstractShippingAddress):
+    date = models.DateField(blank=True, null=True)
+    time = models.CharField(blank=True, null=True, max_length=30)
 
 
 from oscar.apps.order.models import *  # noqa
