@@ -424,7 +424,7 @@ class AddressOptionsView(generics.RetrieveAPIView):
 class CategoryListView(generics.ListAPIView):
     permission_classes = [IsDavDamer]
     serializer_class = shop_serializers.CategorySerializer
-    queryset = Category.objects.browsable().order_by("name").distinct()
+    queryset = Category.objects.browsable().distinct()
 
 
 @method_decorator(cache_page(60), name="get")
@@ -434,8 +434,4 @@ class ProductAttributeListView(generics.ListAPIView):
 
     def get_queryset(self):
         product_class = ProductClass.objects.first()
-        return (
-            ProductAttribute.objects.filter(product_class=product_class)
-            .order_by("name")
-            .distinct()
-        )
+        return ProductAttribute.objects.filter(product_class=product_class).distinct()

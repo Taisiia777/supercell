@@ -50,12 +50,7 @@ class SellerProductCategoriesListView(generics.ListAPIView):
 @method_decorator(cache_page(15), name="list")
 class ProductCategoriesListView(generics.ListAPIView):
     serializer_class = serializers.CategorySerializer
-    queryset = (
-        Category.objects.browsable()
-        .filter(product__isnull=False)
-        .order_by("name")
-        .distinct()
-    )
+    queryset = Category.objects.browsable().filter(product__isnull=False).distinct()
 
 
 @method_decorator(cache_page(15), name="list")
