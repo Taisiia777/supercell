@@ -182,6 +182,9 @@ class CheckoutAPIView(CoreCheckoutView):
     def _validate_order_data(self):
         today = timezone.now().date()
         if "shipping_address" in self.request.data:
+            if "date" not in self.request.data["shipping_address"]:
+                return
+
             str_date = self.request.data["shipping_address"]["date"]
             shipping_date = parse_date(str_date)
             if shipping_date is None:
