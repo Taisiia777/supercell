@@ -1,3 +1,4 @@
+import json
 import logging
 import uuid
 
@@ -16,6 +17,7 @@ from oscarapi.serializers.product import ProductAttributeValueSerializer
 from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.models import fake_autocreated
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from api import examples
 from api.customer.serializers import (
@@ -252,6 +254,19 @@ class CreateProductSerializer(AdminProductSerializer):
         write_only=True,
     )
     is_public = serializers.BooleanField(default=True)
+
+    def to_internal_value(self, data):
+        result = super().to_internal_value(data)
+        attributes = data.get("attributes", [])
+        if isinstance(attributes, str):
+            try:
+                attributes = json.loads(attributes)
+                result["attribute_values"] = CustomProductAttributeValueSerializer(
+                    many=True
+                ).to_internal_value(attributes)
+            except json.JSONDecodeError:
+                raise ValidationError({"attributes": "Ошибка парсинга атрибутов"})
+        return result
 
     def create(self, validated_data):
         validated_data.pop("stockrecords", None)
