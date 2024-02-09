@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from drf_spectacular.utils import extend_schema_field
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 from rest_framework import serializers
@@ -51,20 +50,13 @@ class CustomerMixin:
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
-    original = serializers.SerializerMethodField()
-
-    def get_original(self, obj):
-        # request = self.context.get("request")
-        # todo: remove hardcoded domain
-        return "https://davdam.ecorp.fyi" + obj.original.url
-
     class Meta:
         model = ProductImage
         fields = ["id", "original", "caption", "display_order"]
 
 
 class ProductSerializer(CoreProductSerializer):
-    images = serializers.ListSerializer(child=ProductImageSerializer())
+    images = ProductImageSerializer(many=True)
 
     class Meta(CoreProductSerializer.Meta):
         fields = ["id", "title", "images", "categories"]
@@ -79,12 +71,7 @@ class OrderLineSerializer(serializers.ModelSerializer):
 
 
 class OrderDetailSerializer(OrderSerializer):
-    lines = serializers.SerializerMethodField()
-
-    @extend_schema_field(OrderLineSerializer(many=True))
-    def get_lines(self, order):
-        lines = order.lines.all()
-        return OrderLineSerializer(lines, many=True).data
+    lines = OrderLineSerializer(many=True)
 
 
 class CustomerOrderListSerializer(CustomerMixin, serializers.Serializer):
