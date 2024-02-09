@@ -107,6 +107,7 @@ class ProductSerializer(CoreProductSerializer):
 class CategorySerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
+    image = serializers.ImageField()
 
 
 class CitySerializer(serializers.Serializer):
