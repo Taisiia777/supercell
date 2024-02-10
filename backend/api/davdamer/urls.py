@@ -7,7 +7,7 @@ from . import views
 router = DefaultRouter()
 router.register("seller", views.SellerView, basename="seller")
 router.register("order", views.OrderDetailView, basename="order")
-router.register("product", views.ProductView, basename="product")
+router.register("product", views.ProductView, basename="davdamer-product")
 
 urlpatterns = [
     path("enums/address/", views.AddressOptionsView.as_view()),
@@ -27,3 +27,5 @@ urlpatterns = [
     ),
     *router.urls,
 ]
+
+print(router.urls)

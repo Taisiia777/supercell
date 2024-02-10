@@ -27,6 +27,7 @@ from api.customer.serializers import (
     ShippingAddressSerializer,
 )
 from core.models import DavDamer
+from api.shop.serializers import ProductSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,6 @@ User = get_user_model()
 CoreProductSerializer = get_api_class(
     "serializers.admin.product", "AdminProductSerializer"
 )
-PriceSerializer = get_api_class("serializers.checkout", "PriceSerializer")
 Selector = get_class("partner.strategy", "Selector")
 ProductClass = get_model("catalogue", "ProductClass")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
@@ -186,9 +186,10 @@ class OrderSerializer(CustomerOrderSerializer):
     user = CustomerSerializer()
 
 
-class ProductSerializer(CoreProductSerializer):
-    seller = SellerSerializer()
-    price = serializers.SerializerMethodField()
+class DavdamerProductSerializer(CoreProductSerializer, ProductSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name="davdamer-product-detail", lookup_url_kwarg="product_id"
+    )
     orders_count = serializers.SerializerMethodField()
 
     @staticmethod
@@ -199,13 +200,9 @@ class ProductSerializer(CoreProductSerializer):
         else:
             return product.get_orders_count()
 
-    def get_price(self, product):
-        request = self.context["request"]
-        strategy = Selector().strategy(request=request, user=request.user)
-        ser = PriceSerializer(
-            strategy.fetch_for_product(product).price, context={"request": request}
-        )
-        return ser.data
+    class Meta:
+        model = Product
+        fields = ProductSerializer.Meta.fields + ("orders_count", "is_public")
 
 
 class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
@@ -248,6 +245,18 @@ class CreateProductSerializer(AdminProductSerializer):
     price = serializers.DecimalField(
         max_digits=10, decimal_places=2, write_only=True, min_value=10, max_value=100000
     )
+    old_price = serializers.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        write_only=True,
+        min_value=10,
+        max_value=100000,
+        label="Старая цена",
+    )
+    measurement = serializers.CharField(
+        required=False, write_only=True, max_length=100, label="Единица измерения"
+    )
+
     uploaded_images = serializers.ListField(
         child=serializers.ImageField(allow_empty_file=False, use_url=False),
         required=False,
@@ -306,17 +315,20 @@ class CreateProductSerializer(AdminProductSerializer):
             display_order += 1
 
     @staticmethod
-    def _update_product_price(product, price):
+    def _update_product_price(product, validated_data):
         strategy = Selector().strategy()
         info = strategy.fetch_for_product(product)
-        if info.stockrecord:
-            info.stockrecord.price = price
-            info.stockrecord.save()
-        else:
+        if not info.stockrecord:
             logger.warning("No stockrecord found for product %s", product.pk)
+            return
+
+        for field in ["price", "old_price", "measurement"]:
+            if field in validated_data:
+                setattr(info.stockrecord, field, validated_data[field])
+
+        info.stockrecord.save()
 
     def update(self, product, validated_data):
-        price = validated_data.pop("price", None)
         categories = validated_data.pop("categories", None)
 
         with transaction.atomic():
@@ -326,8 +338,7 @@ class CreateProductSerializer(AdminProductSerializer):
                 with fake_autocreated(product.categories) as _categories:
                     _categories.set(categories)
 
-            if price is not None:
-                self._update_product_price(product, price)
+            self._update_product_price(product, validated_data)
 
         return product
 
@@ -340,6 +351,8 @@ class CreateProductSerializer(AdminProductSerializer):
             "description",
             "upc",
             "price",
+            "old_price",
+            "measurement",
             "is_public",
             "categories",
             "stockrecords",

@@ -316,7 +316,7 @@ class ProductView(
 
     def get_serializer_class(self):
         if self.action in ("retrieve", "list"):
-            return serializers.ProductSerializer
+            return serializers.DavdamerProductSerializer
         elif self.action in ("update", "partial_update"):
             return serializers.UpdateProductSerializer
 

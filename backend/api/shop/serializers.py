@@ -15,7 +15,6 @@ Product = get_model("catalogue", "Product")
 Seller = get_model("partner", "Seller")
 CoreOrderSerializer = get_api_class("serializers.checkout", "OrderSerializer")
 CoreProductSerializer = get_api_class("serializers.product", "ProductSerializer")
-PriceSerializer = get_api_class("serializers.checkout", "PriceSerializer")
 CoreProductLinkSerializer = get_api_class(
     "serializers.product", "ProductLinkSerializer"
 )
@@ -63,45 +62,48 @@ class OrderSerializer(CoreOrderSerializer):
             return None
 
 
-class ProductLinkSerializer(CoreProductLinkSerializer):
+class PriceSerializer(serializers.Serializer):
+    currency = serializers.CharField(
+        max_length=12,
+        default="RUB",
+        required=False,
+        source="price.currency",
+    )
+    incl_tax = serializers.DecimalField(
+        decimal_places=2, max_digits=12, required=True, source="price.excl_tax"
+    )
+    old_price = serializers.DecimalField(
+        decimal_places=2,
+        max_digits=12,
+        required=False,
+        label="Старая цена",
+        source="stockrecord.old_price",
+    )
+    measurement = serializers.CharField(
+        max_length=100,
+        required=False,
+        label="Единица измерения",
+        source="stockrecord.measurement",
+    )
+
+
+class ProductSerializer(CoreProductSerializer):
     price = serializers.SerializerMethodField()
     seller = SellerSerializer()
 
     def get_price(self, product):
         request = self.context["request"]
         strategy = Selector().strategy(request=request, user=request.user)
-        ser = PriceSerializer(
-            strategy.fetch_for_product(product).price, context={"request": request}
-        )
-        return ser.data
-
-    class Meta(CoreProductLinkSerializer.Meta):
-        fields = settings.PRODUCT_FIELDS + ["seller"]
-
-
-class ProductSerializer(CoreProductSerializer):
-    price = serializers.SerializerMethodField()
-    seller = serializers.SerializerMethodField()
-
-    def get_seller(self, product):
-        try:
-            strategy = Selector().strategy()
-            info = strategy.fetch_for_product(product)
-            seller = info.stockrecord.partner
-            return SellerSerializer(seller, context=self.context).data
-        except Exception:
-            return None
-
-    def get_price(self, product):
-        request = self.context["request"]
-        strategy = Selector().strategy(request=request, user=request.user)
-        ser = PriceSerializer(
-            strategy.fetch_for_product(product).price, context={"request": request}
-        )
+        ser = PriceSerializer(strategy.fetch_for_product(product), context=self.context)
         return ser.data
 
     class Meta(CoreProductSerializer.Meta):
         fields = settings.PRODUCTDETAIL_FIELDS + ("seller",)
+
+
+class ProductLinkSerializer(ProductSerializer):
+    class Meta(CoreProductLinkSerializer.Meta):
+        fields = settings.PRODUCT_FIELDS + ["seller"]
 
 
 class CategorySerializer(serializers.Serializer):
