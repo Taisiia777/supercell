@@ -254,9 +254,45 @@ class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
 class OrderUpdateSerializer(serializers.ModelSerializer):
     shipping_address = ShippingAddressSerializer()
 
+    def to_internal_value(self, data):
+        result = super().to_internal_value(data)
+        address = data.get("shipping_address", [])
+        if isinstance(address, str):
+            try:
+                address = json.loads(address)
+                result[
+                    "shipping_address"
+                ] = ShippingAddressSerializer().to_internal_value(address)
+            except json.JSONDecodeError:
+                raise ValidationError({"shipping_address": "Ошибка парсинга адреса"})
+        return result
+
+    @staticmethod
+    def _update_address(order, address):
+        for field in [
+            "line1",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "date",
+            "time",
+            "notes",
+            "state",
+        ]:
+            if field in address:
+                setattr(order.shipping_address, field, address[field])
+
+        order.shipping_address.save()
+
     def update(self, order, validated_data):
-        validated_data.pop("shipping_address", None)
-        order = super().update(order, validated_data)
+        address = validated_data.pop("shipping_address", None)
+
+        with transaction.atomic():
+            order = super().update(order, validated_data)
+
+            if address:
+                self._update_address(order, address)
+
         return order
 
     class Meta:
