@@ -11,6 +11,18 @@ class Product(AbstractProduct):
         "partner.Seller", on_delete=models.PROTECT, null=True, related_name="products"
     )
 
+    country = models.CharField(
+        max_length=255, null=True, blank=True, verbose_name="Страна производства"
+    )
+    is_vegan = models.BooleanField(null=True, blank=True, verbose_name="Веганский")
+    is_sugar_free = models.BooleanField(
+        null=True, blank=True, verbose_name="Без сахара"
+    )
+    is_gluten_free = models.BooleanField(
+        null=True, blank=True, verbose_name="Без глютена"
+    )
+    is_dietary = models.BooleanField(null=True, blank=True, verbose_name="Диетический")
+
     def get_orders_count(self) -> int:
         return OrderLine.objects.filter(product=self).count()
 
