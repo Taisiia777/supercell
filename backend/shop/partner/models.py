@@ -1,8 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Sum
-from oscar.apps.partner.abstract_models import AbstractPartner
-
+from oscar.apps.partner.abstract_models import AbstractPartner, AbstractStockRecord
 from shop.order.enums import OrderStatus
 
 DjangoUser = get_user_model()
@@ -55,6 +54,15 @@ class Partner(AbstractPartner):  # this is a Seller
 class Seller(Partner):
     class Meta:
         proxy = True
+
+
+class StockRecord(AbstractStockRecord):
+    old_price = models.DecimalField(
+        "Старая цена", decimal_places=2, max_digits=12, blank=True, null=True
+    )
+    measurement = models.CharField(
+        "Единица измерения", max_length=255, blank=True, null=True
+    )
 
 
 from oscar.apps.partner.models import *  # noqa
