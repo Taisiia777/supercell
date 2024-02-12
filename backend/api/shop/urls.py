@@ -1,8 +1,15 @@
 from django.urls import path
+from django.views.generic import TemplateView
 
 from api.shop import views
 
 urlpatterns = [
+    path(
+        "stories/",
+        TemplateView.as_view(
+            content_type="application/json", template_name="stories/stories.html"
+        ),
+    ),
     path("sellers/", views.SellersListView.as_view()),
     path("categories/", views.ProductCategoriesListView.as_view()),
     path("products/", views.ProductListView.as_view()),
