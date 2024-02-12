@@ -33,7 +33,7 @@ Category = get_model("catalogue", "Category")
 @method_decorator(cache_page(30), name="list")
 class SellersListView(generics.ListAPIView):
     serializer_class = serializers.SellerSerializer
-    queryset = Seller.objects.filter(stockrecords__isnull=False)
+    queryset = Seller.objects.filter(stockrecords__isnull=False).distinct()
 
 
 @method_decorator(cache_page(30), name="list")
@@ -72,6 +72,7 @@ class ProductListView(CoreProductList):
         Product.objects.browsable()
         .select_related("seller", "product_class")
         .prefetch_related("images", "stockrecords", "categories")
+        .distinct()
     )
 
     @staticmethod
@@ -132,7 +133,7 @@ class SellerProductsListView(CoreProductList):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        qs = qs.filter(stockrecords__partner_id=self.kwargs["seller_id"])
+        qs = qs.filter(seller__id=self.kwargs["seller_id"]).distinct()
 
         category_id = self.request.query_params.get("category_id", "")
         if category_id and category_id.isdigit():
