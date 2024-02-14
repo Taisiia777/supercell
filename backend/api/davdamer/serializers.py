@@ -251,7 +251,6 @@ class CreateProductSerializer(AdminProductSerializer):
         max_digits=10,
         decimal_places=2,
         write_only=True,
-        min_value=10,
         max_value=100000,
         label="Старая цена",
     )
@@ -287,13 +286,19 @@ class CreateProductSerializer(AdminProductSerializer):
         seller_id = self.context["view"].kwargs["seller_id"]
         seller = Seller.objects.get(id=seller_id)
         images = validated_data.pop("uploaded_images", None)
-
+        price = validated_data.pop("price")
         stockrecord = {
             "partner_sku": sku,
             "price_currency": "RUB",
-            "price": validated_data.pop("price"),
+            "price": price,
             "partner": seller,
         }
+        price_data = {
+            "price": price,
+            "old_price": validated_data.pop("old_price", None),
+            "measurement": validated_data.pop("measurement", None),
+        }
+
         validated_data["stockrecords"] = [stockrecord]
         with transaction.atomic():
             product = super().create(validated_data)
@@ -301,6 +306,8 @@ class CreateProductSerializer(AdminProductSerializer):
             product.save(update_fields=["seller"])
             if images:
                 self._add_product_images(product, images)
+            self._update_product_price(product, price_data)
+
         return product
 
     @staticmethod
@@ -332,7 +339,11 @@ class CreateProductSerializer(AdminProductSerializer):
 
     def update(self, product, validated_data):
         categories = validated_data.pop("categories", None)
-
+        price_data = {
+            "price": validated_data.pop("price", None),
+            "old_price": validated_data.pop("old_price", None),
+            "measurement": validated_data.pop("measurement", None),
+        }
         with transaction.atomic():
             product = super().update(product, validated_data)
 
@@ -340,7 +351,7 @@ class CreateProductSerializer(AdminProductSerializer):
                 with fake_autocreated(product.categories) as _categories:
                     _categories.set(categories)
 
-            self._update_product_price(product, validated_data)
+            self._update_product_price(product, price_data)
 
         return product
 
