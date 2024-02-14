@@ -309,7 +309,7 @@ class ProductView(
             )
         )
 
-    @method_decorator(cache_page(15))
+    # @method_decorator(cache_page(15))
     @method_decorator(vary_on_headers("Authorization"))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
