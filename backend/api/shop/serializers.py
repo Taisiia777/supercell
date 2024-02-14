@@ -73,6 +73,7 @@ class PriceSerializer(serializers.Serializer):
         decimal_places=2, max_digits=12, required=True, source="price.excl_tax"
     )
     old_price = serializers.DecimalField(
+        allow_null=True,
         decimal_places=2,
         max_digits=12,
         required=False,

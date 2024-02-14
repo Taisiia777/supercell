@@ -246,6 +246,8 @@ class CreateProductSerializer(AdminProductSerializer):
         max_digits=10, decimal_places=2, write_only=True, min_value=10, max_value=100000
     )
     old_price = serializers.DecimalField(
+        required=False,
+        allow_null=True,
         max_digits=10,
         decimal_places=2,
         write_only=True,
