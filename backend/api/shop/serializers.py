@@ -81,6 +81,7 @@ class PriceSerializer(serializers.Serializer):
         source="stockrecord.old_price",
     )
     measurement = serializers.CharField(
+        allow_null=True,
         max_length=100,
         required=False,
         label="Единица измерения",

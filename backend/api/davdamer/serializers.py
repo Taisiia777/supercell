@@ -255,7 +255,11 @@ class CreateProductSerializer(AdminProductSerializer):
         label="Старая цена",
     )
     measurement = serializers.CharField(
-        required=False, write_only=True, max_length=100, label="Единица измерения"
+        required=False,
+        allow_null=True,
+        write_only=True,
+        max_length=100,
+        label="Единица измерения",
     )
 
     uploaded_images = serializers.ListField(
