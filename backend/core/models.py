@@ -5,6 +5,22 @@ from django.db import models
 class User(AbstractUser):
     telegram_chat_id = models.BigIntegerField(null=True, blank=True, unique=True)
 
+    receiver_name = models.CharField(
+        max_length=50, verbose_name="Имя получателя", blank=True, null=True
+    )
+    receiver_phone = models.CharField(
+        max_length=16, verbose_name="Телефон получателя", blank=True, null=True
+    )
+    delivery_country = models.CharField(
+        max_length=30, verbose_name="Страна доставки", blank=True, null=True
+    )
+    delivery_city = models.CharField(
+        max_length=50, verbose_name="Город доставки", blank=True, null=True
+    )
+    delivery_address = models.CharField(
+        max_length=255, verbose_name="Адрес доставки", blank=True, null=True
+    )
+
 
 class DavDamer(models.Model):
     name = models.CharField(max_length=128, db_index=True)
