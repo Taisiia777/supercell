@@ -275,4 +275,4 @@ class PopularProductsListView(generics.ListAPIView):
         .prefetch_related("images", "stockrecords", "categories")
         .order_by("?")
         .distinct()
-    )
+    )[:5]
