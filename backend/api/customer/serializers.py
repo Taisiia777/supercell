@@ -35,10 +35,32 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class CustomerSerializer(serializers.ModelSerializer):
+class ReceiverSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="receiver_name")
+    phone = serializers.CharField(source="receiver_phone")
+
     class Meta:
         model = User
-        fields = ["id", "first_name", "last_name"]
+        fields = ["name", "phone"]
+
+
+class DeliverySerializer(serializers.ModelSerializer):
+    address = serializers.CharField(source="delivery_address")
+    city = serializers.CharField(source="delivery_city")
+    country = serializers.CharField(source="delivery_country")
+
+    class Meta:
+        model = User
+        fields = ["country", "city", "address"]
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    receiver = ReceiverSerializer(source="*")
+    delivery = DeliverySerializer(source="*")
+
+    class Meta:
+        model = User
+        fields = ["id", "first_name", "last_name", "receiver", "delivery"]
 
 
 class CustomerMixin:
