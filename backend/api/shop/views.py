@@ -53,7 +53,6 @@ class ProductCategoriesListView(generics.ListAPIView):
     queryset = Category.objects.browsable().filter(product__isnull=False).distinct()
 
 
-@method_decorator(cache_page(15), name="list")
 @extend_schema(
     parameters=[
         OpenApiParameter(name="category_id", type=int),
@@ -121,7 +120,6 @@ class ProductListView(CoreProductList):
         return qs
 
 
-@method_decorator(cache_page(15), "list")
 @extend_schema(parameters=[OpenApiParameter(name="category_id", type=int)])
 class SellerProductsListView(CoreProductList):
     serializer_class = serializers.ProductLinkSerializer
