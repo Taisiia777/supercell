@@ -265,3 +265,14 @@ class CityListView(generics.ListAPIView):
         .distinct()
         .order_by("name")
     )
+
+
+class PopularProductsListView(generics.ListAPIView):
+    serializer_class = serializers.ProductLinkSerializer
+    queryset = (
+        Product.objects.browsable()
+        .select_related("seller", "product_class")
+        .prefetch_related("images", "stockrecords", "categories")
+        .order_by("?")
+        .distinct()
+    )

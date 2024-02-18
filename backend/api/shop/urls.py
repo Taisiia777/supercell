@@ -13,6 +13,7 @@ urlpatterns = [
     path("sellers/", views.SellersListView.as_view()),
     path("categories/", views.ProductCategoriesListView.as_view()),
     path("products/", views.ProductListView.as_view()),
+    path("products/popular/", views.PopularProductsListView.as_view()),
     path(
         "seller/<int:seller_id>/products/",
         views.SellerProductsListView.as_view(),
