@@ -57,6 +57,8 @@ class DeliverySerializer(serializers.ModelSerializer):
 class CustomerSerializer(serializers.ModelSerializer):
     receiver = ReceiverSerializer(source="*")
     delivery = DeliverySerializer(source="*")
+    first_name = serializers.CharField(read_only=True)
+    last_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = User

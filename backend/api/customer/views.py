@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema
 from oscar.core.loading import get_model
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -49,9 +50,13 @@ class OrderDetailView(APIView):
         return Response(serializer.data)
 
 
-class CustomerView(generics.RetrieveAPIView):
+class CustomerView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.CustomerSerializer
+
+    @extend_schema(exclude=True)
+    def put(self, request, *args, **kwargs):
+        raise NotImplementedError()
 
     def get_object(self):
         return self.request.user
