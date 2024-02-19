@@ -74,6 +74,14 @@ class ProductListView(CoreProductList):
         .distinct()
     )
 
+    COUNTRY_CODES = {
+        "ru": "Россия",
+        "kz": "Казахстан",
+        "rs": "Сербия",
+        "by": "Беларусь",
+        "pl": "Польша",
+    }
+
     @staticmethod
     def _parse_bool(value: str) -> bool:
         return value.lower() in ("true", "1", "yes")
@@ -95,9 +103,14 @@ class ProductListView(CoreProductList):
         if is_dietary:
             qs = qs.filter(is_dietary=self._parse_bool(is_dietary))
 
-        country = self.request.query_params.get("country", "")
-        if country:
-            qs = qs.filter(country__icontains=country)
+        country_param = self.request.query_params.get("country", "")
+        countries = [
+            self.COUNTRY_CODES.get(country)
+            for country in country_param.split(",")
+            if country in self.COUNTRY_CODES
+        ]
+        if countries:
+            qs = qs.filter(country__in=countries)
 
         return qs
 
