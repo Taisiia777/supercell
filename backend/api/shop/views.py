@@ -243,7 +243,7 @@ class CheckoutAPIView(CoreCheckoutView):
             shipping_date = parse_date(str_date)
             if shipping_date is None:
                 raise AppError("Неверный формат даты")
-            if shipping_date <= today:
+            if shipping_date < today:
                 raise AppError("Недоступная для доставки дата")
 
     def post(self, request, *args, **kwargs):
