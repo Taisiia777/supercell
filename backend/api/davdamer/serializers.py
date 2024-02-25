@@ -467,7 +467,3 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
 
 class DavDamerCategorySerializer(CategorySerializer):
     name = serializers.CharField(source="full_name")
-
-    @staticmethod
-    def get_children(obj):
-        return []
