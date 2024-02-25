@@ -37,6 +37,7 @@ class SellersListView(generics.ListAPIView):
 
 
 @method_decorator(cache_page(30), name="list")
+@extend_schema(deprecated=True)
 class SellerProductCategoriesListView(generics.ListAPIView):
     serializer_class = serializers.CategorySerializer
 
@@ -144,7 +145,9 @@ class ProductListView(CoreProductList):
         return qs
 
 
-@extend_schema(parameters=[OpenApiParameter(name="category_id", type=int)])
+@extend_schema(
+    deprecated=True, parameters=[OpenApiParameter(name="category_id", type=int)]
+)
 class SellerProductsListView(CoreProductList):
     serializer_class = serializers.ProductLinkSerializer
     queryset = (

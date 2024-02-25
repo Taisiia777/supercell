@@ -113,6 +113,7 @@ class OrderDetailView(
         return super().update(request, *args, **kwargs)
 
 
+@extend_schema(deprecated=True)
 class SellerProductsListView(generics.ListAPIView):
     permission_classes = [IsDavDamer, IsSellerOwner]
     serializer_class = serializers.ProductSerializer
