@@ -20,6 +20,12 @@ class User(AbstractUser):
     delivery_address = models.CharField(
         max_length=255, verbose_name="Адрес доставки", blank=True, null=True
     )
+    delivery_district = models.CharField(
+        max_length=100, verbose_name="ЖК", blank=True, null=True
+    )
+    delivery_notes = models.CharField(
+        max_length=255, verbose_name="Комментарий к доставке", blank=True, null=True
+    )
 
 
 class DavDamer(models.Model):

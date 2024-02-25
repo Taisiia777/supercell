@@ -19,6 +19,9 @@ class Order(AbstractOrder):
 
 
 class ShippingAddress(AbstractShippingAddress):
+    district = models.CharField(
+        blank=True, null=True, max_length=100, verbose_name="ЖК"
+    )
     date = models.DateField(blank=True, null=True)
     time = models.CharField(blank=True, null=True, max_length=30)
 
