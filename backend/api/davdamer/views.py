@@ -14,7 +14,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django_filters import rest_framework as filters
 
 from api.permissions import IsDavDamer, IsSellerOwner
-from api.shop import serializers as shop_serializers
 from core.models import City
 from celery_app import app as celery_app
 from . import serializers
@@ -424,8 +423,8 @@ class AddressOptionsView(generics.RetrieveAPIView):
 @method_decorator(cache_page(60), name="get")
 class CategoryListView(generics.ListAPIView):
     permission_classes = [IsDavDamer]
-    serializer_class = shop_serializers.CategorySerializer
-    queryset = Category.objects.browsable().distinct().filter(depth=1)
+    serializer_class = serializers.DavDamerCategorySerializer
+    queryset = Category.objects.browsable().distinct()
 
 
 @method_decorator(cache_page(60), name="get")

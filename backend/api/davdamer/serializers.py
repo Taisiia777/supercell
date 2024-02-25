@@ -27,7 +27,7 @@ from api.customer.serializers import (
     ShippingAddressSerializer,
 )
 from core.models import DavDamer
-from api.shop.serializers import ProductSerializer, CategoryField
+from api.shop.serializers import ProductSerializer, CategoryField, CategorySerializer
 
 logger = logging.getLogger(__name__)
 
@@ -464,3 +464,7 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductAttribute
         fields = ["code", "name"]
+
+
+class DavDamerCategorySerializer(CategorySerializer):
+    name = serializers.CharField(source="full_name")
