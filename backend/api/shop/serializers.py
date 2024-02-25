@@ -111,7 +111,19 @@ class ProductLinkSerializer(ProductSerializer):
 class CategorySerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
+    full_name = serializers.CharField()
     image = serializers.ImageField()
+
+    def get_fields(self):
+        fields = super().get_fields()
+        fields["children"] = CategorySerializer(many=True, source="get_children")
+        return fields
+
+    @staticmethod
+    def get_children(obj):
+        if obj.get_num_children() > 0:
+            return CategorySerializer(obj.get_children(), many=True).data
+        return []
 
 
 class CitySerializer(serializers.Serializer):
