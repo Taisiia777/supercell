@@ -126,6 +126,16 @@ class CategorySerializer(serializers.Serializer):
         return []
 
 
+class ShopCategorySerializer(CategorySerializer):
+    @staticmethod
+    def get_children(obj):
+        if obj.get_num_children() > 0:
+            return ShopCategorySerializer(
+                obj.get_children().filter(product__isnull=False), many=True
+            ).data
+        return []
+
+
 class CitySerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()

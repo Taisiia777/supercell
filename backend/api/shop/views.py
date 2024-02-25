@@ -47,10 +47,21 @@ class SellerProductCategoriesListView(generics.ListAPIView):
         ).distinct()
 
 
-@method_decorator(cache_page(15), name="list")
+@method_decorator(cache_page(60), name="list")
 class ProductCategoriesListView(generics.ListAPIView):
-    serializer_class = serializers.CategorySerializer
+    serializer_class = serializers.ShopCategorySerializer
     queryset = Category.objects.browsable().filter(product__isnull=False).distinct()
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        result = set()
+        for category in qs:
+            if category.depth > 1:
+                result.add(category.get_parent())
+            else:
+                result.add(category)
+        result = sorted(result, key=lambda x: x.path)
+        return result
 
 
 @extend_schema(
