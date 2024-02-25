@@ -126,7 +126,7 @@ class ShopCategorySerializer(CategorySerializer):
 
     def get_fields(self):
         fields = super().get_fields()
-        fields["children"] = CategorySerializer(many=True, source="get_children")
+        fields["children"] = ShopCategorySerializer(many=True, source="get_children")
         return fields
 
     @staticmethod
