@@ -13,6 +13,17 @@ Product = get_model("catalogue", "Product")
 Seller = get_model("partner", "Seller")
 OrderLine = get_model("order", "Line")
 
+PRODUCT_ORDERS_COUNT = Coalesce(
+    Subquery(
+        OrderLine.objects.filter(product=OuterRef("pk"))
+        .values("product")
+        .annotate(cnt=Count("order", distinct=True))
+        .values("cnt"),
+        output_field=models.IntegerField(),
+    ),
+    0,
+)
+
 
 class OrderFilter(filters.FilterSet):
     date = filters.DateFilter(field_name="date_placed", lookup_expr="date")
@@ -44,16 +55,7 @@ class ProductOrderingFilter(OrderingFilter):
 
     def filter(self, qs, value):
         qs = qs.annotate(
-            orders_count=Coalesce(
-                Subquery(
-                    OrderLine.objects.filter(product=OuterRef("pk"))
-                    .values("product")
-                    .annotate(cnt=Count("order", distinct=True))
-                    .values("cnt"),
-                    output_field=models.IntegerField(),
-                ),
-                0,
-            ),
+            orders_count=PRODUCT_ORDERS_COUNT,
             price=F("stockrecords__price"),
         )
         return super().filter(qs, value)

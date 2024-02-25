@@ -18,6 +18,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse_lazy
 from rest_framework.views import APIView
 
+from api.davdamer.filtersets import PRODUCT_ORDERS_COUNT
 from api.shop import serializers
 from core.exceptions import InvalidProductError, AppError
 from core.models import City
@@ -298,8 +299,11 @@ class PopularProductsListView(generics.ListAPIView):
     serializer_class = serializers.ProductLinkSerializer
     queryset = (
         Product.objects.browsable()
+        .annotate(
+            orders_count=PRODUCT_ORDERS_COUNT,
+        )
         .select_related("seller", "product_class")
         .prefetch_related("images", "stockrecords", "categories")
-        .order_by("?")
+        .order_by("-orders_count")
         .distinct()
     )[:5]
