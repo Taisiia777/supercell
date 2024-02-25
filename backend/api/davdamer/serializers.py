@@ -27,7 +27,7 @@ from api.customer.serializers import (
     ShippingAddressSerializer,
 )
 from core.models import DavDamer
-from api.shop.serializers import ProductSerializer
+from api.shop.serializers import ProductSerializer, CategoryField
 
 logger = logging.getLogger(__name__)
 
@@ -187,6 +187,7 @@ class OrderSerializer(CustomerOrderSerializer):
 
 
 class DavdamerProductSerializer(CoreProductSerializer, ProductSerializer):
+    categories = CategoryField(many=True)
     url = serializers.HyperlinkedIdentityField(
         view_name="davdamer-product-detail", lookup_url_kwarg="product_id"
     )

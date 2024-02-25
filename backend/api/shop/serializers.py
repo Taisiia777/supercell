@@ -4,6 +4,7 @@ from django.urls import reverse, NoReverseMatch
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from oscar.core.loading import get_model, get_class
 from oscarapi.serializers.checkout import CheckoutSerializer as CoreCheckoutSerializer
+from oscarapi.serializers.fields import CategoryField as CoreCategoryField
 from oscarapi.utils.loading import get_api_class
 from oscarapi import settings
 from rest_framework import serializers
@@ -89,7 +90,13 @@ class PriceSerializer(serializers.Serializer):
     )
 
 
+class CategoryField(CoreCategoryField):
+    def to_representation(self, value):
+        return value.name
+
+
 class ProductSerializer(CoreProductSerializer):
+    categories = CategoryField(many=True)
     price = serializers.SerializerMethodField()
     seller = SellerSerializer()
 
