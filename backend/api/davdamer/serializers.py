@@ -466,4 +466,19 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
 
 
 class DavDamerCategorySerializer(CategorySerializer):
-    name = serializers.CharField(source="full_name")
+    full_name = serializers.CharField()
+
+    def get_fields(self):
+        fields = super().get_fields()
+        fields["children"] = DavDamerCategorySerializer(
+            many=True, source="get_children"
+        )
+        return fields
+
+    @staticmethod
+    def get_children(obj):
+        if obj.get_num_children() > 0:
+            return DavDamerCategorySerializer(
+                obj.get_children().filter(), many=True
+            ).data
+        return []

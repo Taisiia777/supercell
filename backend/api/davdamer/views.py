@@ -424,7 +424,7 @@ class AddressOptionsView(generics.RetrieveAPIView):
 class CategoryListView(generics.ListAPIView):
     permission_classes = [IsDavDamer]
     serializer_class = serializers.DavDamerCategorySerializer
-    queryset = Category.objects.browsable().distinct()
+    queryset = Category.objects.browsable().filter(depth=1).distinct()
 
 
 @method_decorator(cache_page(60), name="get")
