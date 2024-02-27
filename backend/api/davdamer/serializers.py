@@ -208,26 +208,35 @@ class DavdamerProductSerializer(CoreProductSerializer, ProductSerializer):
 class CategoryDetailField(CategoryField):
     def to_representation(self, value):
         parent = value.get_parent()
-        return {
-            "id": value.pk,
-            "name": value.name,
-            "full_name": value.full_name,
-            "parent": {
+        if parent is None:
+            return {
+                "id": value.pk,
+                "name": value.name,
+                "full_name": value.full_name,
+                "child": None,
+            }
+        else:
+            return {
                 "id": parent.pk,
                 "name": parent.name,
                 "full_name": parent.full_name,
+                "child": {
+                    "id": value.pk,
+                    "name": value.name,
+                    "full_name": value.full_name,
+                },
             }
-            if parent
-            else None,
-        }
 
 
 class DavdamerProductLinkSerializer(DavdamerProductSerializer):
     categories = CategoryField(many=True)
 
 
-class DavdamerProductDetailSerializer(DavdamerProductSerializer):
-    categories = CategoryDetailField(many=True)
+class DavdamerProductDetailSerializer(DavdamerProductLinkSerializer):
+    sub_categories = CategoryDetailField(many=True, source="categories")
+
+    class Meta(DavdamerProductLinkSerializer.Meta):
+        fields = DavdamerProductLinkSerializer.Meta.fields + ("sub_categories",)
 
 
 class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
