@@ -307,3 +307,16 @@ class PopularProductsListView(generics.ListAPIView):
         .order_by("-orders_count")
         .distinct()
     )[:5]
+
+
+class DistrictListView(generics.ListAPIView):
+    serializer_class = serializers.DistrictSerializer
+
+    def get_queryset(self):
+        return [
+            {"id": 1, "name": "ЖК «Скандинавия»"},
+            {"id": 2, "name": "ЖК «Испанские кварталы»"},
+            {"id": 3, "name": "ЖК «Филатов луг»"},
+            {"id": 4, "name": "ЖК «Саларьево парк»"},
+            {"id": 5, "name": "ЖК «Румянцево парк»"},
+        ]

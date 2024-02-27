@@ -10,6 +10,7 @@ urlpatterns = [
             content_type="application/json", template_name="stories/stories.html"
         ),
     ),
+    path("districts/", views.DistrictListView.as_view()),
     path("sellers/", views.SellersListView.as_view()),
     path("categories/", views.ProductCategoriesListView.as_view()),
     path("products/", views.ProductListView.as_view()),
