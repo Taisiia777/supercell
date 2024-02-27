@@ -228,8 +228,16 @@ class CategoryDetailField(CategoryField):
             }
 
 
+class ParentCategoryField(CategoryField):
+    def to_representation(self, value):
+        parent = value.get_parent()
+        if parent:
+            return parent.name
+        return value.name
+
+
 class DavdamerProductLinkSerializer(DavdamerProductSerializer):
-    categories = CategoryField(many=True)
+    categories = ParentCategoryField(many=True)
 
 
 class DavdamerProductDetailSerializer(DavdamerProductLinkSerializer):
