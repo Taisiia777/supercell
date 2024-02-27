@@ -273,6 +273,7 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
             "line1",
             "first_name",
             "last_name",
+            "district",
             "phone_number",
             "date",
             "time",
