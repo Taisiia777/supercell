@@ -49,12 +49,11 @@ class DeliverySerializer(serializers.ModelSerializer):
     district = serializers.CharField(source="delivery_district")
     address = serializers.CharField(source="delivery_address")
     city = serializers.CharField(source="delivery_city")
-    country = serializers.CharField(source="delivery_country")
     notes = serializers.CharField(source="delivery_notes")
 
     class Meta:
         model = User
-        fields = ["country", "city", "district", "address", "notes"]
+        fields = ["city", "district", "address", "notes"]
 
 
 class CustomerSerializer(serializers.ModelSerializer):
