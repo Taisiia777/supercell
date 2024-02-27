@@ -27,7 +27,7 @@ from api.customer.serializers import (
     ShippingAddressSerializer,
 )
 from core.models import DavDamer
-from api.shop.serializers import ProductSerializer, CategorySerializer
+from api.shop.serializers import ProductSerializer, CategorySerializer, CategoryField
 
 logger = logging.getLogger(__name__)
 
@@ -203,6 +203,31 @@ class DavdamerProductSerializer(CoreProductSerializer, ProductSerializer):
     class Meta:
         model = Product
         fields = ProductSerializer.Meta.fields + ("orders_count", "is_public")
+
+
+class CategoryDetailField(CategoryField):
+    def to_representation(self, value):
+        parent = value.get_parent()
+        return {
+            "id": value.pk,
+            "name": value.name,
+            "full_name": value.full_name,
+            "parent": {
+                "id": parent.pk,
+                "name": parent.name,
+                "full_name": parent.full_name,
+            }
+            if parent
+            else None,
+        }
+
+
+class DavdamerProductLinkSerializer(DavdamerProductSerializer):
+    categories = CategoryField(many=True)
+
+
+class DavdamerProductDetailSerializer(DavdamerProductSerializer):
+    categories = CategoryDetailField(many=True)
 
 
 class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):

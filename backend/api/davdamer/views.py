@@ -315,8 +315,10 @@ class ProductView(
         return super().list(request, *args, **kwargs)
 
     def get_serializer_class(self):
-        if self.action in ("retrieve", "list"):
-            return serializers.DavdamerProductSerializer
+        if self.action == "list":
+            return serializers.DavdamerProductLinkSerializer
+        elif self.action == "retrieve":
+            return serializers.DavdamerProductDetailSerializer
         elif self.action in ("update", "partial_update"):
             return serializers.UpdateProductSerializer
 
