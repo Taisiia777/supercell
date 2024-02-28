@@ -39,6 +39,7 @@ class WebAppAuthentication(BaseAuthentication):
     def authenticate(self, request):
         try:
             token = self.parse_token(request)
+            logger.info(f"Token: {token}")
             user_data = safe_parse_webapp_init_data(settings.BOT_TOKEN, token)
             if user_data.user is None:
                 raise ValueError("Token has no user data")
