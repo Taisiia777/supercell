@@ -13,6 +13,7 @@ urlpatterns = [
     path("districts/", views.DistrictListView.as_view()),
     path("sellers/", views.SellersListView.as_view()),
     path("categories/", views.ProductCategoriesListView.as_view()),
+    path("categories/popular/", views.ProductCategoriesListView.as_view()),
     path("products/", views.ProductListView.as_view()),
     path("products/popular/", views.PopularProductsListView.as_view()),
     path(

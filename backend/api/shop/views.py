@@ -66,6 +66,13 @@ class ProductCategoriesListView(generics.ListAPIView):
         return result
 
 
+@method_decorator(cache_page(60), name="list")
+class PopularCategoriesListView(ProductCategoriesListView):
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs[:3]
+
+
 @extend_schema(
     parameters=[
         OpenApiParameter(name="category_id", type=int),
