@@ -21,6 +21,11 @@ CoreProductLinkSerializer = get_api_class(
 )
 
 
+class IntPriceField(serializers.DecimalField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, max_digits=12, decimal_places=0, **kwargs)
+
+
 class SellerSerializer(serializers.ModelSerializer):
     products_url = serializers.HyperlinkedIdentityField(
         view_name="seller-products", lookup_url_kwarg="seller_id"
@@ -70,13 +75,9 @@ class PriceSerializer(serializers.Serializer):
         required=False,
         source="price.currency",
     )
-    incl_tax = serializers.DecimalField(
-        decimal_places=2, max_digits=12, required=True, source="price.excl_tax"
-    )
-    old_price = serializers.DecimalField(
+    incl_tax = IntPriceField(required=True, source="price.excl_tax")
+    old_price = IntPriceField(
         allow_null=True,
-        decimal_places=2,
-        max_digits=12,
         required=False,
         label="Старая цена",
         source="stockrecord.old_price",

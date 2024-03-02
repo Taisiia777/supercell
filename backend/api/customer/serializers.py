@@ -3,6 +3,8 @@ from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 from rest_framework import serializers
 
+from api.shop.serializers import IntPriceField
+
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
 Product = get_model("catalogue", "Product")
@@ -30,6 +32,11 @@ class ShippingAddressSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     shipping_address = ShippingAddressSerializer()
+
+    total_incl_tax = IntPriceField()
+    total_excl_tax = IntPriceField()
+    shipping_incl_tax = IntPriceField()
+    shipping_excl_tax = IntPriceField()
 
     class Meta:
         model = Order
@@ -90,6 +97,12 @@ class ProductSerializer(CoreProductSerializer):
 
 class OrderLineSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
+    unit_price_incl_tax = serializers.DecimalField(
+        allow_null=True,
+        decimal_places=0,
+        max_digits=12,
+        required=False,
+    )
 
     class Meta:
         model = OrderLine
