@@ -188,7 +188,7 @@ class PaymentView(APIView):
         )
 
 
-@method_decorator(cache_page(15), name="retrieve")
+# @method_decorator(cache_page(15), name="retrieve")
 class ProductDetailView(generics.RetrieveAPIView):
     queryset = (
         Product.objects.browsable()
