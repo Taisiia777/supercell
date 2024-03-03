@@ -38,7 +38,7 @@ class SellerSerializer(serializers.ModelSerializer):
 
 class BasketProductSerializer(serializers.Serializer):
     product_id = serializers.IntegerField(min_value=1)
-    quantity = serializers.IntegerField(min_value=1, max_value=10)
+    quantity = serializers.IntegerField(min_value=1, max_value=99)
 
 
 @extend_schema_serializer(
