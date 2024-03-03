@@ -17,7 +17,14 @@ class OrdersListView(APIView):
     def get_queryset(self):
         return (
             Order.objects.filter(user=self.request.user)
-            .prefetch_related("lines")
+            .prefetch_related(
+                "lines",
+                "lines__product",
+                "lines__product__images",
+                "lines__product__product_class",
+                "lines__product__categories",
+            )
+            .select_related("shipping_address")
             .order_by("-pk")
         )
 
@@ -38,7 +45,13 @@ class OrderDetailView(APIView):
         return (
             Order.objects.filter(user=self.request.user, number=number)
             .select_related("shipping_address")
-            .prefetch_related("lines")
+            .prefetch_related(
+                "lines",
+                "lines__product",
+                "lines__product__images",
+                "lines__product__product_class",
+                "lines__product__categories",
+            )
             .first()
         )
 
