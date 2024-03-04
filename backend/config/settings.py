@@ -202,7 +202,6 @@ OSCAR_INITIAL_LINE_STATUS = "Pending"
 OSCAR_ORDER_STATUS_PIPELINE = {
     "NEW": ("CANCELLED",),
     "PAID": (
-        "READY",
         "SENT",
         "CANCELLED",
     ),

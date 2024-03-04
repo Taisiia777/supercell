@@ -59,14 +59,6 @@ class SellerNotifier:
             inline_keyboard=[
                 [
                     types.InlineKeyboardButton(
-                        text="Заказ собран",
-                        callback_data=SellerActionCf(
-                            order_number=self.order.number, action="ready"
-                        ).pack(),
-                    ),
-                ],
-                [
-                    types.InlineKeyboardButton(
                         text="Отменить заказ",
                         callback_data=SellerActionCf(
                             order_number=self.order.number, action="cancel"
@@ -112,9 +104,7 @@ class SellerActionHandler:
             )
 
     def _handle_action(self):
-        if self.action == "ready":
-            self.order.status = OrderStatus.READY
-        elif self.action == "cancel":
+        if self.action == "cancel":
             self.order.status = OrderStatus.CANCELLED
 
         self.order.save(update_fields=["status", "updated_dt"])
