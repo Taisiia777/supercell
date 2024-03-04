@@ -84,7 +84,7 @@ class OrderDetailView(
             return serializers.OrderSerializer
         elif self.action == "retrieve":
             return serializers.OrderDetailSerializer
-        elif self.action == "partial_update":
+        elif self.action in ("partial_update", "update"):
             return serializers.OrderUpdateSerializer
 
     def get_object(self):
