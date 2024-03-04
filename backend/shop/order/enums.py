@@ -2,10 +2,9 @@ from django.db import models
 
 
 class OrderStatus(models.TextChoices):
-    NEW = "NEW", "Создан"
-    PAID = "PAID", "Оплачен"
-    PROCESSING = "PROCESSING", "В обработке"
-    READY = "READY", "Передан курьеру"
+    NEW = "NEW", "Заказ оформлен"
+    PAID = "PAID", "Заказ оплачен"
+    PROCESSING = "PROCESSING", "Сборка заказа"
     SENT = "SENT", "Курьер в пути"
-    DELIVERED = "DELIVERED", "Выдан"
-    CANCELLED = "CANCELLED", "Отменён"
+    DELIVERED = "DELIVERED", "Заказ выдан"
+    CANCELLED = "CANCELLED", "Заказ отменен"
