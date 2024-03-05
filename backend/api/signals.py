@@ -3,7 +3,6 @@ from django.dispatch import receiver
 from oscar.core.loading import get_model
 from oscarapi.signals import oscarapi_post_checkout
 
-from celery_app import app as celery_app
 from shop.order.enums import OrderStatus
 
 OrderLine = get_model("order", "Line")
@@ -22,5 +21,3 @@ def created_api_callback_handler(sender, order, user, **kwargs):
             line.measurement = line.stockrecord.measurement
             updated_lines.append(line)
         OrderLine.objects.bulk_update(updated_lines, ["measurement"])
-
-    celery_app.send_task("api.shop.new_order", args=(order.pk,))
