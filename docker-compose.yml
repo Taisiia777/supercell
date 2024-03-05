@@ -66,17 +66,6 @@ services:
       - "${DJANGO_MEDIA_VOLUME:-./backend/media}:/var/www/mediafiles:ro"
       - "${DJANGO_STATIC_VOLUME:-./backend/static}:/var/www/staticfiles:ro"
 
-  seller_bot:
-    build: ./seller_bot
-    restart: unless-stopped
-    command: python bot.py
-    depends_on:
-      - redis
-    environment:
-      <<: *common-env
-      BOT_LOGLEVEL_INFO: $BOT_LOGLEVEL_INFO
-      API_HOST: http://backend:8000
-
   customer_bot:
     build: ./customer_bot
     restart: unless-stopped
