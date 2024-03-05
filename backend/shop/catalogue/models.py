@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import ForeignKey
 from oscar.apps.catalogue.abstract_models import AbstractProduct
 from oscar.core.loading import get_model
+from shop.catalogue.enums import LoginType
 
 OrderLine = get_model("order", "Line")
 
@@ -22,6 +23,7 @@ class Product(AbstractProduct):
         null=True, blank=True, verbose_name="Без глютена"
     )
     is_dietary = models.BooleanField(null=True, blank=True, verbose_name="Диетический")
+    login_type = models.CharField(choices=LoginType.choices, max_length=20, default=LoginType.WITHOUT_LOGIN)
 
     def get_orders_count(self) -> int:
         return OrderLine.objects.filter(product=self).count()
