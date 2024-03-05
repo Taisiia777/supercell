@@ -103,10 +103,11 @@ class OrderLineSerializer(serializers.ModelSerializer):
         max_digits=12,
         required=False,
     )
+    measurement = serializers.CharField(required=False)
 
     class Meta:
         model = OrderLine
-        fields = ["product", "quantity", "unit_price_incl_tax"]
+        fields = ["product", "quantity", "unit_price_incl_tax", "measurement"]
 
 
 class OrderDetailSerializer(OrderSerializer):
