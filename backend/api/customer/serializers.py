@@ -3,7 +3,7 @@ from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 from rest_framework import serializers
 
-from api.shop.serializers import IntPriceField
+from api.shop.serializers import IntPriceField, CategoryField
 
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
@@ -90,6 +90,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(CoreProductSerializer):
     images = ProductImageSerializer(many=True)
+    categories = CategoryField(many=True)
 
     class Meta(CoreProductSerializer.Meta):
         fields = ["id", "title", "images", "categories"]
