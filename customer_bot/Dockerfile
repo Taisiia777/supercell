@@ -13,5 +13,6 @@ COPY bot.py ./bot.py
 COPY create_bot.py ./create_bot.py
 COPY customer_api ./customer_api
 COPY src ./src
+COPY static ./static
 
 USER bot
