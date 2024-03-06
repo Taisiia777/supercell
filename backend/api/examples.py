@@ -30,6 +30,7 @@ CreateProductExample = {
     "is_dietary": False,
     "categories": ["Одежда"],
     "attributes": [{"code": "size", "value": "XS"}],
+    "login_type": ["NEED_LOGIN", "WITHOUT_LOGIN"],
 }
 
 UpdateProductExample = {
@@ -49,4 +50,5 @@ UpdateProductExample = {
     "uploaded_images": [],
     "deleted_images": [1],
     "new_seller_id": 1,
+    "login_type": ["NEED_LOGIN", "WITHOUT_LOGIN"],
 }

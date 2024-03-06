@@ -108,12 +108,12 @@ class ProductSerializer(CoreProductSerializer):
         return ser.data
 
     class Meta(CoreProductSerializer.Meta):
-        fields = settings.PRODUCTDETAIL_FIELDS + ("seller",)
+        fields = settings.PRODUCTDETAIL_FIELDS + ("seller", "login_type")
 
 
 class ProductLinkSerializer(ProductSerializer):
     class Meta(CoreProductLinkSerializer.Meta):
-        fields = settings.PRODUCT_FIELDS + ["seller"]
+        fields = settings.PRODUCT_FIELDS + ["seller", "login_type"]
 
 
 class CategorySerializer(serializers.Serializer):
