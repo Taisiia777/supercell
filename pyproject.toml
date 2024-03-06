@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "davdam"}]
 
 [tool.poetry.dependencies]
-python = "^3.11.x"
+python = "^3.11"
 django = "^4.2.7"
 django-oscar = {extras = ["sorl-thumbnail"], version = "3.2.4"}
 django-oscar-api = "^3.2.4"
