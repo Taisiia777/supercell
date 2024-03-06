@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from aiogram import Router, types
 from aiogram.filters import Command
 
@@ -14,6 +16,9 @@ HELLO_TEXT = """Добро пожаловать - приложение «ДОС�
 👉 Гарантия качества
 
 Продукты со всего мира 🌍"""
+
+file = Path(__file__).parent.parent.parent / "static" / "main.png"
+HELLO_IMAGE = types.FSInputFile(file)
 webapp_button = None
 if settings.CUSTOMER_WEBAPP_URL:
     webapp_button = types.InlineKeyboardMarkup(
@@ -30,7 +35,9 @@ if settings.CUSTOMER_WEBAPP_URL:
 
 @router.message(Command("start"))
 async def start_command(message: types.Message):
-    await message.answer(HELLO_TEXT, reply_markup=webapp_button)
+    await message.answer_photo(
+        HELLO_IMAGE, caption=HELLO_TEXT, reply_markup=webapp_button
+    )
 
     if settings.CUSTOMER_WEBAPP_URL:
         await message.bot.set_chat_menu_button(
