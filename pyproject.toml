@@ -25,6 +25,7 @@ django-filter = "^23.5"
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.25"}
 celery = "^5.3.6"
 redis = "^5.0.1"
+yookassa = "^3.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
