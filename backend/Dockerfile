@@ -9,6 +9,11 @@ ENV PYTHONUNBUFFERED=1 \
 RUN apt-get update --yes --quiet && apt-get install --yes --quiet --no-install-recommends \
     build-essential \
     libpq-dev \
+    wget \
+    unzip \
+ && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+ && apt-get install -y ./google-chrome-stable_current_amd64.deb \
+ && rm google-chrome-stable_current_amd64.deb \
  && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

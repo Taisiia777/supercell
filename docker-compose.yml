@@ -30,6 +30,7 @@ services:
 
   celery_worker:
     image: davdam/backend
+    platform: linux/amd64
     command: celery -A celery_app:app worker --concurrency=${CELERY_WORKERS_COUNT:-1}
     restart: unless-stopped
     depends_on:
@@ -40,6 +41,7 @@ services:
 
   backend:
     build: ./backend
+    platform: linux/amd64
     image: davdam/backend
     restart: unless-stopped
     command: gunicorn config.wsgi:application -w ${DJANGO_WORKERS_COUNT:-1}
