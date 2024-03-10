@@ -15,6 +15,15 @@ class Order(AbstractOrder):
         null=True,
         related_name="orders",
     )
+    payment_link = models.URLField(
+        null=True, blank=True, verbose_name="Ссылка на оплату заказа."
+    )
+    payment_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name="id заказа после оплаты на Юкассе",
+    )
     updated_dt = models.DateTimeField(auto_now=True, blank=True, null=True)
 
 
