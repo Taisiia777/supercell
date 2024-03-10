@@ -1,6 +1,3 @@
-import warnings
-
-from django.urls import reverse, NoReverseMatch
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from oscar.core.loading import get_model, get_class
 from oscarapi.serializers.checkout import CheckoutSerializer as CoreCheckoutSerializer
@@ -53,19 +50,21 @@ class CheckoutSerializer(CoreCheckoutSerializer):
 
 
 class OrderSerializer(CoreOrderSerializer):
-    def get_payment_url(self, obj):
-        try:
-            request = self.context["request"]
-            url = reverse("api-payment", args=(obj.pk,))
-            return request.build_absolute_uri(url)
-        except NoReverseMatch:
-            msg = (
-                "You need to implement a view named 'api-payment' "
-                "which redirects to the payment provider and sets up the "
-                "callbacks."
-            )
-            warnings.warn(msg, stacklevel=2)
-            return None
+    @staticmethod
+    def get_payment_url(obj) -> str | None:
+        return obj.payment_link
+        # try:
+        #     request = self.context["request"]
+        #     url = reverse("api-payment", args=(obj.pk,))
+        #     return request.build_absolute_uri(url)
+        # except NoReverseMatch:
+        #     msg = (
+        #         "You need to implement a view named 'api-payment' "
+        #         "which redirects to the payment provider and sets up the "
+        #         "callbacks."
+        #     )
+        #     warnings.warn(msg, stacklevel=2)
+        #     return None
 
 
 class PriceSerializer(serializers.Serializer):

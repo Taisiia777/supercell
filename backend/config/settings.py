@@ -283,5 +283,10 @@ if SENTRY_DSN:
         profiles_sample_rate=0.2,
     )
 
+YOOKASSA_SHOP_ID = os.environ["YOOKASSA_SHOP_ID"]
+YOOKASSA_API_KEY = os.environ["YOOKASSA_API_KEY"]
+PAYMENT_REDIRECT_URL = os.environ.get(
+    "PAYMENT_REDIRECT_URL", "example.com/some_payment_url"
+)
 
 from oscar.defaults import *  # noqa
