@@ -37,5 +37,5 @@ def create_yoomoney_payment(order: Order) -> dict:
             "payment_id": payment.id,
         }
     except Exception as error:
-        logger.error("Could not create yookassa payment: %s", error)
+        logger.exception("Could not create yookassa payment: %s", error)
     return payment_data
