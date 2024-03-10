@@ -1,13 +1,19 @@
+import logging
+
 from drf_spectacular.utils import extend_schema
 from oscar.core.loading import get_model
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from yookassa import Payment
 
+from shop.order.enums import OrderStatus
 from . import serializers
 
 Order = get_model("order", "Order")
+
+logger = logging.getLogger(__name__)
 
 
 class OrdersListView(APIView):
@@ -73,3 +79,37 @@ class CustomerView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+@extend_schema(responses=serializers.OrderPaymentStatusSerializer)
+class ConfirmPaymentView(APIView):
+    @staticmethod
+    def check_payment_status(payment_id: str) -> bool:
+        paid = False
+        try:
+            result = Payment.find_one(payment_id)
+            if result.paid:
+                paid = True
+        except Exception as error:
+            logger.exception("Could not get payment status: %s", error)
+        return paid
+
+    @staticmethod
+    def payment_successful(order: Order):
+        order.status = OrderStatus.PAID
+        order.save(update_fields=["status"])
+
+    def post(self, request, order_number: str):
+        try:
+            order = Order.objects.get(number=order_number)
+        except Order.DoesNotExist:
+            logger.info("Order does not exist: %s", order_number)
+            return Response({"status": False})
+
+        if order.status != OrderStatus.NEW or not order.payment_id:
+            return Response({"status": False})
+
+        if payment_status := self.check_payment_status(order.payment_id):
+            self.payment_successful(order)
+
+        return Response({"status": payment_status})

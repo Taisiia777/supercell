@@ -123,3 +123,7 @@ class CustomerOrderListSerializer(CustomerMixin, serializers.Serializer):
 class CustomerOrderDetailSerializer(CustomerMixin, serializers.Serializer):
     user = CustomerSerializer()
     order = OrderDetailSerializer(required=False)
+
+
+class OrderPaymentStatusSerializer(serializers.Serializer):
+    status = serializers.BooleanField()

@@ -6,4 +6,7 @@ urlpatterns = [
     path("me/", views.CustomerView.as_view()),
     path("orders/", views.OrdersListView.as_view()),
     path("order/<str:order_number>/", views.OrderDetailView.as_view()),
+    path(
+        "order/<str:order_number>/confirm_payment/", views.ConfirmPaymentView.as_view()
+    ),
 ]
