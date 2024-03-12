@@ -76,13 +76,7 @@ class PopularCategoriesListView(ProductCategoriesListView):
 @extend_schema(
     parameters=[
         OpenApiParameter(name="category_id", type=int),
-        OpenApiParameter(name="city_id", type=int),
         OpenApiParameter(name="search", type=str),
-        OpenApiParameter(name="country", type=str),
-        OpenApiParameter(name="is_vegan", type=bool),
-        OpenApiParameter(name="is_sugar_free", type=bool),
-        OpenApiParameter(name="is_gluten_free", type=bool),
-        OpenApiParameter(name="is_dietary", type=bool),
     ]
 )
 class ProductListView(CoreProductList):
@@ -94,46 +88,6 @@ class ProductListView(CoreProductList):
         .distinct()
     )
 
-    COUNTRY_CODES = {
-        "ru": "Россия",
-        "kz": "Казахстан",
-        "rs": "Сербия",
-        "by": "Беларусь",
-        "pl": "Польша",
-    }
-
-    @staticmethod
-    def _parse_bool(value: str) -> bool:
-        return value.lower() in ("true", "1", "yes")
-
-    def _attribute_search(self, qs):
-        is_vegan = self.request.query_params.get("is_vegan", "")
-        if is_vegan:
-            qs = qs.filter(is_vegan=self._parse_bool(is_vegan))
-
-        is_sugar_free = self.request.query_params.get("is_sugar_free", "")
-        if is_sugar_free:
-            qs = qs.filter(is_sugar_free=self._parse_bool(is_sugar_free))
-
-        is_gluten_free = self.request.query_params.get("is_gluten_free", "")
-        if is_gluten_free:
-            qs = qs.filter(is_gluten_free=self._parse_bool(is_gluten_free))
-
-        is_dietary = self.request.query_params.get("is_dietary", "")
-        if is_dietary:
-            qs = qs.filter(is_dietary=self._parse_bool(is_dietary))
-
-        country_param = self.request.query_params.get("country", "")
-        countries = [
-            self.COUNTRY_CODES.get(country)
-            for country in country_param.split(",")
-            if country in self.COUNTRY_CODES
-        ]
-        if countries:
-            qs = qs.filter(country__in=countries)
-
-        return qs
-
     def get_queryset(self):
         qs = super().get_queryset()
 
@@ -141,15 +95,10 @@ class ProductListView(CoreProductList):
         if category_id and category_id.isdigit():
             qs = qs.filter(categories__id=category_id)
 
-        city_id = self.request.query_params.get("city_id", "")
-        if city_id and city_id.isdigit():
-            qs = qs.filter(seller__city_id=city_id)
-
         search = self.request.query_params.get("search", "")
         if search:
             qs = qs.filter(title__icontains=search)
 
-        qs = self._attribute_search(qs)
         return qs
 
 

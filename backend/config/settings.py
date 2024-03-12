@@ -242,11 +242,6 @@ OSCARAPI_PRODUCT_FIELDS = [
     "images",
     "price",
     "categories",
-    "country",
-    "is_vegan",
-    "is_sugar_free",
-    "is_gluten_free",
-    "is_dietary",
 ]
 OSCARAPI_PRODUCTDETAIL_FIELDS = tuple(OSCARAPI_PRODUCT_FIELDS)
 OSCAR_DEFAULT_CURRENCY = "RUB"
