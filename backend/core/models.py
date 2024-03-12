@@ -44,3 +44,15 @@ class City(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class EmailCodeRequest(models.Model):
+    email = models.EmailField()
+    is_successful = models.BooleanField(default=None, null=True)
+
+    created_dt = models.DateTimeField(auto_now_add=True)
+    updated_dt = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Запрос кода"
+        verbose_name_plural = "Запросы кода"
