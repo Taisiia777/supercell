@@ -28,7 +28,6 @@ from api.customer.serializers import (
 )
 from core.models import DavDamer
 from api.shop.serializers import ProductSerializer, CategorySerializer, CategoryField
-from shop.catalogue.enums import LoginType
 
 logger = logging.getLogger(__name__)
 
@@ -348,9 +347,6 @@ class CreateProductSerializer(AdminProductSerializer):
         write_only=True,
     )
     is_public = serializers.BooleanField(default=True)
-    login_type = serializers.ChoiceField(
-        choices=LoginType, default=LoginType.WITHOUT_LOGIN
-    )
 
     def to_internal_value(self, data):
         result = super().to_internal_value(data)

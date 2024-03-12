@@ -24,7 +24,7 @@ class Product(AbstractProduct):
     )
     is_dietary = models.BooleanField(null=True, blank=True, verbose_name="Диетический")
     login_type = models.CharField(
-        choices=LoginType.choices, max_length=20, default=LoginType.WITHOUT_LOGIN
+        choices=LoginType.choices, max_length=20, default=LoginType.LINK
     )
 
     def get_orders_count(self) -> int:
