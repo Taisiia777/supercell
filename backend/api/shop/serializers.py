@@ -24,9 +24,7 @@ class IntPriceField(serializers.DecimalField):
 
 
 class SellerSerializer(serializers.ModelSerializer):
-    products_url = serializers.HyperlinkedIdentityField(
-        view_name="seller-products", lookup_url_kwarg="seller_id"
-    )
+    products_url = serializers.ReadOnlyField(default=None)
 
     class Meta:
         model = Seller
