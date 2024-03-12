@@ -21,17 +21,17 @@ SELENIUM_WAITING_TIMEOUT = 5
 
 WEBPAGE_URL = "https://store.supercell.com/ru"
 COOKIE_AGREE_XPATH = '//*[@id="onetrust-accept-btn-handler"]'
-SUPERCELL_LOGIN_XPATH = '/html/body/div[1]/div/div[1]/div/header/div/div[2]/a'
-EMAIL_XPATH = '/html/body/div[1]/div/main/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div/form/div[1]/div[2]/input'
-BUTTON_XPATH = '/html/body/div[1]/div/main/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div/form/div[2]/button[1]'
+SUPERCELL_LOGIN_XPATH = "/html/body/div[1]/div/div[1]/div/header/div/div[2]/a"
+EMAIL_XPATH = "/html/body/div[1]/div/main/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div/form/div[1]/div[2]/input"  # noqa
+BUTTON_XPATH = "/html/body/div[1]/div/main/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div/form/div[2]/button[1]"  # noqa
 
 
 def get_driver():
     service = Service(ChromeDriverManager().install())
     options = Options()
-    options.add_argument('--no-sandbox')
+    options.add_argument("--no-sandbox")
     if os.getenv("IS_HEADLESS"):
-        options.add_argument('--headless')
+        options.add_argument("--headless")
 
     return webdriver.Chrome(service=service, options=options)
 
@@ -47,7 +47,7 @@ def agree_with_cookie(driver):
         logger.exception(err)
 
 
-def request_the_code(email: str) -> None:
+def request_the_code(email: str) -> bool:
     try:
         driver = get_driver()
         driver.get(WEBPAGE_URL)
@@ -55,7 +55,7 @@ def request_the_code(email: str) -> None:
         login_button = WebDriverWait(driver, SELENIUM_WAITING_TIMEOUT).until(
             EC.element_to_be_clickable((By.XPATH, SUPERCELL_LOGIN_XPATH))
         )
-        time.sleep(.5)
+        time.sleep(0.5)
         login_button.click()
         agree_with_cookie(driver)
         email_field = WebDriverWait(driver, SELENIUM_WAITING_TIMEOUT).until(
@@ -70,5 +70,7 @@ def request_the_code(email: str) -> None:
         signin_button.click()
         time.sleep(2)
         logger.info(f"Successfully requested for {email}")
+        return True
     except Exception as err:
         logger.exception(err)
+        return False

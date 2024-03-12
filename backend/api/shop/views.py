@@ -21,7 +21,8 @@ from rest_framework.views import APIView
 from api.davdamer.filtersets import PRODUCT_ORDERS_COUNT
 from api.shop import serializers
 from core.exceptions import InvalidProductError, AppError
-from core.models import City
+from core.models import City, EmailCodeRequest
+from celery_app import app as celery_app
 
 logger = logging.getLogger(__name__)
 
@@ -276,3 +277,23 @@ class DistrictListView(generics.ListAPIView):
             {"id": 4, "name": "ЖК «Саларьево парк»"},
             {"id": 5, "name": "ЖК «Румянцево парк»"},
         ]
+
+
+class RequestCodeAPIView(APIView):
+    @staticmethod
+    def save_code_requests(emails: list[str]):
+        for email in emails:
+            code_request = EmailCodeRequest.objects.create(email=email)
+            celery_app.send_task("api.shop.request_code", args=[code_request.pk])
+
+    @extend_schema(
+        request=serializers.EmailCodeRequestSerializer,
+        responses=serializers.ResponseStatusSerializer,
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = serializers.EmailCodeRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        self.save_code_requests(serializer.validated_data["emails"])
+
+        return Response({"status": True})

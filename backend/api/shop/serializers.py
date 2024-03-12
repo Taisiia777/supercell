@@ -144,3 +144,11 @@ class CitySerializer(serializers.Serializer):
 class DistrictSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
+
+
+class EmailCodeRequestSerializer(serializers.Serializer):
+    emails = serializers.ListField(child=serializers.EmailField())
+
+
+class ResponseStatusSerializer(serializers.Serializer):
+    status = serializers.BooleanField(default=True)
