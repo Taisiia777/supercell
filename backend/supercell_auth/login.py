@@ -21,9 +21,9 @@ SELENIUM_WAITING_TIMEOUT = 5
 
 WEBPAGE_URL = "https://store.supercell.com/ru"
 COOKIE_AGREE_XPATH = '//*[@id="onetrust-accept-btn-handler"]'
-SUPERCELL_LOGIN_XPATH = "/html/body/div[1]/div/div[1]/div/header/div/div[2]/a"
-EMAIL_XPATH = "/html/body/div[1]/div/main/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div/form/div[1]/div[2]/input"  # noqa
-BUTTON_XPATH = "/html/body/div[1]/div/main/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div/form/div[2]/button[1]"  # noqa
+SUPERCELL_LOGIN_XPATH = '//*[@id="main"]/div[1]/div/header/div/div[1]/a'
+EMAIL_XPATH = '//*[@id="root"]/div/main/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div/form/div[1]/div[2]/input'  # noqa
+BUTTON_XPATH = '//*[@id="root"]/div/main/div/div/div/div/div/div[2]/div/div/div/div[2]/div/div/form/div[2]/button[1]'  # noqa
 
 
 def get_driver():
