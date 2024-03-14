@@ -23,4 +23,6 @@ WORKDIR /app
 RUN chown web:web /app
 COPY --chown=web:web . .
 
+RUN mkdir -p /home/web && chown web:web /home/web
+
 USER web

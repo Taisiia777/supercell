@@ -33,13 +33,14 @@ services:
   celery_worker:
     image: davdam/backend
     platform: linux/amd64
-    command: celery -A celery_app:app worker --concurrency=${CELERY_WORKERS_COUNT:-1}
+    command: celery -A celery_app:app worker --concurrency=${CELERY_WORKERS_COUNT:-1} -l INFO
     restart: unless-stopped
     depends_on:
       - postgres
       - redis
     environment:
       <<: *common-env
+      IS_HEADLESS: 1
 
   backend:
     build: ./backend
