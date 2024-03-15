@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema_field
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_class
 from rest_framework import serializers
@@ -112,24 +113,6 @@ class OrderLineSerializer(serializers.ModelSerializer):
         fields = ["product", "quantity", "unit_price_incl_tax", "measurement"]
 
 
-class OrderDetailSerializer(OrderSerializer):
-    lines = OrderLineSerializer(many=True)
-
-
-class CustomerOrderListSerializer(CustomerMixin, serializers.Serializer):
-    user = CustomerSerializer()
-    orders = OrderDetailSerializer(many=True)
-
-
-class CustomerOrderDetailSerializer(CustomerMixin, serializers.Serializer):
-    user = CustomerSerializer()
-    order = OrderDetailSerializer(required=False)
-
-
-class OrderPaymentStatusSerializer(serializers.Serializer):
-    status = serializers.BooleanField()
-
-
 class OrderLoginDataSerializer(serializers.ModelSerializer):
     link = serializers.URLField(required=False, allow_blank=True, allow_null=True)
     email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
@@ -148,4 +131,31 @@ class OrderLoginDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderLoginData
-        fields = ["link", "email", "code"]
+        fields = ["link", "email", "code", "created_dt"]
+        read_only_fields = ["created_dt"]
+
+
+class OrderDetailSerializer(OrderSerializer):
+    lines = OrderLineSerializer(many=True)
+    login_data = serializers.SerializerMethodField()
+
+    @extend_schema_field(OrderLoginDataSerializer(required=False))
+    def get_login_data(self, order):
+        login_data = order.login_data.first()
+        if login_data:
+            return OrderLoginDataSerializer(login_data).data
+        return None
+
+
+class CustomerOrderListSerializer(CustomerMixin, serializers.Serializer):
+    user = CustomerSerializer()
+    orders = OrderDetailSerializer(many=True)
+
+
+class CustomerOrderDetailSerializer(CustomerMixin, serializers.Serializer):
+    user = CustomerSerializer()
+    order = OrderDetailSerializer(required=False)
+
+
+class OrderPaymentStatusSerializer(serializers.Serializer):
+    status = serializers.BooleanField()

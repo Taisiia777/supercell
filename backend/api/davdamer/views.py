@@ -76,6 +76,14 @@ class OrderDetailView(
         return (
             Order.objects.filter(seller__davdamer__user=self.request.user)
             .select_related("user", "shipping_address", "seller")
+            .prefetch_related(
+                "lines",
+                "lines__product",
+                "lines__product__images",
+                "lines__product__product_class",
+                "lines__product__categories",
+                "login_data",
+            )
             .order_by("-pk")
         )
 

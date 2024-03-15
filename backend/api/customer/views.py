@@ -58,6 +58,7 @@ class OrderDetailView(APIView):
                 "lines__product__images",
                 "lines__product__product_class",
                 "lines__product__categories",
+                "login_data",
             )
             .first()
         )
