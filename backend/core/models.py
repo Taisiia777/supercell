@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from oscar.core.loading import get_model
+
+Order = get_model("order", "Order")
 
 
 class User(AbstractUser):
@@ -56,3 +59,21 @@ class EmailCodeRequest(models.Model):
     class Meta:
         verbose_name = "Запрос кода"
         verbose_name_plural = "Запросы кода"
+
+
+class OrderLoginData(models.Model):
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, related_name="login_data"
+    )
+    link = models.URLField(verbose_name="URL игрока", null=True, blank=True)
+    email = models.EmailField(verbose_name="Email для входа", null=True, blank=True)
+    code = models.CharField(
+        max_length=15, verbose_name="Код для входа", null=True, blank=True
+    )
+
+    created_dt = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Данные для входа"
+        verbose_name_plural = "Данные для входа"
+        ordering = ["-created_dt"]
