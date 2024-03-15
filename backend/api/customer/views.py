@@ -121,18 +121,44 @@ class OrderLoginDataView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.OrderLoginDataSerializer
 
-    def perform_create(self, serializer):
-        try:
-            order_number = self.kwargs.get("order_number")
-            order = Order.objects.get(number=order_number, user=self.request.user)
-            serializer.save(order=order)
-        except Order.DoesNotExist:
-            raise APIException("Order does not exist")
+    def get_order(self) -> Order:
+        order_number = self.kwargs.get("order_number")
+        order = (
+            Order.objects.filter(number=order_number, user=self.request.user)
+            .select_related("shipping_address")
+            .prefetch_related(
+                "lines",
+                "lines__product",
+                "lines__product__images",
+                "lines__product__product_class",
+                "lines__product__categories",
+                "login_data",
+            )
+            .first()
+        )
+        if not order:
+            raise APIException("Order not found")
+        return order
 
+    def perform_create(self, serializer):
+        order = self.get_order()
+        serializer.save(order=order)
+
+    @extend_schema(
+        request=serializers.OrderLoginDataSerializer,
+        responses=serializers.CustomerOrderDetailSerializer,
+    )
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(
-            serializer.data,
+            serializers.CustomerOrderDetailSerializer(
+                {"order": self.get_order(), "user": request.user},
+                context={
+                    "request": self.request,
+                    "format": self.format_kwarg,
+                    "view": self,
+                },
+            ).data,
         )
