@@ -93,7 +93,7 @@ class ProductSerializer(CoreProductSerializer):
     categories = CategoryField(many=True)
 
     class Meta(CoreProductSerializer.Meta):
-        fields = ["id", "title", "images", "categories"]
+        fields = ["id", "title", "images", "categories", "login_type"]
 
 
 class OrderLineSerializer(serializers.ModelSerializer):
