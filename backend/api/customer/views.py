@@ -3,6 +3,7 @@ import logging
 from drf_spectacular.utils import extend_schema
 from oscar.core.loading import get_model
 from rest_framework import generics
+from rest_framework.exceptions import APIException
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -113,3 +114,24 @@ class ConfirmPaymentView(APIView):
             self.payment_successful(order)
 
         return Response({"status": payment_status})
+
+
+class OrderLoginDataView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = serializers.OrderLoginDataSerializer
+
+    def perform_create(self, serializer):
+        try:
+            order_number = self.kwargs.get("order_number")
+            order = Order.objects.get(number=order_number, user=self.request.user)
+            serializer.save(order=order)
+        except Order.DoesNotExist:
+            raise APIException("Order does not exist")
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(
+            serializer.data,
+        )

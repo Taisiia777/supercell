@@ -4,6 +4,7 @@ from oscarapi.utils.loading import get_api_class
 from rest_framework import serializers
 
 from api.shop.serializers import IntPriceField, CategoryField
+from core.models import OrderLoginData
 
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
@@ -127,3 +128,24 @@ class CustomerOrderDetailSerializer(CustomerMixin, serializers.Serializer):
 
 class OrderPaymentStatusSerializer(serializers.Serializer):
     status = serializers.BooleanField()
+
+
+class OrderLoginDataSerializer(serializers.ModelSerializer):
+    link = serializers.URLField(required=False, allow_blank=True, allow_null=True)
+    email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
+    code = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+    def validate(self, data):
+        if data.get("link"):
+            if data.get("email") or data.get("code"):
+                raise serializers.ValidationError("Должен быть заполнен только link")
+        else:
+            if not (data.get("email") and data.get("code")):
+                raise serializers.ValidationError(
+                    "Должны быть заполнены email и code вместе"
+                )
+        return data
+
+    class Meta:
+        model = OrderLoginData
+        fields = ["link", "email", "code"]

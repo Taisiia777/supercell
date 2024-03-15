@@ -9,4 +9,5 @@ urlpatterns = [
     path(
         "order/<str:order_number>/confirm_payment/", views.ConfirmPaymentView.as_view()
     ),
+    path("order/<str:order_number>/login_data/", views.OrderLoginDataView.as_view()),
 ]
