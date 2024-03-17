@@ -1,0 +1,2 @@
+class CustomerAPIError(Exception):
+    pass
