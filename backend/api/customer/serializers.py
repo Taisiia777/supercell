@@ -107,12 +107,8 @@ class OrderLoginDataSerializer(serializers.ModelSerializer):
 
 class OrderLineSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
-    unit_price_incl_tax = serializers.DecimalField(
-        allow_null=True,
-        decimal_places=0,
-        max_digits=12,
-        required=False,
-    )
+    unit_price_incl_tax = IntPriceField()
+    line_price_incl_tax = IntPriceField()
     measurement = serializers.CharField(required=False)
     login_data = serializers.SerializerMethodField()
 
@@ -126,9 +122,11 @@ class OrderLineSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderLine
         fields = [
+            "id",
             "product",
             "quantity",
             "unit_price_incl_tax",
+            "line_price_incl_tax",
             "measurement",
             "login_data",
         ]
