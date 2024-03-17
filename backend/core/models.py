@@ -62,11 +62,10 @@ class EmailCodeRequest(models.Model):
 
 
 class OrderLoginData(models.Model):
-    order = models.ForeignKey(
-        Order, on_delete=models.CASCADE, related_name="login_data"
+    order_line = models.ForeignKey(
+        "order.Line", on_delete=models.CASCADE, related_name="login_data", null=True
     )
-    link = models.URLField(verbose_name="URL игрока", null=True, blank=True)
-    email = models.EmailField(verbose_name="Email для входа", null=True, blank=True)
+    account_id = models.CharField(max_length=150, verbose_name="ID аккаунта", null=True)
     code = models.CharField(
         max_length=15, verbose_name="Код для входа", null=True, blank=True
     )
