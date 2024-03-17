@@ -25,7 +25,6 @@ from api.customer.serializers import (
     OrderDetailSerializer as CustomerOrderDetailSerializer,
     CustomerSerializer,
     ShippingAddressSerializer,
-    OrderLoginDataSerializer,
 )
 from core.models import DavDamer
 from api.shop.serializers import ProductSerializer, CategorySerializer, CategoryField
@@ -249,10 +248,7 @@ class DavdamerProductDetailSerializer(DavdamerProductLinkSerializer):
 
 
 class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
-    @extend_schema_field(OrderLoginDataSerializer(many=True))
-    def get_login_data(self, order):
-        login_data = order.login_data.all()
-        return OrderLoginDataSerializer(login_data, many=True).data
+    pass
 
 
 class OrderUpdateSerializer(serializers.ModelSerializer):

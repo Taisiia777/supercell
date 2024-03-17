@@ -98,6 +98,13 @@ class ProductSerializer(CoreProductSerializer):
         fields = ["id", "title", "images", "categories", "login_type"]
 
 
+class OrderLoginDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderLoginData
+        fields = ["account_id", "code", "created_dt"]
+        read_only_fields = ["created_dt"]
+
+
 class OrderLineSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
     unit_price_incl_tax = serializers.DecimalField(
@@ -107,36 +114,6 @@ class OrderLineSerializer(serializers.ModelSerializer):
         required=False,
     )
     measurement = serializers.CharField(required=False)
-
-    class Meta:
-        model = OrderLine
-        fields = ["product", "quantity", "unit_price_incl_tax", "measurement"]
-
-
-class OrderLoginDataSerializer(serializers.ModelSerializer):
-    link = serializers.URLField(required=False, allow_blank=True, allow_null=True)
-    email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
-    code = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-
-    def validate(self, data):
-        if data.get("link"):
-            if data.get("email") or data.get("code"):
-                raise serializers.ValidationError("Должен быть заполнен только link")
-        else:
-            if not (data.get("email") and data.get("code")):
-                raise serializers.ValidationError(
-                    "Должны быть заполнены email и code вместе"
-                )
-        return data
-
-    class Meta:
-        model = OrderLoginData
-        fields = ["link", "email", "code", "created_dt"]
-        read_only_fields = ["created_dt"]
-
-
-class OrderDetailSerializer(OrderSerializer):
-    lines = OrderLineSerializer(many=True)
     login_data = serializers.SerializerMethodField()
 
     @extend_schema_field(OrderLoginDataSerializer(required=False))
@@ -145,6 +122,20 @@ class OrderDetailSerializer(OrderSerializer):
         if login_data:
             return OrderLoginDataSerializer(login_data).data
         return None
+
+    class Meta:
+        model = OrderLine
+        fields = [
+            "product",
+            "quantity",
+            "unit_price_incl_tax",
+            "measurement",
+            "login_data",
+        ]
+
+
+class OrderDetailSerializer(OrderSerializer):
+    lines = OrderLineSerializer(many=True)
 
 
 class CustomerOrderListSerializer(CustomerMixin, serializers.Serializer):
