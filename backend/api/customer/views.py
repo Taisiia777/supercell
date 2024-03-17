@@ -1,16 +1,19 @@
 import logging
 
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from oscar.core.loading import get_model
-from rest_framework import generics
-from rest_framework.exceptions import APIException
+from rest_framework import generics, status
+from rest_framework.exceptions import ParseError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from yookassa import Payment
 
+from core.models import OrderLoginData
 from shop.order.enums import OrderStatus
 from . import serializers
+from ..shop.serializers import ResponseStatusSerializer
 
 Order = get_model("order", "Order")
 
@@ -116,47 +119,55 @@ class ConfirmPaymentView(APIView):
         return Response({"status": payment_status})
 
 
-class OrderLoginDataView(APIView):
+class OrderLoginDataView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = serializers.OrderLoginDataSerializer
+    serializer_class = serializers.PutLoginDataSerializer
 
-    def get_order(self) -> Order:
+    def get_object(self) -> Order:
+        if cached_order := getattr(self, "_order", None):
+            return cached_order
+
         order_number = self.kwargs.get("order_number")
         order = (
             Order.objects.filter(number=order_number, user=self.request.user)
-            .select_related("shipping_address")
             .prefetch_related(
                 "lines",
-                "lines__product",
-                "lines__product__images",
-                "lines__product__product_class",
-                "lines__product__categories",
             )
             .first()
         )
-        if not order:
-            raise APIException("Order not found")
+        if order is None:
+            raise ParseError("Order not found", code=status.HTTP_400_BAD_REQUEST)
+        setattr(self, "_order", order)
         return order
 
-    def perform_create(self, serializer):
-        order = self.get_order()
-        serializer.save(order=order)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["order"] = self.get_object()
+        return context
+
+    @staticmethod
+    def perform_create(serializer):
+        now = timezone.now()
+        login_data = [
+            OrderLoginData(
+                order_line_id=data["order_line"],
+                account_id=data["account_id"],
+                code=data["code"],
+                created_dt=now,
+            )
+            for data in serializer.validated_data
+        ]
+        OrderLoginData.objects.bulk_create(login_data)
 
     @extend_schema(
-        request=serializers.OrderLoginDataSerializer,
-        responses=serializers.CustomerOrderDetailSerializer,
+        request=serializers.PutLoginDataSerializer(many=True),
+        responses={
+            200: ResponseStatusSerializer,
+            400: None,
+        },
     )
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+    def patch(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, many=True)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        return Response(
-            serializers.CustomerOrderDetailSerializer(
-                {"order": self.get_order(), "user": request.user},
-                context={
-                    "request": self.request,
-                    "format": self.format_kwarg,
-                    "view": self,
-                },
-            ).data,
-        )
+        return Response({"status": True})

@@ -105,6 +105,22 @@ class OrderLoginDataSerializer(serializers.ModelSerializer):
         read_only_fields = ["created_dt"]
 
 
+class PutLoginDataSerializer(serializers.ModelSerializer):
+    line_id = serializers.PrimaryKeyRelatedField(
+        queryset=OrderLine.objects.all(), source="order_line"
+    )
+
+    def validate_line_id(self, value: OrderLine) -> int:
+        order = self.context["order"]
+        if not order.lines.filter(id=value.pk).exists():
+            raise serializers.ValidationError("Line %d not found in order" % value.pk)
+        return value.pk
+
+    class Meta:
+        model = OrderLoginData
+        fields = ["line_id", "account_id", "code"]
+
+
 class OrderLineSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
     unit_price_incl_tax = IntPriceField()
