@@ -20,7 +20,7 @@ def created_api_callback_handler(sender, order, user, **kwargs):
     print(time.time() - start_time, "yoomoney latency")
 
     product_account_id = {
-        product["product_id"]: product["account_id"]
+        product["product_id"]: (product["account_id"], product.get("code"))
         for product in sender.serializer.validated_data["products"]
     }
 
@@ -40,7 +40,8 @@ def created_api_callback_handler(sender, order, user, **kwargs):
             login_data.append(
                 OrderLoginData(
                     order_line_id=line.pk,
-                    account_id=product_account_id[line.product_id],
+                    account_id=product_account_id[line.product_id][0],
+                    code=product_account_id[line.product_id][1],
                     created_dt=now,
                 )
             )

@@ -35,6 +35,7 @@ class BasketProductSerializer(serializers.Serializer):
     product_id = serializers.IntegerField(min_value=1)
     quantity = serializers.IntegerField(min_value=1, max_value=99)
     account_id = serializers.CharField(max_length=100)
+    code = serializers.CharField(max_length=100, required=False, allow_null=True)
 
     def validate(self, data):
         # todo: if product.login_type is EMAIL_CODE, then account_id should be an email
