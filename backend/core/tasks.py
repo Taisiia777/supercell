@@ -1,9 +1,15 @@
-from celery import shared_task
+import logging
 
-from core.services.customer import CustomerOrderNotifier
+from celery import shared_task
+from oscar.core.loading import get_model
+
+from core.services.customer import CustomerOrderNotifier, CustomerAccountCodeNotifier
 from core.services.seller import SellerNotifier, SellerActionHandler
 from core.models import EmailCodeRequest
 from supercell_auth.login import request_the_code
+
+logger = logging.getLogger(__name__)
+OrderLine = get_model("order", "Line")
 
 
 @shared_task(name="api.shop.new_order")
@@ -14,6 +20,35 @@ def new_order(order_pk: int):
 @shared_task(name="api.davdamer.order_status_updated")
 def order_status_updated(order_pk: int):
     CustomerOrderNotifier(order_pk).notify()
+
+
+@shared_task(name="api.davdamer.request_code")
+def davdamer_requested_code(line_id: int):
+    try:
+        line = OrderLine.objects.get(pk=line_id)
+    except OrderLine.DoesNotExist:
+        logger.info(f"OrderLine with id {line_id} does not exist")
+        return
+
+    login_data = line.login_data.first()
+    if not login_data:
+        logger.info(f"No logindata for OrderLine with id {line_id}")
+        return
+
+    if "@" not in login_data.account_id:
+        logger.info(
+            f"Account id {login_data.account_id} is not an email (line_id: {line_id})"
+        )
+        return
+
+    requested_successful = request_the_code(login_data.account_id)
+    EmailCodeRequest.objects.create(
+        email=login_data.account_id, is_successful=requested_successful
+    )
+    if requested_successful:
+        CustomerAccountCodeNotifier(
+            line.order.user, login_data.account_id, line_id
+        ).notify()
 
 
 @shared_task(name="bot.seller.act")

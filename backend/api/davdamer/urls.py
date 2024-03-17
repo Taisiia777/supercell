@@ -20,5 +20,6 @@ urlpatterns = [
         "product/<int:product_id>/image/<int:image_id>/",
         views.DeleteProductImageView.as_view(),
     ),
+    path("order/<int:id>/request_code/<int:line_id>/", views.RequestCodeView.as_view()),
     *router.urls,
 ]

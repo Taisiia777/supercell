@@ -1,7 +1,8 @@
 import logging
 from typing import Any
 
-from aiogram import Bot
+from aiogram import Bot, types
+from aiogram.filters.callback_data import CallbackData
 from django.conf import settings
 
 from core.services.exceptions import InvalidCommandError, CommandWarning
@@ -63,3 +64,39 @@ class CustomerOrderNotifier:
             logger.warning(err)
         except Exception as err:
             logger.exception(err)
+
+
+class RequestLoginCodeCf(CallbackData, prefix="mgr_req_code"):
+    line_id: int
+    email: str
+
+
+class CustomerAccountCodeNotifier:
+    def __init__(self, user: User, email: str, line_id: int):
+        self.user: User = user
+        self.email: str = email
+        self.line_id: int = line_id
+
+    def _prepare_message(self) -> tuple[str, Any]:
+        text = f"Менеджер запросил код для входа в аккаунт {self.email}"
+        keyboard = types.InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    types.InlineKeyboardButton(
+                        text="Отправить код",
+                        callback_data=RequestLoginCodeCf(
+                            line_id=self.line_id, email=self.email
+                        ).pack(),
+                    )
+                ]
+            ]
+        )
+        return text, keyboard
+
+    def notify(self) -> None:
+        if not self.user.telegram_chat_id:
+            logger.warning(f"User {self.user.pk} has no telegram_chat_id")
+            return
+
+        message, keyboard = self._prepare_message()
+        send_message(bot, self.user.telegram_chat_id, message, reply_markup=keyboard)

@@ -8,18 +8,22 @@ from oscar.core.loading import get_model
 from rest_framework import generics, viewsets, mixins
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django_filters import rest_framework as filters
 
 from api.permissions import IsDavDamer, IsSellerOwner
 from celery_app import app as celery_app
+from shop.catalogue.enums import LoginType
 from . import serializers
 from .filtersets import OrderFilter, ProductFilter
 from ..pagination import DefaultPageNumberPagination
+from ..shop.serializers import ResponseStatusSerializer
 
 User = get_user_model()
 Seller = get_model("partner", "Seller")
 Order = get_model("order", "Order")
+OrderLine = get_model("order", "Line")
 Product = get_model("catalogue", "Product")
 ProductImage = get_model("catalogue", "ProductImage")
 Category = get_model("catalogue", "Category")
@@ -271,3 +275,19 @@ class ProductAttributeListView(generics.ListAPIView):
     def get_queryset(self):
         product_class = ProductClass.objects.first()
         return ProductAttribute.objects.filter(product_class=product_class).distinct()
+
+
+class RequestCodeView(APIView):
+    permission_classes = [IsDavDamer]
+
+    @extend_schema(request=None, responses=ResponseStatusSerializer)
+    def post(self, request, *args, **kwargs):
+        if not OrderLine.objects.filter(
+            pk=kwargs["line_id"],
+            order__id=kwargs["id"],
+            product__login_type=LoginType.EMAIL_CODE,
+        ).exists():
+            return Response({"status": False})
+
+        celery_app.send_task("api.davdamer.request_code", args=(kwargs["line_id"],))
+        return Response({"status": True})
