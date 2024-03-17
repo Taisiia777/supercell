@@ -101,8 +101,7 @@ class ProductSerializer(CoreProductSerializer):
 class OrderLoginDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderLoginData
-        fields = ["account_id", "code", "created_dt"]
-        read_only_fields = ["created_dt"]
+        fields = ["account_id", "code"]
 
 
 class PutLoginDataSerializer(serializers.ModelSerializer):
