@@ -43,8 +43,8 @@ def agree_with_cookie(driver):
         )
         if cookie_button:
             cookie_button.click()
-    except Exception as err:
-        logger.exception(err)
+    except Exception:
+        pass
 
 
 def request_the_code(email: str) -> bool:
