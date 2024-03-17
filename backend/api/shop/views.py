@@ -282,6 +282,6 @@ class RequestCodeAPIView(APIView):
         serializer = serializers.EmailCodeRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        self.save_code_requests([serializer.validated_data["email"]])
+        self.save_code_requests(serializer.validated_data["emails"])
 
         return Response({"status": True})

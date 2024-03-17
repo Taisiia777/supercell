@@ -154,7 +154,7 @@ class DistrictSerializer(serializers.Serializer):
 
 
 class EmailCodeRequestSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    emails = serializers.ListField(child=serializers.EmailField())
 
 
 class ResponseStatusSerializer(serializers.Serializer):
