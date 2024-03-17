@@ -12,6 +12,7 @@ x-common-envs: &common-env
   SENTRY_DSN: $SENTRY_DSN
   CELERY_BROKER_URL: redis://redis/1
   DJANGO_REDIS_URL: redis://redis/8
+  REDIS_URL: redis://redis/0
   YOOKASSA_SHOP_ID: $YOOKASSA_SHOP_ID
   YOOKASSA_API_KEY: $YOOKASSA_API_KEY
 
