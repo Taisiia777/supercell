@@ -8,7 +8,7 @@ from .http_client import HTTPRequestMaker
 logger = logging.getLogger(__name__)
 
 
-class SellerAPIClient:
+class CustomerAPIClient:
     http = HTTPRequestMaker()
     api_host = os.getenv("API_HOST", "http://localhost:8000")
 
