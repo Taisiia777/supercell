@@ -2,8 +2,6 @@ import logging
 
 from django.db.models import Q
 from django.urls import reverse
-from django.utils import timezone
-from django.utils.dateparse import parse_date
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -30,6 +28,7 @@ CoreProductDetail = get_api_class("views.product", "ProductDetail")
 Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
+Order = get_model("order", "Order")
 
 
 @method_decorator(cache_page(30), name="list")
@@ -187,35 +186,24 @@ class CheckoutAPIView(CoreCheckoutView):
         )
         self.request.data["basket"] = basket_url
 
-    def _set_default_request_data(self):
-        if "shipping_address" in self.request.data:
-            self.request.data["shipping_address"]["country"] = self.default_country
-
-    def _validate_order_data(self):
-        today = timezone.now().date()
-        if "shipping_address" in self.request.data:
-            if "date" not in self.request.data["shipping_address"]:
-                return
-
-            str_date = self.request.data["shipping_address"]["date"]
-            shipping_date = parse_date(str_date)
-            if shipping_date is None:
-                raise AppError("Неверный формат даты")
-            if shipping_date < today:
-                raise AppError("Недоступная для доставки дата")
-
     def post(self, request, *args, **kwargs):
         try:
             self._parse_products_and_fill_basket()
-            self._set_default_request_data()
-            self._validate_order_data()
         except AppError as err:
             return Response({"success": False, "message": str(err)}, status=400)
         except Exception as err:
             logger.exception(f"Uncaught checkout error: {err}")
             return Response({"success": False, "message": "Server error"}, status=500)
 
-        return super().post(request, *args, **kwargs)
+        # refresh order's updated fields (like payment_link)
+        response = super().post(request, *args, **kwargs)
+        if response.status_code != status.HTTP_200_OK:
+            return response
+
+        order = Order.objects.get(number=response.data["number"])
+        context = {"request": request}
+        response = Response(self.order_serializer_class(order, context=context).data)
+        return response
 
 
 @extend_schema(tags=["in-development"])

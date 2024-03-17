@@ -34,6 +34,12 @@ class SellerSerializer(serializers.ModelSerializer):
 class BasketProductSerializer(serializers.Serializer):
     product_id = serializers.IntegerField(min_value=1)
     quantity = serializers.IntegerField(min_value=1, max_value=99)
+    account_id = serializers.CharField(max_length=100)
+
+    def validate(self, data):
+        # todo: if product.login_type is EMAIL_CODE, then account_id should be an email
+        # else if product.login_type is LINK, then account_id should be a link
+        return data
 
 
 @extend_schema_serializer(
