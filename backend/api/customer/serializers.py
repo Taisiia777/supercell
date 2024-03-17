@@ -163,3 +163,8 @@ class CustomerOrderDetailSerializer(CustomerMixin, serializers.Serializer):
 
 class OrderPaymentStatusSerializer(serializers.Serializer):
     status = serializers.BooleanField()
+
+
+class UpdateLoginDataSerializer(serializers.Serializer):
+    line_id = serializers.IntegerField()
+    code = serializers.CharField()

@@ -16,6 +16,7 @@ from . import serializers
 from ..shop.serializers import ResponseStatusSerializer
 
 Order = get_model("order", "Order")
+OrderLine = get_model("order", "Line")
 
 logger = logging.getLogger(__name__)
 
@@ -171,3 +172,36 @@ class OrderLoginDataView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response({"status": True})
+
+
+class UpdateLoginDataView(APIView):
+    serializer_class = serializers.UpdateLoginDataSerializer
+
+    @staticmethod
+    def perform_update(line: OrderLine, serializer):
+        # изменить код для всех позиций заказа с таким же email
+        login_data = line.login_data.first()
+        if login_data is None:
+            return
+
+        new_code = serializer.validated_data["code"]
+        email = login_data.account_id
+        for local_line in line.order.lines.all():
+            login_data = local_line.login_data.first()
+            if login_data and login_data.account_id == email:
+                OrderLoginData.objects.create(
+                    order_line=local_line,
+                    account_id=login_data.account_id,
+                    code=new_code,
+                )
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            line = OrderLine.objects.get(pk=serializer.validated_data["line_id"])
+            self.perform_update(line, serializer)
+
+            return Response({"status": True})
+        except OrderLine.DoesNotExist:
+            return Response({"status": False})
