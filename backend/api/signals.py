@@ -16,7 +16,7 @@ OrderLine = get_model("order", "Line")
 @receiver(oscarapi_post_checkout)
 def created_api_callback_handler(sender, order, user, **kwargs):
     start_time = time.time()
-    yoomoney_data = create_yoomoney_payment(order=order)
+    yoomoney_data = create_yoomoney_payment(order=order, request=sender.request)
     print(time.time() - start_time, "yoomoney latency")
 
     product_account_id = {

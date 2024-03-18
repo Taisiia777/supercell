@@ -104,7 +104,7 @@ class ConfirmPaymentView(APIView):
         order.status = OrderStatus.PAID
         order.save(update_fields=["status"])
 
-    def post(self, request, order_number: str):
+    def get(self, request, order_number: str):
         try:
             order = Order.objects.get(number=order_number)
         except Order.DoesNotExist:
