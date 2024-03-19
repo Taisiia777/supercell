@@ -4,17 +4,11 @@ from celery import shared_task
 from oscar.core.loading import get_model
 
 from core.services.customer import CustomerOrderNotifier, CustomerAccountCodeNotifier
-from core.services.seller import SellerNotifier, SellerActionHandler
 from core.models import EmailCodeRequest
 from supercell_auth.login import request_the_code
 
 logger = logging.getLogger(__name__)
 OrderLine = get_model("order", "Line")
-
-
-@shared_task(name="api.shop.new_order")
-def new_order(order_pk: int):
-    SellerNotifier(order_pk).notify()
 
 
 @shared_task(name="api.davdamer.order_status_updated")
@@ -49,11 +43,6 @@ def davdamer_requested_code(line_id: int):
         CustomerAccountCodeNotifier(
             line.order.user, login_data.account_id, line_id
         ).notify()
-
-
-@shared_task(name="bot.seller.act")
-def seller_action(order_number: str, action: str):
-    SellerActionHandler(order_number, action).act()
 
 
 @shared_task(name="api.shop.request_code")
