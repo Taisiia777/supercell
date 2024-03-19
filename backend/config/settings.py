@@ -247,7 +247,7 @@ OSCARAPI_PRODUCTDETAIL_FIELDS = tuple(OSCARAPI_PRODUCT_FIELDS)
 OSCAR_DEFAULT_CURRENCY = "RUB"
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
-SELLER_BOT_TOKEN = os.environ["SELLER_BOT_TOKEN"]
+SELLER_BOT_TOKEN = os.environ.get("SELLER_BOT_TOKEN")
 AUTH_USER_MODEL = "core.User"
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -280,8 +280,7 @@ if SENTRY_DSN:
 
 YOOKASSA_SHOP_ID = os.environ["YOOKASSA_SHOP_ID"]
 YOOKASSA_API_KEY = os.environ["YOOKASSA_API_KEY"]
-PAYMENT_REDIRECT_URL = os.environ.get(
-    "PAYMENT_REDIRECT_URL", "example.com/some_payment_url"
-)
+FRONTEND_URL = os.environ.get("CUSTOMER_WEBAPP_URL", "https://example.com/")
+FRONTEND_PAYMENT_REDIRECT_URL = "/orders/{id}/success"
 
 from oscar.defaults import *  # noqa

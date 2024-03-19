@@ -1,6 +1,8 @@
 import logging
 
+from django.http import HttpResponseRedirect
 from django.utils import timezone
+from django.conf import settings
 from drf_spectacular.utils import extend_schema
 from oscar.core.loading import get_model
 from rest_framework import generics, status
@@ -105,19 +107,26 @@ class ConfirmPaymentView(APIView):
         order.save(update_fields=["status"])
 
     def get(self, request, order_number: str):
+        frontend_host = settings.FRONTEND_URL
+        if frontend_host.endswith("/"):
+            frontend_host = frontend_host[:-1]
+        url = settings.FRONTEND_PAYMENT_REDIRECT_URL.format(id=order_number)
+
         try:
             order = Order.objects.get(number=order_number)
         except Order.DoesNotExist:
-            logger.info("Order does not exist: %s", order_number)
-            return Response({"status": False})
+            return HttpResponseRedirect(frontend_host)
 
         if order.status != OrderStatus.NEW or not order.payment_id:
-            return Response({"status": False})
+            return HttpResponseRedirect(frontend_host)
 
         if payment_status := self.check_payment_status(order.payment_id):
             self.payment_successful(order)
 
-        return Response({"status": payment_status})
+        if payment_status is True:
+            return HttpResponseRedirect(frontend_host + url)
+        else:
+            return HttpResponseRedirect(frontend_host)
 
 
 class OrderLoginDataView(generics.GenericAPIView):
