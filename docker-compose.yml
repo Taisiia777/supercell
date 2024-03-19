@@ -79,6 +79,7 @@ services:
     environment:
       <<: *common-env
       BOT_LOGLEVEL_INFO: $BOT_LOGLEVEL_INFO
+      API_HOST: http://backend:8000
 
 
 volumes:
