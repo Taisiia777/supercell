@@ -63,7 +63,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "first_name", "last_name", "receiver", "delivery", "game_email"]
+        fields = ["id", "first_name", "last_name", "game_email"]
 
 
 class CustomerMixin:
