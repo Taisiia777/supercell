@@ -4,6 +4,7 @@ from typing import Any
 from aiogram import Bot, types
 from aiogram.filters.callback_data import CallbackData
 from django.conf import settings
+from oscar.core.loading import get_model
 
 from core.services.exceptions import InvalidCommandError, CommandWarning
 from core.services.utils import send_message
@@ -13,6 +14,7 @@ from core.models import User
 
 bot = Bot(token=settings.BOT_TOKEN, parse_mode="HTML")
 logger = logging.getLogger(__name__)
+OrderLine = get_model("order", "Line")
 
 
 class CustomerOrderNotifier:
@@ -77,8 +79,14 @@ class CustomerAccountCodeNotifier:
         self.email: str = email
         self.line_id: int = line_id
 
+        self.order: Order = OrderLine.objects.get(pk=line_id).order
+
     def _prepare_message(self) -> tuple[str, Any]:
-        text = f"Менеджер запросил код для входа в аккаунт {self.email}"
+        text = (
+            f"По заказу {self.order.number} к почте {self.email} неправильно указан "
+            f"код. Проверьте, пожалуйста, почтовый ящик, затем, направьте нам новый "
+            f"код в бота"
+        )
         keyboard = types.InlineKeyboardMarkup(
             inline_keyboard=[
                 [
