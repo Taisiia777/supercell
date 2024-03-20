@@ -39,10 +39,10 @@ class CustomerOrderNotifier:
         match self.order.status:
             case OrderStatus.PAID:
                 action = "оплачен"
-            case OrderStatus.SENT:
-                action = "отправлен"
+            case OrderStatus.PROCESSING:
+                action = "в процессе обработки"
             case OrderStatus.DELIVERED:
-                action = "доставлен"
+                action = "завершен"
             case OrderStatus.CANCELLED:
                 action = "отменён"
             case _:
