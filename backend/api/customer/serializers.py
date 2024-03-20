@@ -45,26 +45,6 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ReceiverSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="receiver_name")
-    phone = serializers.CharField(source="receiver_phone")
-
-    class Meta:
-        model = User
-        fields = ["name", "phone"]
-
-
-class DeliverySerializer(serializers.ModelSerializer):
-    district = serializers.CharField(source="delivery_district")
-    address = serializers.CharField(source="delivery_address")
-    city = serializers.CharField(source="delivery_city")
-    notes = serializers.CharField(source="delivery_notes")
-
-    class Meta:
-        model = User
-        fields = ["city", "district", "address", "notes"]
-
-
 class GameEmailSerializer(serializers.ModelSerializer):
     brawl_stars = serializers.EmailField(source="brawl_stars_email")
     clash_of_clans = serializers.EmailField(source="clash_of_clans_email")
@@ -77,8 +57,6 @@ class GameEmailSerializer(serializers.ModelSerializer):
 
 
 class CustomerSerializer(serializers.ModelSerializer):
-    receiver = ReceiverSerializer(source="*")
-    delivery = DeliverySerializer(source="*")
     game_email = GameEmailSerializer(source="*")
     first_name = serializers.CharField(read_only=True)
     last_name = serializers.CharField(read_only=True)
