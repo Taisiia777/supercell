@@ -7,6 +7,7 @@ CheckoutExample = {
             "code": "649971",
         },
     ],
+    "email": "customer@example.com",
     "total": 1500,
 }
 

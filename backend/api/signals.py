@@ -28,7 +28,10 @@ def created_api_callback_handler(sender, order, user, **kwargs):
         order.status = OrderStatus.NEW
         order.payment_link = yoomoney_data["confirmation_url"]
         order.payment_id = yoomoney_data["payment_id"]
-        order.save(update_fields=["status", "payment_link", "payment_id"])
+        order.guest_email = sender.serializer.validated_data["email"]
+        order.save(
+            update_fields=["status", "payment_link", "payment_id", "guest_email"]
+        )
 
         updated_lines = []
         login_data = []

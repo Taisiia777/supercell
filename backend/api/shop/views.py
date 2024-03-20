@@ -11,6 +11,7 @@ from oscarapi.utils.loading import get_api_class
 from oscarapi.views.checkout import CheckoutView as CoreCheckoutView
 from oscarapi.views.product import ProductList as CoreProductList
 from rest_framework import generics, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse_lazy
@@ -174,8 +175,7 @@ class CheckoutAPIView(CoreCheckoutView):
 
     def _parse_products_and_fill_basket(self):
         serializer = self.products_serializer_class(data=self.request.data)
-        if not serializer.is_valid():
-            raise InvalidProductError(serializer.errors)
+        serializer.is_valid(raise_exception=True)
 
         self.serializer = serializer
         self.request.basket.flush()
@@ -189,6 +189,8 @@ class CheckoutAPIView(CoreCheckoutView):
     def post(self, request, *args, **kwargs):
         try:
             self._parse_products_and_fill_basket()
+        except ValidationError:
+            raise
         except AppError as err:
             return Response({"success": False, "message": str(err)}, status=400)
         except Exception as err:

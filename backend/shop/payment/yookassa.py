@@ -40,7 +40,7 @@ def create_yoomoney_payment(order: Order, request=None) -> dict:
                 "description": f"Оплата заказа: {order.number}",
                 "receipt": {
                     "customer": {
-                        "email": "customer@example.com",
+                        "email": request.data.get("email", "customer@example.com"),
                     },
                     "items": [
                         {

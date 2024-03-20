@@ -48,6 +48,7 @@ class BasketProductSerializer(serializers.Serializer):
 )
 class APICheckoutSerializer(serializers.Serializer):
     products = BasketProductSerializer(many=True)
+    email = serializers.EmailField()
 
 
 class CheckoutSerializer(CoreCheckoutSerializer):
