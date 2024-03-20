@@ -242,6 +242,7 @@ OSCARAPI_PRODUCT_FIELDS = [
     "images",
     "price",
     "categories",
+    "game",
 ]
 OSCARAPI_PRODUCTDETAIL_FIELDS = tuple(OSCARAPI_PRODUCT_FIELDS)
 OSCAR_DEFAULT_CURRENCY = "RUB"

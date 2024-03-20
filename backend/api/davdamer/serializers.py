@@ -28,6 +28,7 @@ from api.customer.serializers import (
 )
 from core.models import DavDamer
 from api.shop.serializers import ProductSerializer, CategorySerializer, CategoryField
+from shop.catalogue.enums import GameType
 
 logger = logging.getLogger(__name__)
 
@@ -309,6 +310,20 @@ class CustomProductAttributeValueSerializer(ProductAttributeValueSerializer):
         return result
 
 
+def category_to_game_mapper(category_name: str) -> GameType | None:
+    match category_name:
+        case "Brawl Stars":
+            return GameType.BRAWL_STARS
+        case "Clash Royale":
+            return GameType.CLASH_ROYALE
+        case "Clash of Clans":
+            return GameType.CLASH_OF_CLANS
+        case "Stumble Guys":
+            return GameType.STUMBLE_GUYS
+        case _:
+            return None
+
+
 @extend_schema_serializer(
     examples=[OpenApiExample("Создание товара", examples.CreateProductExample)]
 )
@@ -431,8 +446,11 @@ class CreateProductSerializer(AdminProductSerializer):
             product = super().update(product, validated_data)
 
             if categories is not None:
+                for category in categories[:1]:
+                    product.game = category_to_game_mapper(category.name)
                 with fake_autocreated(product.categories) as _categories:
                     _categories.set(categories)
+                product.save(update_fields=["game"])
 
             self._update_product_price(product, price_data)
 

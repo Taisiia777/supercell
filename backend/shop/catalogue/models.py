@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import ForeignKey
 from oscar.apps.catalogue.abstract_models import AbstractProduct
 from oscar.core.loading import get_model
-from shop.catalogue.enums import LoginType
+from shop.catalogue.enums import LoginType, GameType
 
 OrderLine = get_model("order", "Line")
 
@@ -26,6 +26,7 @@ class Product(AbstractProduct):
     login_type = models.CharField(
         choices=LoginType.choices, max_length=20, default=LoginType.LINK
     )
+    game = models.CharField(max_length=50, choices=GameType.choices, null=True)
 
     def get_orders_count(self) -> int:
         return OrderLine.objects.filter(product=self).count()
