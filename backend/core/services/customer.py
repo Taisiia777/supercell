@@ -40,19 +40,29 @@ class CustomerOrderNotifier:
     def _prepare_message(self) -> tuple[str, Any]:
         match self.order.status:
             case OrderStatus.PAID:
-                action = "оплачен"
-            case OrderStatus.PROCESSING:
-                action = "в процессе обработки"
+                text = (
+                    f"Оплата прошла успешно по заказу {self.order.number} на "
+                    f"сумму {self.order.total_incl_tax} руб. "
+                    "Ожидайте, пожалуйста, менеджер возьмет в работу Ваш заказ в "
+                    "течение нескольких минут."
+                )
             case OrderStatus.DELIVERED:
-                action = "завершен"
+                text = (
+                    f"🎯 Ваш заказ {self.order.number} был недавно Выполнен!\n"
+                    "Мы знаем, что у вас есть выбор! Спасибо, что выбрали нас!"
+                )
             case OrderStatus.CANCELLED:
-                action = "отменён"
+                text = (
+                    f"🎯 К сожалению, по вашему заказу {self.order.number} "
+                    "был оформлен возврат!\n\n"
+                    "Надеемся, что ваш опыт пользования сервисом остался положительным!"
+                    " Будем рады видеть вас вновь, всего доброго!"
+                )
             case _:
                 raise CommandWarning(
                     f"Unsupported order status {self.order.status} pk={self.order_pk}"
                 )
 
-        text = f"Ваш заказ <code>{self.order.number}</code> {action}"
         return text, None
 
     def notify(self) -> None:
@@ -108,3 +118,42 @@ class CustomerAccountCodeNotifier:
 
         message, keyboard = self._prepare_message()
         send_message(bot, self.user.telegram_chat_id, message, reply_markup=keyboard)
+
+
+class CustomerFailedPaymentNotifier:
+    def __init__(self, order_number: str):
+        self.order_number = order_number
+        self.order = None
+        self.customer = None
+
+    def _load_data(self):
+        try:
+            self.order = Order.objects.get(number=self.order_number)
+            self.customer = self.order.user
+        except Order.DoesNotExist:
+            raise InvalidCommandError(
+                f"Order with number={self.order_number} does not exist"
+            )
+
+        if self.customer is None or self.customer.telegram_chat_id is None:
+            raise InvalidCommandError(
+                f"Cannot get customer for order with number={self.order_number}"
+            )
+
+    def _prepare_message(self) -> tuple[str, Any]:
+        text = (
+            f"💡 К сожалению, у вас не прошла оплата по вашему заказу "
+            f"{self.order.number}. Попробуйте, пожалуйста, другой метод оплаты "
+            f"в приложении!."
+        )
+        return text, None
+
+    def notify(self) -> None:
+        try:
+            self._load_data()
+            message, keyboard = self._prepare_message()
+            send_message(
+                bot, self.customer.telegram_chat_id, message, reply_markup=keyboard
+            )
+        except Exception as err:
+            logger.warning(err)

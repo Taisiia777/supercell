@@ -16,6 +16,7 @@ from core.models import OrderLoginData
 from shop.order.enums import OrderStatus
 from . import serializers
 from ..shop.serializers import ResponseStatusSerializer
+from celery_app import app as celery_app
 
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
@@ -122,6 +123,8 @@ class ConfirmPaymentView(APIView):
 
         if payment_status := self.check_payment_status(order.payment_id):
             self.payment_successful(order)
+        else:
+            celery_app.send_task("api.shop.failed_payment", args=[order_number])
 
         if payment_status is True:
             return HttpResponseRedirect(frontend_host + url)
