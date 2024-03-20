@@ -7,6 +7,7 @@ from core.services.customer import (
     CustomerOrderNotifier,
     CustomerAccountCodeNotifier,
     CustomerFailedPaymentNotifier,
+    CustomerSuccessOrderNotifier,
 )
 from core.models import EmailCodeRequest
 from supercell_auth.login import request_the_code
@@ -64,3 +65,8 @@ def request_supercell_code(code_request_pk: int):
 @shared_task(name="api.shop.failed_payment")
 def failed_payment_task(order_number: str):
     CustomerFailedPaymentNotifier(order_number).notify()
+
+
+@shared_task(name="api.shop.success_payment")
+def success_payment_task(order_number: str):
+    CustomerSuccessOrderNotifier(order_number).notify()

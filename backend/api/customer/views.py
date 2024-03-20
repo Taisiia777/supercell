@@ -123,6 +123,7 @@ class ConfirmPaymentView(APIView):
 
         if payment_status := self.check_payment_status(order.payment_id):
             self.payment_successful(order)
+            celery_app.send_task("api.shop.success_payment", args=[order_number])
         else:
             celery_app.send_task("api.shop.failed_payment", args=[order_number])
 

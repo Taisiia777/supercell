@@ -39,13 +39,6 @@ class CustomerOrderNotifier:
 
     def _prepare_message(self) -> tuple[str, Any]:
         match self.order.status:
-            case OrderStatus.PAID:
-                text = (
-                    f"Оплата прошла успешно по заказу {self.order.number} на "
-                    f"сумму {self.order.total_incl_tax} руб. "
-                    "Ожидайте, пожалуйста, менеджер возьмет в работу Ваш заказ в "
-                    "течение нескольких минут."
-                )
             case OrderStatus.DELIVERED:
                 text = (
                     f"🎯 Ваш заказ {self.order.number} был недавно Выполнен!\n"
@@ -157,3 +150,14 @@ class CustomerFailedPaymentNotifier:
             )
         except Exception as err:
             logger.warning(err)
+
+
+class CustomerSuccessOrderNotifier(CustomerFailedPaymentNotifier):
+    def _prepare_message(self) -> tuple[str, Any]:
+        text = (
+            f"Оплата прошла успешно по заказу {self.order.number} на "
+            f"сумму {self.order.total_incl_tax} руб. "
+            "Ожидайте, пожалуйста, менеджер возьмет в работу Ваш заказ в "
+            "течение нескольких минут."
+        )
+        return text, None
