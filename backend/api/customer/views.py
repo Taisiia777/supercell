@@ -94,8 +94,8 @@ class ConfirmPaymentView(APIView):
     def check_payment_status(payment_id: str) -> bool:
         paid = False
         try:
-            result = Payment.find_one(payment_id)
-            if result.paid:
+            payment = Payment.find_one(payment_id)
+            if payment.status == "succeeded":
                 paid = True
         except Exception as error:
             logger.exception("Could not get payment status: %s", error)
