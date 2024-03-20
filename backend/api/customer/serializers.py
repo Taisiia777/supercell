@@ -65,15 +65,27 @@ class DeliverySerializer(serializers.ModelSerializer):
         fields = ["city", "district", "address", "notes"]
 
 
+class GameEmailSerializer(serializers.ModelSerializer):
+    brawl_stars = serializers.EmailField(source="brawl_stars_email")
+    clash_of_clans = serializers.EmailField(source="clash_of_clans_email")
+    clash_royale = serializers.EmailField(source="clash_royale_email")
+    stumble_guys = serializers.EmailField(source="stumble_guys_email")
+
+    class Meta:
+        model = User
+        fields = ["brawl_stars", "clash_of_clans", "clash_royale", "stumble_guys"]
+
+
 class CustomerSerializer(serializers.ModelSerializer):
     receiver = ReceiverSerializer(source="*")
     delivery = DeliverySerializer(source="*")
+    game_email = GameEmailSerializer(source="*")
     first_name = serializers.CharField(read_only=True)
     last_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
-        fields = ["id", "first_name", "last_name", "receiver", "delivery"]
+        fields = ["id", "first_name", "last_name", "receiver", "delivery", "game_email"]
 
 
 class CustomerMixin:

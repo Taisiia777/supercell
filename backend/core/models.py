@@ -29,6 +29,10 @@ class User(AbstractUser):
     delivery_notes = models.CharField(
         max_length=255, verbose_name="Комментарий к доставке", blank=True, null=True
     )
+    brawl_stars_email = models.EmailField(null=True)
+    clash_of_clans_email = models.EmailField(null=True)
+    clash_royale_email = models.EmailField(null=True)
+    stumble_guys_email = models.EmailField(null=True)
 
 
 class DavDamer(models.Model):
