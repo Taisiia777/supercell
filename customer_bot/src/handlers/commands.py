@@ -7,15 +7,7 @@ from create_bot import settings
 
 router = Router()
 
-HELLO_TEXT = """Добро пожаловать - приложение «ДОСТАВКА ФУДСИТИ»!
-
-Все самое свежее и натуральное с легендарного рынка! 
-
-👉 Бесплатная доставка
-👉 Низкие цены
-👉 Гарантия качества
-
-Продукты со всего мира 🌍"""
+HELLO_TEXT = """🎊Welcome! 📲Mamostore - сервис внутриигровых покупок и услуг"""
 
 file = Path(__file__).parent.parent.parent / "static" / "main.png"
 HELLO_IMAGE = types.FSInputFile(file)
