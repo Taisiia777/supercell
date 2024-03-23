@@ -48,8 +48,10 @@ def agree_with_cookie(driver):
 
 
 def request_the_code(email: str) -> bool:
+    driver = get_driver()
+    result = False
+
     try:
-        driver = get_driver()
         driver.get(WEBPAGE_URL)
         agree_with_cookie(driver)
         login_button = WebDriverWait(driver, SELENIUM_WAITING_TIMEOUT).until(
@@ -70,7 +72,10 @@ def request_the_code(email: str) -> bool:
         signin_button.click()
         time.sleep(2)
         logger.info(f"Successfully requested for {email}")
-        return True
+        result = True
     except Exception as err:
         logger.exception(err)
-        return False
+    finally:
+        driver.close()
+        driver.quit()
+        return result
