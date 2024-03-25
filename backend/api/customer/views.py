@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.http import HttpResponseRedirect
@@ -11,6 +12,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from yookassa import Payment
+from yookassa.domain.common import SecurityHelper
+from yookassa.domain.notification import (
+    WebhookNotificationFactory,
+    WebhookNotificationEventType,
+)
 
 from core.models import OrderLoginData
 from shop.order.enums import OrderStatus
@@ -118,6 +124,9 @@ class ConfirmPaymentView(APIView):
         except Order.DoesNotExist:
             return HttpResponseRedirect(frontend_host)
 
+        if order.status == OrderStatus.PAID:
+            return HttpResponseRedirect(frontend_host + url)
+
         if order.status != OrderStatus.NEW or not order.payment_id:
             return HttpResponseRedirect(frontend_host)
 
@@ -218,3 +227,53 @@ class UpdateLoginDataView(APIView):
             return Response({"status": True})
         except OrderLine.DoesNotExist:
             return Response({"status": False})
+
+
+class OrderWebhookView(APIView):
+    def post(self, request):
+        ip = self.get_client_ip(request)
+        if not SecurityHelper().is_ip_trusted(ip):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            event_json = json.loads(request.body)
+            notification = WebhookNotificationFactory().create(event_json)
+            response_obj = notification.object
+        except Exception as error:
+            logger.exception("Could not parse notification: %s", error)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            if notification.event == WebhookNotificationEventType.PAYMENT_SUCCEEDED:
+                self.payment_successful(response_obj.id)
+            elif notification.event == WebhookNotificationEventType.PAYMENT_CANCELED:
+                self.payment_canceled(response_obj.id)
+        except Exception as error:
+            logger.warning("Could not process notification: %s", error)
+
+        return Response(status=status.HTTP_200_OK)
+
+    @staticmethod
+    def get_client_ip(request) -> str:
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(",")[0]
+        else:
+            ip = request.META.get("REMOTE_ADDR")
+        return ip
+
+    @staticmethod
+    def payment_successful(payment_id: str) -> None:
+        order = Order.objects.get(payment_id=payment_id)
+        order.status = OrderStatus.PAID
+        order.save()
+
+        celery_app.send_task("api.shop.success_payment", args=[order.number])
+
+    @staticmethod
+    def payment_canceled(payment_id: str) -> None:
+        order = Order.objects.get(payment_id=payment_id)
+        order.status = OrderStatus.CANCELLED
+        order.save()
+
+        celery_app.send_task("api.davdamer.order_status_updated", args=[order.pk])

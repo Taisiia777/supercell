@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     path("me/", views.CustomerView.as_view()),
     path("orders/", views.OrdersListView.as_view()),
+    path("order/webhook/", views.OrderWebhookView.as_view(), name="api_order_webhook"),
     path("order/<str:order_number>/", views.OrderDetailView.as_view()),
     path(
         "order/<str:order_number>/confirm_payment/",
