@@ -10,7 +10,6 @@ from core.services.customer import (
     CustomerSuccessOrderNotifier,
 )
 from core.models import EmailCodeRequest
-from supercell_auth.login import request_the_code
 from supercell_auth.mobile_app import request_code_from_mobile
 
 logger = logging.getLogger(__name__)
@@ -26,6 +25,7 @@ def order_status_updated(order_pk: int):
 def davdamer_requested_code(line_id: int):
     try:
         line = OrderLine.objects.get(pk=line_id)
+        game = line.product.game
     except OrderLine.DoesNotExist:
         logger.info(f"OrderLine with id {line_id} does not exist")
         return
@@ -41,9 +41,9 @@ def davdamer_requested_code(line_id: int):
         )
         return
 
-    requested_successful = request_the_code(login_data.account_id)
+    requested_successful = request_code_from_mobile(login_data.account_id, game)
     EmailCodeRequest.objects.create(
-        email=login_data.account_id, is_successful=requested_successful
+        email=login_data.account_id, game=game, is_successful=requested_successful
     )
     if requested_successful:
         CustomerAccountCodeNotifier(
