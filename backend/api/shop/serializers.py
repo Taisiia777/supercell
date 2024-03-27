@@ -154,8 +154,13 @@ class DistrictSerializer(serializers.Serializer):
     name = serializers.CharField()
 
 
+class CodeRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    game = serializers.CharField(max_length=50)
+
+
 class EmailCodeRequestSerializer(serializers.Serializer):
-    emails = serializers.ListField(child=serializers.EmailField())
+    emails = CodeRequestSerializer(many=True)
 
 
 class ResponseStatusSerializer(serializers.Serializer):

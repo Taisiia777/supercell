@@ -271,9 +271,11 @@ class DistrictListView(generics.ListAPIView):
 
 class RequestCodeAPIView(APIView):
     @staticmethod
-    def save_code_requests(emails: list[str]):
-        for email in emails:
-            code_request = EmailCodeRequest.objects.create(email=email)
+    def save_code_requests(requests: list[serializers.CodeRequestSerializer]):
+        for request in requests:
+            code_request = EmailCodeRequest.objects.create(
+                email=request["email"], game=request["game"]
+            )
             celery_app.send_task("api.shop.request_code", args=[code_request.pk])
 
     @extend_schema(
