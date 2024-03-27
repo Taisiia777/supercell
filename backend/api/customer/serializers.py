@@ -85,7 +85,7 @@ class ProductSerializer(CoreProductSerializer):
     categories = CategoryField(many=True)
 
     class Meta(CoreProductSerializer.Meta):
-        fields = ["id", "title", "images", "categories", "login_type"]
+        fields = ["id", "title", "images", "categories", "login_type", "game"]
 
 
 class OrderLoginDataSerializer(serializers.ModelSerializer):
