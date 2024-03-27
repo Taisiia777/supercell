@@ -11,6 +11,7 @@ from core.services.customer import (
 )
 from core.models import EmailCodeRequest
 from supercell_auth.login import request_the_code
+from supercell_auth.mobile_app import request_code_from_mobile
 
 logger = logging.getLogger(__name__)
 OrderLine = get_model("order", "Line")
@@ -57,7 +58,8 @@ def request_supercell_code(code_request_pk: int):
     except EmailCodeRequest.DoesNotExist:
         return
 
-    result = request_the_code(code_request.email)
+    game = code_request.game or "brawl_stars"
+    result = request_code_from_mobile(code_request.email, game)
     code_request.is_successful = result
     code_request.save()
 
