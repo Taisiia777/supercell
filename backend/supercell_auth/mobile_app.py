@@ -115,7 +115,7 @@ class AuthClient:
 GAME_CLIENTS = {
     "clash_of_clans": GameClient(Games.CLASH_OF_CLANS, "16.137.13", "android", "en"),
     "clash_royale": GameClient(Games.CLASH_ROYALE, "6.256.8", "android", "en"),
-    "hay_day": GameClient(Games.HAY_DAY, "1.61.264", "android", "en"),
+    "stumble_guys": GameClient(Games.HAY_DAY, "1.61.264", "android", "en"),
     "brawl_stars": GameClient(Games.BRAWL_STARS, "54.298", "android", "en"),
 }
 
