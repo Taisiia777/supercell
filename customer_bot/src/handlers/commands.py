@@ -7,7 +7,10 @@ from create_bot import settings
 
 router = Router()
 
-HELLO_TEXT = """🎊Welcome! 📲Mamostore - сервис внутриигровых покупок и услуг"""
+HELLO_TEXT = (
+    '🎊Welcome! 📲<a href="https://t.me/Mamoyan_shop">Mamostore</a> '
+    "- сервис внутриигровых покупок и услуг"
+)
 
 file = Path(__file__).parent.parent.parent / "static" / "main.png"
 HELLO_IMAGE = types.FSInputFile(file)
