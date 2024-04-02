@@ -8,8 +8,8 @@ from create_bot import settings
 router = Router()
 
 HELLO_TEXT = (
-    '🎊Welcome! 📲<a href="https://t.me/Mamoyan_shop">Mamostore</a> '
-    "- сервис внутриигровых покупок и услуг"
+    '<b>🎊Welcome! 📲<a href="https://t.me/Mamoyan_shop">Mamostore</a> '
+    "- сервис внутриигровых покупок и услуг</b>"
 )
 
 file = Path(__file__).parent.parent.parent / "static" / "main.png"
