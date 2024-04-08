@@ -21,10 +21,10 @@ services:
     build:
       context: ./webapp_frontend
       args:
-        - API_URL=https://supercell.ecorp.fyi/api/
+        - API_URL=https://api.mamostore.ru/api/
     restart: unless-stopped
     environment:
-      API_URL: https://supercell.ecorp.fyi/api/
+      API_URL: https://api.mamostore.ru/api/
 
   admin_frontend:
     build: ./admin_frontend

@@ -26,7 +26,7 @@ interface IParamDeleteImg {
 
 export const davDamerAPI = createApi({
     reducerPath: 'davDamerAPI',
-    baseQuery: fetchBaseQuery({ baseUrl: 'https://supercell.ecorp.fyi/api' }),
+    baseQuery: fetchBaseQuery({ baseUrl: 'https://api.mamostore.ru/api' }),
     tagTypes: ['Products', 'Orders'],
     endpoints: (build) => ({
         fetchAllProducts: build.query<IProduct[], IParamsAPI>({
