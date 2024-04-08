@@ -9,12 +9,12 @@ const nextConfig = {
         remotePatterns: [
             {
                 protocol: "https",
-                hostname: "supercell.ecorp.fyi",
+                hostname: "api.mamostore.ru",
                 port: ""
             },
             {
                 protocol: "http",
-                hostname: "supercell.ecorp.fyi",
+                hostname: "api.mamostore.ru",
                 port: ""
             },
         ]
