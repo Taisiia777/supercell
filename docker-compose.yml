@@ -17,6 +17,19 @@ x-common-envs: &common-env
   YOOKASSA_API_KEY: $YOOKASSA_API_KEY
 
 services:
+  webapp_frontend:
+    build:
+      context: ./webapp_frontend
+      args:
+        - API_URL=https://supercell.ecorp.fyi/api/
+    restart: unless-stopped
+    environment:
+      API_URL: https://supercell.ecorp.fyi/api/
+
+  admin_frontend:
+    build: ./admin_frontend
+    restart: unless-stopped
+
   postgres:
     image: postgres:15
     restart: unless-stopped
@@ -64,7 +77,9 @@ services:
     ports:
       - "127.0.0.1:8009:80"
     environment:
-      NGINX_SERVER_NAME: $NGINX_SERVER_NAME
+      NGINX_API_SERVER_NAME: $NGINX_API_SERVER_NAME
+      NGINX_WEBAPP_SERVER_NAME: $NGINX_WEBAPP_SERVER_NAME
+      NGINX_ADMIN_SERVER_NAME: $NGINX_ADMIN_SERVER_NAME
     depends_on:
       - backend
     volumes:

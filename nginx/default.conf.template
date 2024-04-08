@@ -1,5 +1,15 @@
-upstream shop {
+upstream api_backend {
     server backend:8000;
+    keepalive 16;
+}
+
+upstream webapp_backend {
+    server webapp_frontend:3000;
+    keepalive 16;
+}
+
+upstream admin_backend {
+    server admin_frontend:80;
     keepalive 16;
 }
 
@@ -12,7 +22,7 @@ server {
 }
 
 server {
-    server_name ${NGINX_SERVER_NAME};
+    server_name ${NGINX_API_SERVER_NAME};
 
     server_tokens off;
     gzip on;
@@ -54,7 +64,50 @@ server {
         proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_pass http://shop;
+        proxy_pass http://api_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+    }
+
+    listen 80;
+}
+
+
+server {
+    server_name ${NGINX_WEBAPP_SERVER_NAME};
+
+    server_tokens off;
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml image/svg+xml;
+    gzip_min_length 512;
+    client_max_body_size 20M;
+
+    location ~ ^()/ {
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://webapp_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+    }
+
+    listen 80;
+}
+
+server {
+    server_name ${NGINX_ADMIN_SERVER_NAME};
+
+    server_tokens off;
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml image/svg+xml;
+    gzip_min_length 512;
+    client_max_body_size 20M;
+
+    location / {
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://admin_backend;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
     }
