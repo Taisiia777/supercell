@@ -1,0 +1,22 @@
+.button_add {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  .btn {
+    background: linear-gradient(142deg, #375aab 0%, #2a3b67 100%);
+    border-radius: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 7px;
+    grid-gap: 5px;
+    span {
+      font-weight: 300;
+      font-size: 13px;
+      letter-spacing: -0.02em;
+      color: #fff;
+      text-transform: uppercase;
+    }
+  }
+}

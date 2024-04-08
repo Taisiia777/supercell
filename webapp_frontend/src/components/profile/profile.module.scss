@@ -1,0 +1,33 @@
+.profile {
+  padding: 0 19px;
+  margin-top: 32px;
+  .form {
+    display: flex;
+    flex-direction: column;
+    grid-gap: 13px;
+    margin-top: 22px;
+
+    p {
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+      color: rgba(255, 255, 255, 0.6);
+      font-family: sans-serif;
+    }
+  }
+  .support {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 21px;
+    grid-gap: 10px;
+    span {
+      font-weight: 600;
+      font-size: 18px;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+}

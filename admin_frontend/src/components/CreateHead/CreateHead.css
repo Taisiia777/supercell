@@ -1,0 +1,22 @@
+.head__btns {
+    display: flex;
+    gap: 20px;
+}
+
+.head__btn {
+    padding: 8px 16px;
+    color: var(--color);
+    font-size: 20px;
+    font-weight: 300;
+    box-shadow: 1px 1px 2px 0px rgba(186, 186, 186, 0.40);
+    border-radius: 8px;
+    background: var(--bg-block);
+    border: 1px solid var(--bg-block);
+    cursor: pointer;
+}
+
+.head__btn:nth-child(2) {
+    color: var(--bg-block);
+    background: var(--icon-active);
+    border-color: #D4E0FA;
+}

@@ -1,0 +1,322 @@
+.filter__head {
+    color: white;
+    padding: 13px 8px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 1px 1px 2px 0px rgba(186, 186, 186, 0.40);
+    width: 200px;
+    color: var(--2, #7D7D7D);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.filter .filter__head img {
+    transform: scale(1, -1);
+}
+
+.filter.active .filter__head img {
+    transform: scale(-1, 1);
+}
+
+.filter {
+    position: relative;
+    display: inline-block;
+
+}
+
+.filter__content {
+
+    display: none;
+    position: absolute;
+    width: 200px;
+    border-radius: 0px 0px 8px 8px;
+    box-shadow: 1px 1px 2px 0px rgba(186, 186, 186, 0.40);
+    z-index: 999;
+    background: #fff;
+    padding: 3px 8px 8px 8px;
+    max-height: 226px;
+    overflow-y: auto;
+}
+
+.filter__content label {
+    font-size: 12px;
+    color: #000;
+    position: relative;
+
+}
+
+.filter__content label img {
+    position: absolute;
+    width: 14px;
+    top: 0px;
+    left: 10px;
+}
+
+.filter__content label.disable img {
+    display: none;
+
+}
+
+.filter__content input {
+    border-radius: 8px;
+    border: 1px solid rgba(19, 19, 19, 0.10);
+    padding: 11px 11px 11px 24px;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.filter__content label input:focus,
+.filter__content label.disable input {
+    padding-left: 11px;
+}
+
+.filter__content label input:focus~.searchImg {
+    display: none;
+}
+
+.filter__content input:focus {
+    outline: none;
+}
+
+.filter__content input::placeholder {
+    color: var(--3, #C0C0C0);
+    font-size: 12px;
+    font-weight: 300;
+    line-height: normal;
+    font-family: Rubik;
+}
+
+.filter__content {
+    display: none;
+    flex-direction: column;
+}
+
+.filter__content li {
+    list-style: none;
+    color: #000;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px
+}
+
+.filter.active .filter__content {
+    display: flex;
+
+}
+
+.filter.active .filter__head {
+    border-radius: 8px 8px 0px 0px;
+}
+
+.filter.active li:not(.filter__search) {
+    padding: 7px 0px;
+
+}
+
+
+
+.filter.active li.cancel {
+    align-self: end;
+    padding-bottom: 0px;
+    opacity: .6;
+    font-size: 11px;
+    border-bottom: 1px dashed rgba(0, 0, 0, .6);
+
+}
+
+.filter.date.active {
+    width: 350px;
+}
+
+
+.filter__close {
+    position: absolute;
+    top: 0;
+    right: 0px;
+    font-weight: 400;
+    color: #7D7D7D;
+    opacity: .6;
+    z-index: 1000;
+    cursor: pointer;
+    height: 40px;
+    width: 40px;
+    display: none;
+    align-items: start;
+    justify-content: center;
+    font-size: 16px;
+
+}
+
+.filter.date.active .filter__close {
+    display: flex;
+}
+
+.calendar {
+    z-index: 999;
+    width: 347px;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.test {
+    font-size: 16px;
+    font-family: "Rubik";
+    border-radius: 16px;
+    background: #FFF;
+
+    box-shadow: 1px 1px 2px 0px rgba(186, 186, 186, 0.40);
+
+}
+
+.test button {
+    background: transparent;
+    outline: none;
+    border: none;
+}
+
+.test button[disabled] {
+    opacity: .5;
+    border-radius: 0;
+}
+
+.calendar .react-date-picker__wrapper {
+    display: none;
+}
+
+.test .react-calendar__month-view__days {
+    padding: 10px 15px 10px;
+    height: 300px;
+}
+
+.test .react-calendar__tile--active,
+.test .react-calendar__tile--now.react-calendar__tile--active {
+    background: var(--icon-active);
+    border: 1px solid transparent;
+}
+
+.test abbr,
+.test .react-calendar__tile {
+    color: #7D7D7D;
+    font-family: "Rubik";
+}
+
+.test .react-calendar__tile {
+    height: 45px;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    border: none;
+    font-size: 16px;
+}
+
+.test .react-calendar__tile--active abbr,
+.test .react-calendar__tile--now.react-calendar__tile--active abbr {
+    color: #fff
+}
+
+.test .react-calendar__navigation {
+    display: grid;
+    grid-template-columns: 1fr .5fr .5fr;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.test .react-calendar__tile--now abbr {
+    color: var(--icon-active);
+}
+
+.test .react-calendar__navigation__label__labelText {
+    font-family: "Rubik";
+    color: #7D7D7D;
+    font-family: Rubik;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    text-transform: uppercase;
+
+}
+
+.test .react-calendar__navigation__prev2-button,
+.test .react-calendar__navigation__next2-button {
+    display: none;
+}
+
+.test .react-calendar__navigation__label {
+    grid-column: 1/2;
+    grid-row: 1/2;
+}
+
+.test .react-calendar__navigation__next-button {
+    grid-column: 3/4;
+    grid-row: 1/2;
+    font-size: 18px;
+    color: #7D7D7D;
+
+}
+
+.test .react-calendar__navigation__prev-button {
+    grid-column: 2/3;
+    grid-row: 1/2;
+    font-size: 18px;
+    padding-right: 10px;
+    justify-self: end;
+    color: #7D7D7D;
+
+}
+
+.test .react-calendar__month-view__weekdays {
+    margin-left: 30px;
+}
+
+.test .react-calendar__month-view__weekdays__weekday abbr {
+    color: #131313;
+    font-family: Rubik;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-transform: capitalize;
+    text-decoration: none;
+}
+
+.test .react-calendar__tile--now {
+
+    background: #EEF2F8;
+    border: 1px solid #D4E0FA;
+}
+
+.test .react-calendar__year-view__months__month,
+.test .react-calendar__decade-view__years__year {
+    border-radius: 0%;
+    border: none;
+    background: transparent;
+
+}
+
+.test .react-calendar__tile--now.react-calendar__decade-view__years__year {
+    color: var(--icon-active)
+}
+
+.calendar__cancel {
+    position: absolute;
+    z-index: 1000;
+    right: 24px;
+    top: 338px;
+    opacity: .6;
+    font-size: 11px;
+    border-bottom: 1px dashed rgba(0, 0, 0, .6);
+    cursor: pointer;
+}
+
+#dateCalendar div.react-date-picker__calendar.react-date-picker__calendar--open {
+    inset: 100% auto auto 0px;
+}

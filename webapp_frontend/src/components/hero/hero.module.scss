@@ -1,0 +1,73 @@
+.hero {
+  display: flex;
+  width: 100%;
+  position: relative;
+  padding: 0 19px;
+  overflow: hidden;
+  .msg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin-top: 60px;
+    margin-left: 35px;
+    display: flex;
+    max-width: 173px;
+    z-index: 1;
+    font-weight: 500;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.84);
+    border-radius: 10px;
+    width: 164px;
+    height: 53px;
+    background: #375aab;
+    padding: 4px 6px;
+    animation: fadein 0.7s ease-in-out 1;
+    animation-fill-mode: forwards;
+    &:after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: -20px;
+      border: 10px solid transparent;
+      border-top: 10px solid #375aab;
+      transform: rotate(-90deg);
+      margin-top: -15px;
+      margin-right: -53px;
+    }
+  }
+  .img {
+    max-width: 372px;
+    width: 100%;
+    height: 207px;
+    position: relative;
+    background-size: contain;
+
+    .hero_img_container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      max-width: 372px;
+      top: 0;
+      overflow: hidden;
+      .hero_img {
+        width: 100%;
+        height: 210px;
+        position: absolute;
+        bottom: 0;
+        max-width: 281px;
+        margin-left: 65px;
+      }
+    }
+
+
+  }
+  @keyframes fadein {
+    0% {
+      transform: translateX(40px);
+    }
+    100% {
+      transform: translateX(0px);
+    }
+  }
+}

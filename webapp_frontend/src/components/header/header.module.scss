@@ -1,0 +1,25 @@
+.header {
+  margin-top: 18px;
+  padding: 0 19px;
+  .container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: center;
+    padding-bottom: 30px;
+    .logo {
+      display: flex;
+    }
+    .location {
+      display: flex;
+      justify-content: flex-end;
+
+      h2 {
+        font-weight: 700;
+        font-size: 17px;
+        letter-spacing: -0.02em;
+        color: #fff;
+        text-transform: uppercase;
+      }
+    }
+  }
+}

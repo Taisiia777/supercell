@@ -1,0 +1,24 @@
+.actions {
+  display: grid;
+  grid-template-columns: repeat(3, 24px);
+  grid-gap: 10px;
+  background: #242C3B;
+  border-radius: 8px;
+  justify-content: center;
+  align-items: center;
+  height: 31px;
+  width: 100%;
+  .add, .remove {
+    width: 24px;
+    height: 24px;
+  }
+
+  .count {
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    justify-content: center;
+  }
+}

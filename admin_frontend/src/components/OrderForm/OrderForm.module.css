@@ -1,0 +1,182 @@
+.form {
+    align-items: start;
+    gap: 20px;
+}
+
+.form input {
+    padding-left: 0;
+}
+
+div.form__head {
+    grid-column: 1/2;
+    grid-row: 1/2;
+    display: flex;
+    align-items: start;
+}
+
+.form__client {
+    grid-column: 1/2;
+    grid-row: 2/3;
+}
+
+.form__pay {
+    grid-column: 1/2;
+    grid-row: 3/4;
+    align-self: stretch;
+}
+
+.form__comment {
+    grid-column: 1/2;
+    grid-row: 4/5;
+    align-self: stretch;
+}
+
+
+
+.form__cart {
+    grid-column: 2/3;
+    grid-row: 1/4;
+    align-self: stretch
+}
+
+
+
+
+.form__head label {
+    margin-top: 0;
+
+}
+
+.status {
+    color: var(--icon-active);
+    font-weight: 400;
+    background: #D4E0FA;
+    padding: 2px 12px;
+    border-radius: 8px;
+    width: max-content;
+    text-align: center;
+}
+
+.form__name {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form__orderTitle {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.form__orderTitle p {
+    color: #131313;
+    font-family: Rubik;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.form__orderTitle p:last-child {
+    font-weight: 300;
+}
+
+.order {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.infoOrder {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.1fr) minmax(160px, 1fr) minmax(110px, .8fr);
+    gap: 5px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+
+.infoCount {
+    color: var(--color-title);
+    font-family: Rubik;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+}
+
+.infoPace {
+    font-size: 1.2em;
+    text-align: center;
+}
+
+.infoCount {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px
+}
+
+.infoCount span:last-child {
+    opacity: .7;
+    font-size: 16px;
+}
+
+.formInfoProduct {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    grid-column: 1/4;
+
+}
+
+.formCode {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+    margin-right: 10px;
+
+}
+
+.formCode .btn {
+    flex: 0 0 auto;
+
+}
+
+.code {
+    position: relative;
+    width: 52%;
+}
+
+body input.input:read-only {
+    color: rgba(19, 19, 19, .8);
+    cursor: pointer;
+    z-index: 1;
+    position: relative;
+    border: 1px dashed var(--icon-active);
+    user-select: none;
+    padding-left: 5px;
+    background: transparent;
+    width: 100%;
+}
+
+.code img {
+    top: 3px;
+    right: 5px;
+    position: absolute;
+    width: 15px;
+    height: auto;
+    z-index: 0;
+
+}
+
+body input.input:active {
+    border: 1px solid var(--icon-active);
+    background: var(--icon-active);
+    opacity: .7;
+    color: white;
+    user-select: none;
+}

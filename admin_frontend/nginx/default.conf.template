@@ -1,0 +1,23 @@
+server {
+    server_name _;
+
+    server_tokens off;
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+    gzip_min_length 512;
+    client_max_body_size 20M;
+
+    root /var/www/frontend;
+    error_page 403 404 /404.html;
+
+    location ~ ^/(assets|media|icons|favicon.ico)/ {
+        access_log off;
+        try_files $uri =404;
+    }
+
+    location / {
+        index index.html;
+    }
+
+    listen 80;
+}

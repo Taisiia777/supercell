@@ -1,0 +1,85 @@
+'use client'
+import styles from "./button.module.scss"
+import {useCart} from "@/components/store/store";
+import {IProductAdd} from "@/types/add-product.interface";
+import toast from "react-hot-toast";
+
+function ButtonAdd(props: IProductAdd) {
+    const { addItem, items, removeAll } = useCart();
+
+    const handleClick = (e: any) => {
+        e.preventDefault()
+
+        const check = items.some((item) => item.game !== props.game)
+        if(check) {
+            toast.error("Нельзя добавить в корзину разные игры", {
+                style: {
+                    borderRadius: '10px',
+                    background: 'linear-gradient(180deg, #375aab 0%, #2a3b67 100%)',
+                    boxShadow: "0 20px 60px 0 rgba(0, 0, 0, 0.25)",
+                    color: '#fff',
+                }
+            })
+            toast((t) => (
+                <div className="toast_delete">
+                    <span>Удалить предыдущие товары и добавить новый?</span>
+                    <div className="btn3d">
+                        <button onClick={() => handleRemoveCart()} className="btn">
+                            <span>Удалить</span>
+                        </button>
+                    </div>
+                </div>
+            ), {
+                style: {
+                    borderRadius: '10px',
+                    background: 'linear-gradient(180deg, #375aab 0%, #2a3b67 100%)',
+                    boxShadow: "0 20px 60px 0 rgba(0, 0, 0, 0.25)",
+                    color: '#fff',
+                }
+            });
+
+            return
+        }
+
+        addItem(props.id, props.game)
+    }
+
+    const handleRemoveCart = () => {
+        removeAll()
+        addItem(props.id, props.game)
+        toast.success("Корзина очищена, новая игра добавлена", {
+            style: {
+                borderRadius: '10px',
+                background: 'linear-gradient(180deg, #375aab 0%, #2a3b67 100%)',
+                boxShadow: "0 20px 60px 0 rgba(0, 0, 0, 0.25)",
+                color: '#fff',
+            }
+        })
+
+        setTimeout(() => {
+            toast.dismiss();
+        }, 1200)
+    }
+
+    return (
+        <div className={styles.button_add}>
+                <button type="button" className={styles.btn} onClick={(e) => {
+                    handleClick(e)
+                }}>
+                    <svg width="21" height="17" viewBox="0 0 21 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M19.9733 3.50389L16.6717 0.831111C16.0159 0.299606 15.1263 0.000661308 14.1983 0H6.80167C5.87372 0.000661308 4.98408 0.299606 4.32833 0.831111L1.02667 3.50389C0.370102 4.03473 0.00081691 4.75492 0 5.50611V14.1667C0 14.9181 0.368749 15.6388 1.02513 16.1701C1.6815 16.7015 2.57174 17 3.5 17H17.5C18.4283 17 19.3185 16.7015 19.9749 16.1701C20.6313 15.6388 21 14.9181 21 14.1667V5.50611C20.9992 4.75492 20.6299 4.03473 19.9733 3.50389ZM5.97333 2.16278C6.19691 1.9902 6.49277 1.89237 6.80167 1.88889H14.1983C14.5072 1.89237 14.8031 1.9902 15.0267 2.16278L17.0217 3.77778H3.97833L5.97333 2.16278ZM17.5 15.1111H3.5C3.19058 15.1111 2.89383 15.0116 2.67504 14.8345C2.45625 14.6574 2.33333 14.4171 2.33333 14.1667V5.66667H18.6667V14.1667C18.6667 14.4171 18.5438 14.6574 18.325 14.8345C18.1062 15.0116 17.8094 15.1111 17.5 15.1111Z"
+                            fill="white"/>
+                        <path
+                            d="M13.875 7C13.5766 7 13.2905 7.12643 13.0795 7.35147C12.8685 7.57652 12.75 7.88174 12.75 8.2C12.75 8.83652 12.5129 9.44697 12.091 9.89706C11.669 10.3471 11.0967 10.6 10.5 10.6C9.90326 10.6 9.33097 10.3471 8.90901 9.89706C8.48705 9.44697 8.25 8.83652 8.25 8.2C8.25 7.88174 8.13147 7.57652 7.92049 7.35147C7.70952 7.12643 7.42337 7 7.125 7C6.82663 7 6.54048 7.12643 6.32951 7.35147C6.11853 7.57652 6 7.88174 6 8.2C6 9.47304 6.47411 10.6939 7.31802 11.5941C8.16193 12.4943 9.30653 13 10.5 13C11.6935 13 12.8381 12.4943 13.682 11.5941C14.5259 10.6939 15 9.47304 15 8.2C15 7.88174 14.8815 7.57652 14.6705 7.35147C14.4595 7.12643 14.1734 7 13.875 7Z"
+                            fill="white"/>
+                    </svg>
+                    <span>
+                        В корзину
+                    </span>
+                </button>
+        </div>
+    );
+}
+
+export default ButtonAdd

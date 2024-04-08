@@ -1,0 +1,43 @@
+.row {
+    grid-gap: 1%;
+    grid-template-columns: 36% 17% 13% 8% 9% 7%;
+}
+
+.title,
+.col__desc,
+.col__seller {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.col__desc {
+    color: var(--color-title);
+    font-size: 12px;
+    font-weight: 400;
+    -webkit-line-clamp: 3;
+    opacity: .6;
+}
+
+.col__seller {
+    color: var(--icon-active);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 125%;
+    -webkit-line-clamp: 2;
+}
+
+.col__count {
+    color: var(--color-title);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 125%;
+}
+
+.col:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}

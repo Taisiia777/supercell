@@ -1,0 +1,95 @@
+.popular {
+  display: grid;
+  grid-template-columns: repeat(2, 165px);
+  padding: 0 19px;
+  justify-content: space-between;
+  grid-row-gap: 20px;
+  margin-top: 25px;
+    .item {
+      position: relative;
+      height: 265px;
+      width: 100%;
+      transition: transform 0.5s ease;
+
+
+
+      &:hover {
+        transform: translateY(-10px);
+      }
+      .type {
+        position: absolute;
+        z-index: 1;
+        top: 18px;
+        margin-left: auto;
+        right: 13px;
+      }
+      .content {
+        padding: 59px 13px 13px 13px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        .img {
+          position: relative;
+          width: 139px;
+          height: 82px;
+        }
+        .container {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          height: 100%;
+          .name {
+            display: grid;
+            grid-template-columns: repeat(1fr, 1fr);
+            margin-top: 5px;
+            align-content: start;
+            h3 {
+              font-weight: 500;
+              font-size: 13px;
+              letter-spacing: -0.02em;
+              color: rgba(255, 255, 255, 0.6);
+              align-self: start;
+            }
+            h4{
+              font-weight: 700;
+              font-size: 15px;
+              letter-spacing: -0.02em;
+              color: #fff;
+              word-break: break-word;
+              align-self: start;
+            }
+          }
+          .actions {
+            display: flex;
+            flex-direction: column;
+            grid-gap: 14px;
+            width: 100%;
+            p {
+              font-weight: 500;
+              font-size: 13px;
+              letter-spacing: -0.02em;
+              color: rgba(255, 255, 255, 0.6);
+              align-self: start;
+            }
+            .cart_action {
+              display: flex;
+              justify-content: center;
+              width: 100%;
+            }
+          }
+        }
+      }
+
+      .bg {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        min-width: 165px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        min-height: 265px;
+      }
+    }
+}

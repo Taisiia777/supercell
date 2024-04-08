@@ -1,0 +1,74 @@
+.container {
+    display: grid;
+    grid-template-columns: 320px auto;
+    height: 100vh;
+    gap: 1px;
+}
+
+.logo.active,
+.logo {
+    color: var(--icon-active);
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 70px;
+}
+
+.nav__link {
+    color: var(--color-title);
+    font-family: Rubik;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.nav__link.active {
+    text-decoration: none;
+    color: var(--icon-active);
+}
+
+.nav__main svg {
+    stroke: var(--icon-disable);
+}
+
+.nav__main.active svg {
+    stroke: var(--icon-active);
+}
+
+.nav__sellers svg path,
+.nav__products svg path,
+.nav__orders svg path {
+    fill: var(--icon-disable);
+}
+
+.nav__sellers.active svg path,
+.nav__products.active svg path,
+.nav__orders.active svg path {
+    fill: var(--icon-active);
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 59px 0px 0px 40px;
+    box-shadow: 1px 1px 2px 0px rgba(186, 186, 186, 0.40);
+}
+
+.main {
+    background-color: var(--bg);
+    width: 100%;
+}
+
+h2 {
+    padding: 0;
+    margin: 0;
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
