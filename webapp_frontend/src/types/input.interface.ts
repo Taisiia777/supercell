@@ -11,4 +11,9 @@ interface InputInterface {
     type?: "account_id" | "code" | "link"
     error?: boolean
     rest?: any
+    editable?: boolean // новое
+    clearable?: boolean // новое
+    onClear?: () => void // новое
+    onUpdate?: (value: string) => void
+
 }

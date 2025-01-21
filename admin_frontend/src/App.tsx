@@ -3,7 +3,7 @@ import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } 
 import HomePage from "./pages/Home/HomePage";
 import OrdersPage from "./pages/Orders/OrdersPageMain/OrdersPage";
 import ProductsPage from "./pages/Products/ProductsPageMain/ProductsPage";
-
+import MassMailingPage from "./pages/Mailing/MassMailingPage";
 import ErrorPages from "./pages/Error/ErrorPages";
 
 
@@ -12,7 +12,7 @@ import OrdersShowEdit from "./pages/Orders/OrdersShowEdit/OrdersShowEdit";
 
 import ProductsShowEdit from "./pages/Products/ProductsShowEdit/ProductsShowEdit";
 import ProductsCreate from "./pages/Products/ProductsCreate/ProductsCreate";
-
+import ExcelPage from "./pages/Excel/ExcelPage";
 import LayoutMenu from "./components/Layout/Layout";
 import 'overlayscrollbars/overlayscrollbars.css';
 import './App.css'
@@ -22,6 +22,9 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<LayoutMenu />}>
       <Route index element={<HomePage />}></Route>
+      
+      <Route path="mailing" element={<MassMailingPage />}></Route>
+      <Route path="excel" element={<ExcelPage />}></Route>
 
       <Route path="products" element={<ProductsPage />}></Route>
       <Route path="products/:id" element={<ProductsShowEdit edit={false} nameFunc="show" />}></Route>

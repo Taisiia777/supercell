@@ -13,4 +13,5 @@ urlpatterns = [
         name="api_confirm_payment",
     ),
     path("order/<str:order_number>/login_data/", views.OrderLoginDataView.as_view()),
+
 ]

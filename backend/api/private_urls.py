@@ -8,4 +8,5 @@ urlpatterns = [
         seller_bot_views.SellerOrdersView.as_view(),
     ),
     path("customer_bot/login_data/", customer_views.UpdateLoginDataView.as_view()),
+
 ]

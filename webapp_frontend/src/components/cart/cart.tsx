@@ -17,12 +17,24 @@ import { useRouter } from 'next/navigation';
 import {revalidatePath} from "next/cache";
 import {useTelegram} from "@/app/useTg";
 
+const generateUniqueId = (baseId, index) => `${baseId}-${index}`;
+
+
+
 export default function Cart(props: { data: IProduct[] }) {
     const router = useRouter();
 
     const { user, webApp } = useTelegram();
     const [profile, setProfile] = useState()
     const [isLoadingProfile, setLoadingProfile] = useState(true)
+    const [formErrors, setFormErrors] = useState({});
+    const [validationStates, setValidationStates] = useState({});
+
+    // Функция валидации email
+    const validateEmail = (email) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return !email || emailRegex.test(email);
+    };
 
     useEffect(() => {
         if(user && webApp?.initData) {
@@ -72,38 +84,31 @@ export default function Cart(props: { data: IProduct[] }) {
 
     const [filteredData, setFilteredData] = useState<IProduct[]>([]);
 
+
+
     useEffect(() => {
-        // Получаем массив id из items
-        const itemIds = items.map(item => item.id);
-
-        // Фильтруем данные, оставляя только те продукты, id которых есть в itemIds
-        const newData = props.data
-            .filter(product => itemIds.includes(product.id))
-            .map(product => {
-                // Находим соответствующий элемент из items
-                const currentItem = items.find(item => item.id === product.id);
-                // Создаем объект с нужными полями и значениями
-                const productData = {
-                    account_id: currentItem?.account_id || '',
-                    link: currentItem?.link || '',
-                    code: currentItem?.code || '',
-                    ...product, // Включаем остальные данные о продукте
-                    count: currentItem?.count || 0 // Количество продукта
-                };
-                return productData;
-            });
-
-        // Обновляем состояние отфильтрованных данных
-        setFilteredData(newData);
-    }, [items, props.data]); // Зависимость от items и props.data
+        const expandedItems = items.flatMap(item => {
+            const product = props.data.find(p => p.id === item.id);
+            if (!product) return [];
+            
+            // Создаем отдельные записи для каждого экземпляра товара
+            return Array(item.count).fill(0).map((_, index) => ({
+                ...product,
+                uniqueId: generateUniqueId(item.id, index),
+                cartItemId: item.id,
+                count: 1,
+                email: item.email,
+                code: item.code,
+                type: item.type
+            }));
+        });
+        
+        setFilteredData(expandedItems);
+    }, [items, props.data]);
 
     const {setEmail, email} = useOrderData()
 
-    // type FormValues = {
-    //     firstName: string;
-    //     lastName: string;
-    //     email: string;
-    // };
+
 
 
     type FormValues = {
@@ -112,54 +117,92 @@ export default function Cart(props: { data: IProduct[] }) {
 
     const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<FormValues>();
 
-    const onSubmit = handleSubmit((data) => {
-        // Инициализируем два массива: для данных продуктов и для email
-        const productFormData = [];
-        let emailFormData = null;
+    const handleValidationChange = (fieldName, hasError) => {
+        setValidationStates(prev => ({
+            ...prev,
+            [fieldName]: hasError
+        }));
+    };
 
-        console.log(data);
-        console.log("---")
-        // Обходим все данные из формы
-        Object.entries(data).forEach(([key, value]) => {
-            // Проверяем, является ли ключ идентификатором продукта
-            if (key.endsWith("-email")) {
-                // Если это поле с электронной почтой для продукта, добавляем его в соответствующий объект
-                const productId = key.split("-")[0];
-                const productIndex = productFormData.findIndex(product => product.productId === productId);
-                if (productIndex !== -1) {
-                    productFormData[productIndex].email = value;
+
+    const onSubmit = handleSubmit((data) => {
+        let isValid = true;
+        const newErrors = {};
+      
+        // Валидация основного email
+        if (!validateEmail(data.email)) {
+          newErrors.email = 'Неверный формат email';
+          isValid = false;
+        }
+      
+        // Валидация email'ов Supercell ID
+        filteredData.forEach(item => {
+          const emailKey = `${item.uniqueId}-email`;
+          if (data[emailKey] && !validateEmail(data[emailKey])) {
+            newErrors[emailKey] = 'Неверный формат email';
+            isValid = false;
+          }
+        });
+      
+        setFormErrors(newErrors);
+      
+        if (!isValid) {
+          return;
+        }
+      
+        if (isValid) {
+            const productFormData = [];
+            let emailFormData = null;
+    
+            console.log(data);
+            console.log("---")
+            // Обходим все данные из формы
+            Object.entries(data).forEach(([key, value]) => {
+                // Проверяем, является ли ключ идентификатором продукта
+                if (key.endsWith("-email")) {
+                    // Если это поле с электронной почтой для продукта, добавляем его в соответствующий объект
+                    const productId = key.split("-")[0];
+                    const productIndex = productFormData.findIndex(product => product.productId === productId);
+                    if (productIndex !== -1) {
+                        productFormData[productIndex].email = value;
+                    } else {
+                        const item = filteredData.find((item) => item.id.toString() === productId);
+                        if (item) {
+                            const loginType = item.login_type;
+                            productFormData.push({ productId, email: value, loginType });
+                        }
+                    }
+                } else if (key === "email") {
+                    // Если это поле с общей электронной почтой, сохраняем его в emailFormData
+                    emailFormData = { email: value };
                 } else {
-                    const item = filteredData.find((item) => item.id.toString() === productId);
+                    // Иначе, это поле с данными продукта
+                    // Находим соответствующий продукт из filteredData
+                    const item = filteredData.find((item) => item.id.toString() === key);
                     if (item) {
                         const loginType = item.login_type;
-                        productFormData.push({ productId, email: value, loginType });
+                        productFormData.push({ productId: key, value, loginType });
                     }
                 }
-            } else if (key === "email") {
-                // Если это поле с общей электронной почтой, сохраняем его в emailFormData
-                emailFormData = { email: value };
-            } else {
-                // Иначе, это поле с данными продукта
-                // Находим соответствующий продукт из filteredData
-                const item = filteredData.find((item) => item.id.toString() === key);
-                if (item) {
-                    const loginType = item.login_type;
-                    productFormData.push({ productId: key, value, loginType });
+            });
+    
+            // Выводим в консоль полученные данные для проверки
+            console.log("Product Form Data:", productFormData);
+            console.log("Email Form Data:", emailFormData);
+    
+            // Вызываем функцию для обновления данных продуктов
+            addProductData(productFormData);
+            setEmail(emailFormData.email);
+    
+            router.push('/checkout');
                 }
-            }
-        });
-
-        // Выводим в консоль полученные данные для проверки
-        console.log("Product Form Data:", productFormData);
-        console.log("Email Form Data:", emailFormData);
-
-        // Вызываем функцию для обновления данных продуктов
-        addProductData(productFormData);
-        setEmail(emailFormData.email);
-
-        router.push('/checkout');
+        
     });
+    
+    // Add this to your component's state
+    const [formError, setFormError] = useState(null);
 
+  
     const [totalPrice, setTotalPrice] = useState(0)
 
     useEffect(() => {
@@ -171,7 +214,7 @@ export default function Cart(props: { data: IProduct[] }) {
                 (item.game === "clash_of_clans" ? profile && profile.game_email.clash_of_clans :
                     (item.game === "clash_royale" ? profile && profile.game_email.clash_royale :
                         (item.game === "brawl_stars" ? profile && profile.game_email.brawl_stars :
-                            (item.game === "stumble_guys" ? profile && profile.game_email.stumble_guys : ""))))
+                            (item.game === "hay_day" ? profile && profile.game_email.hay_day : ""))))
                 : "";
 
             // const defaultEmail = cartItem ? (item.login_type === "EMAIL_CODE" ? cartItem.account_id : cartItem.link) : '';
@@ -215,6 +258,38 @@ export default function Cart(props: { data: IProduct[] }) {
         }
     }, [filteredData, profile]); // Пустой массив зависимостей гарантирует выполнение эффекта только при монтировании компонента
 
+    useEffect(() => {
+        if (profile?.game_email) {
+          // Автозаполнение почты для товаров
+          filteredData.forEach(item => {
+            const emailKey = `${item.uniqueId}-email`;
+            const gameEmail = profile.game_email[item.game];
+            if (gameEmail && item.login_type === "EMAIL_CODE") {
+              setValue(emailKey, gameEmail);
+            }
+          });
+          
+          // Для чека используем email из первой игры из корзины
+          const firstGameItem = filteredData.find(item => item.login_type === "EMAIL_CODE");
+          if (firstGameItem) {
+            const gameEmail = profile.game_email[firstGameItem.game];
+            if (gameEmail) {
+              setValue("email", gameEmail);
+            }
+          }
+        }
+      }, [profile, filteredData, setValue]);
+
+      const isFormValid = () => {
+        // Проверяем есть ли хоть одна ошибка валидации или пустое значение
+        const hasErrors = Object.values(validationStates).some(error => error);
+        const hasEmptyFields = watch("email") === "" || filteredData.some(item => {
+            const emailValue = watch(`${item.uniqueId}-email`);
+            return emailValue === undefined || emailValue === "";
+        });
+    
+        return !hasErrors && !hasEmptyFields;
+    };
 
     console.log("filtred data")
     console.log(filteredData)
@@ -223,6 +298,11 @@ export default function Cart(props: { data: IProduct[] }) {
         <div className={styles.cart}>
             {filteredData.length > 0 ? (
                 <form className={styles.items} onSubmit={onSubmit}>
+                    {formError && (
+    <div className={styles.error}>
+        {formError}
+    </div>
+)}
                     {filteredData.map((item, index) => {
 
                         const uid = item.id.toString();
@@ -315,11 +395,24 @@ export default function Cart(props: { data: IProduct[] }) {
                                     <Input
                                         title={item.login_type === "EMAIL_CODE" ? "Почта Supercell ID" : "Ссылка в друзья"}
                                         productId={item.id}
-                                        {...register(uid_email, { required: true })} // Регистрируем поле с именем "test 123", "test 124" и т.д.
-                                        name={uid_email} // Используем имя поля ввода
+                                        {...register(`${item.uniqueId}-email`, { 
+                                            required: true,
+                                            validate: validateEmail
+                                          })}                                        
+                                        name={`${item.uniqueId}-email`}
+                                        editable={false}  
+                                        validation="email"
+
                                         setValue={setValue}
-                                        value={watch().uid_email}
-                                        style={errors[uid_email] ? { boxShadow: "inset 4px 10px 30px 0 #f006" } : {}}
+                                        // value={watch()[`${item.uniqueId}-email`]}
+                                        value={watch(`${item.uniqueId}-email`)}
+
+                                        error={formErrors[`${item.uniqueId}-email`]}
+                                        onValidationChange={(hasError) => 
+                                            handleValidationChange(`${item.uniqueId}-email`, hasError)
+                                        }
+                                        style={errors[`${item.uniqueId}-email`] ? { boxShadow: "inset 4px 10px 30px 0 #f006" } : {}}
+
                                         icon={item.login_type !== "EMAIL_CODE" && <>
                                             <svg width="24" height="21" viewBox="0 0 24 21" fill="none"
                                                  xmlns="http://www.w3.org/2000/svg">
@@ -335,20 +428,35 @@ export default function Cart(props: { data: IProduct[] }) {
                                             </svg>
                                         </>}
                                     />
+
                                 </div>
                             </div>
                         )
                     })}
                     <div className={styles.action}>
-                        <Input
-                            title="EMAIL для чека"
-                            {...register("email", { required: true })} // Регистрируем поле с именем "test 123", "test 124" и т.д.
-                            name="email" // Используем имя поля ввода
-                            setValue={setValue}
-                            value={watch().email}
-                            style={errors["email"] ? { boxShadow: "inset 4px 10px 30px 0 #f006" } : {}}
-                        />
-                        <PrimaryButton type="submit" title="Оформить заказ" subtitle={`Сумма: ${totalPrice} ₽`}/>
+                    <Input
+  title="EMAIL для чека"
+  {...register("email", { 
+    required: true,
+    validate: validateEmail 
+  })}
+  name="email"
+  setValue={setValue}
+  value={watch().email}
+  error={formErrors["email"]}
+  validation="email"
+  editable={false}
+  onValidationChange={(hasError) => 
+    handleValidationChange('email', hasError)
+}
+/>
+<PrimaryButton 
+    type="submit" 
+    title="Оформить заказ" 
+    subtitle={`Сумма: ${totalPrice} ₽`}
+    disabled={!isFormValid()}
+    style={!isFormValid() ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+/>
                     </div>
                 </form>
             ) : (
@@ -360,3 +468,4 @@ export default function Cart(props: { data: IProduct[] }) {
         </div>
     )
 }
+

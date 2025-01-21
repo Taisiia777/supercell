@@ -1,13 +1,11 @@
+
 'use client'
 import styles from "./categories.module.scss"
 import Link from "next/link";
-
-//import img1 from "@/images/categories_mini/cm1.png"
-import img2 from "@/images/categories_mini/icon1.png";
-import img3 from "@/images/categories_mini/icon2.png";
-import img4 from "@/images/categories_mini/icon3.png";
-import img5 from "@/images/categories_mini/icon4.png";
-
+import img2 from "@/images/categories_mini/image2.png";
+import img3 from "@/images/categories_mini/image3.png";
+import img4 from "@/images/categories_mini/image1.png";
+import img5 from "@/images/categories_mini/image4.png";
 import Image from "next/image";
 import NavIcon from "@/images/nav/catalog";
 
@@ -16,18 +14,14 @@ interface Items {
     href: string
     img?: any
     icon?: any
-    height?: number
-    width?: number
-    left?: string
 }
 
 function CategoriesMini() {
-
     const items = [
         {id: 1, href: "/catalog", icon: <NavIcon name="catalog"/>},
-        {id: 2, href: "/catalog/3", img: img4, height: 30, width: 28},
-        {id: 3, href: "/catalog/1", img: img2, height: 30, width: 28},
-        {id: 4, href: "/catalog/2", img: img3, height: 30, width: 30, left: "-3px"},
+        {id: 2, href: "/catalog/3", img: img4},
+        {id: 3, href: "/catalog/1", img: img2},
+        {id: 4, href: "/catalog/2", img: img3},
         {id: 5, href: "/catalog/4", img: img5}
     ]
 
@@ -52,12 +46,19 @@ function CategoriesMini() {
                     </svg>
                     <div className={styles.img}>
                         {item.img ? (
-                                <Image src={item.img} alt="Category" height={item.height ?? 30} width={item.width ?? 30} quality={100} priority unoptimized={true} loading="eager" layout="" style={item.left ? {left: item.left} : {}}/>
-                            ) : (
-                                <div className={styles.icon}>
-                                    {item.icon}
-                                </div>
-                            )}
+                            <Image 
+                                src={item.img} 
+                                alt="Category" 
+                                width={49} 
+                                height={49}
+                                quality={100}
+                                priority
+                            />
+                        ) : (
+                            <div className={styles.icon}>
+                                {item.icon}
+                            </div>
+                        )}
                     </div>
                 </Link>
             ))}

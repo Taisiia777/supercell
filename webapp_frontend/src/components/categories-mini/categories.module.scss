@@ -11,9 +11,9 @@ $img: 10px;
       animation-fill-mode: forwards;
       .img {
         margin-bottom: $base-margin + ($i - 1) * $increment;
-        img {
-          margin-top: 10px;
-        }
+        // img {
+        //   margin-top: 10px;
+        // }
       }
     }
   }
@@ -36,12 +36,16 @@ $img: 10px;
       right: 0;
       display: flex;
       justify-content: center;
-
+      border-radius: 10px;
       img {
         position: relative;
+        border-radius: 10px;
+
       }
       .icon {
         margin-top: 15px;
+        border-radius: 10px;
+
       }
     }
 

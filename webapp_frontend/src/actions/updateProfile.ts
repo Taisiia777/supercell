@@ -7,7 +7,7 @@ export async function updateProfile(data: any, token?: any) {
         brawl_stars: data.brawl_stars,
         clash_of_clans: data.clash_of_clans,
         clash_royale: data.clash_royale,
-        stumble_guys: data.stumble_guys
+        hay_day: data.hay_day
     }
 
     const res = await fetch(process.env.API_URL + "customer/me", {

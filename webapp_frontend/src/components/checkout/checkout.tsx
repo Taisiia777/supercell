@@ -11,6 +11,18 @@ import {IProduct} from "@/types/products.interface";
 import {useRouter} from "next/navigation";
 import {useTelegram} from "@/app/useTg";
 import {IOrders} from "@/types/orders.interface";
+
+
+interface CartStateItem {
+    id: number;
+    account_id: string;
+    game: string;
+    type?: "EMAIL_CODE" | "LINK";
+    email?: string;
+    code?: string;
+}
+
+
 export default function CheckOut(props: {data : IProduct[]}) {
 
     const { user, webApp } = useTelegram();
@@ -111,7 +123,7 @@ export default function CheckOut(props: {data : IProduct[]}) {
     return (
         <div className={styles.checkout}>
             <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-                {state && state.filter((item: { email: string, account_id: string, game: string }) => item.email).map((item: { id: number, account_id: string, game: string }, index: number) => {
+                {/* {state && state.filter((item: { email: string, account_id: string, game: string }) => item.email).map((item: { id: number, account_id: string, game: string }, index: number) => {
                     const uid = item.id.toString();
                     return (
                         <div key={uid} className={styles.code}>
@@ -129,7 +141,33 @@ export default function CheckOut(props: {data : IProduct[]}) {
                             <p>На вашу почту <span>{item.account_id}</span> пришел код для входа. Его нужно ввести в поле выше без пробелов для игр(ы)</p>
                         </div>
                     )
-                })}
+                })} */}
+{state && state
+    .filter((item: { email: string, account_id: string, game: string }) => item.email)
+    .map((item: { id: number, account_id: string, game: string }, index: number) => {
+        const uid = item.id.toString();
+        return (
+            <div key={uid} className={styles.code}>
+                <Input 
+                    title="Введите код"
+                    productId={item.id}
+                    {...register(uid, { 
+                        required: true, 
+                        minLength: 6, 
+                        maxLength: 6, 
+                        pattern: /^[0-9]*$/ 
+                    })}
+                    name={uid}
+                    value={watch().uid}
+                    style={errors[uid] ? { boxShadow: "inset 4px 10px 30px 0 #f006" } : {}}
+                    type_action="request_code"
+                    requestClick={() => handleRequest(item.account_id, item.game)}
+                />
+                {errors[uid] && <p className={styles.error}>Код должен содержать 6 цифр</p>}
+                <p>На вашу почту <span>{item.account_id}</span> пришел код для входа. Его нужно ввести в поле выше без пробелов для игр(ы)</p>
+            </div>
+        )
+    })}
                 <PrimaryButton title="Оплатить" type="submit"/>
             </form>
         </div>

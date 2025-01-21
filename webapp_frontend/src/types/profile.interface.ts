@@ -4,7 +4,7 @@ export interface IProfile {
         brawl_stars?: string
         clash_of_clans?: string
         clash_royale?: string
-        stumble_guys?: string
+        hay_day?: string
     }
     first_name?: string
     last_name?: string

@@ -4,4 +4,6 @@ export interface IPrimaryButton {
     maxWidthValue?: number
     onClick?: () => void
     type: "button" | "submit"
+    disabled?: boolean
+    style?: React.CSSProperties
 }

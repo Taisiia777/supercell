@@ -1,5 +1,5 @@
 import "./PagesHead.css"
-import urlPhoto from "../../assets/images/test-davdamer.png";
+// import urlPhoto from "../../assets/images/test-davdamer.png";
 interface IProps {
     title: string;
 }
@@ -12,7 +12,7 @@ function Pages(props: IProps) {
             <div className="page">
                 <div className="page__head">
                     <h2 className="page__title">{title}</h2>
-                    <div className="page__name">
+                    {/* <div className="page__name">
                         <div className="page__info">
                             <span>Констанипольский</span>
                             <span>Богдан Иванович</span>
@@ -20,7 +20,7 @@ function Pages(props: IProps) {
                         <div className="page__img">
                             <img src={urlPhoto} alt="photo" />
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </>

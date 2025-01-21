@@ -32,8 +32,7 @@ class User(AbstractUser):
     brawl_stars_email = models.EmailField(null=True)
     clash_of_clans_email = models.EmailField(null=True)
     clash_royale_email = models.EmailField(null=True)
-    stumble_guys_email = models.EmailField(null=True)
-
+    hay_day_email = models.EmailField(null=True)
 
 class DavDamer(models.Model):
     name = models.CharField(max_length=128, db_index=True)

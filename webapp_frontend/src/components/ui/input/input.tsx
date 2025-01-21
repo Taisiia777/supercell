@@ -25,6 +25,12 @@ interface InputInterface {
     input_type?: "number" | "text"
     validation?: "code"
     background?: boolean
+    editable?: boolean;
+    clearable?: boolean;
+    onClear?: () => void;
+    onUpdate?: (value: string) => void;
+    validation?: "email" | "code";
+
 }
 
 const Input = forwardRef((props: InputInterface, ref) => {
@@ -35,28 +41,55 @@ const Input = forwardRef((props: InputInterface, ref) => {
     const [validationError, setValidationError] = useState(''); // Состояние для хранения сообщения об ошибке валидации
     const [shouldFocus, setShouldFocus] = useState(false);
 
-    const handleChange = (e: any) => {
-        const value = e.target.value;
-        console.log(value)
-        setInputValue(value)
+    useEffect(() => {
+        setInputValue(props.value ?? '');
+    }, [props.value]);
 
-        // Проверяем валидацию, если она указана и если значение изменилось
-        if (props.validation && value !== initialValue) {
-            validateInput(value);
-        }
-    }
 
+    
     const validateInput = (value) => {
-        // Проверяем валидацию для кода (6 цифр)
-        if (props.validation === "code") {
-            const codeRegex = /^\d{6}$/;
-            if (!codeRegex.test(value)) {
-                setValidationError('Введите 6 цифр');
+        if (props.validation === "email") {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(value) && value) {
+            setValidationError('Введите корректный email');
+            return false;
+          }
+        } else if (props.validation === "code") {
+          const codeRegex = /^\d{6}$/;
+          if (!codeRegex.test(value)) {
+            setValidationError('Введите 6 цифр');
+            return false; 
+          }
+        }
+        setValidationError('');
+        return true;
+      };
+
+      const handleChange = (e: any) => {
+        const value = e.target.value;
+        setInputValue(value);
+    
+        if (props.validation === "email") {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const isValid = !value || emailRegex.test(value);
+            
+            if (!isValid) {
+                setValidationError('Введите корректный email');
             } else {
                 setValidationError('');
             }
+    
+            // Передаем состояние валидации наверх
+            if (props.onValidationChange) {
+                props.onValidationChange(!isValid);
+            }
         }
-    };
+    
+        // Вызываем onChange от формы если он есть
+        if (props.onChange) {
+            props.onChange(e);
+        }
+    }
 
     const {...rest} = props
 
@@ -76,42 +109,37 @@ const Input = forwardRef((props: InputInterface, ref) => {
         }
     }, [inputValue, initialValue]);
 
-    const handleEditClick = () => {
+
+   
+
+    const handleEditClick = async (e: React.MouseEvent) => {
+        // Предотвращаем поведение по умолчанию
+        e.preventDefault();
+        
         if (!editing) {
-            // Если не в режиме редактирования, включаем его
             setEditing(true);
-            setShouldFocus(true)
-            // document.body.dispatchEvent(new Event('touchstart', { bubbles: true }));
-            // inputRef.current.blur();
-            // inputRef.current.focus();
+            setShouldFocus(true);
         } else {
-            // Если в режиме редактирования, сохраняем изменения, если они есть, и выключаем режим редактирования
-            if (hasChanges) {
-
-                if (validationError) {
-                    // Если есть ошибка валидации, не сохраняем изменения
-                    return;
-                }
-
-                if(props.handleEdit) {
-                    props.handleEdit(inputValue, props.name, props.productId);
-                    setHasChanges(false);
+            if (hasChanges && !validationError && !props.error) {
+                if (props.onUpdate) {
+                    const success = await props.onUpdate(inputValue);
+                    if (success) {
+                        setInitialValue(inputValue);
+                        setHasChanges(false);
+                    }
                 }
             }
             setEditing(false);
         }
     };
-
-    useEffect(() => {
-        if (inputRef.current && shouldFocus) {
-            setTimeout(() => {
-                inputRef.current.blur();
-                inputRef.current.focus();
-                setShouldFocus(false);
-            }, 150);
+    
+    const handleClear = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (props.onClear) {
+            props.onClear();
         }
-    }, [shouldFocus]);
-
+    }
+    
     const [buttonText, setButtonText] = useState("Отправить еще раз");
 
     const handleClickRequest = () => {
@@ -123,6 +151,7 @@ const Input = forwardRef((props: InputInterface, ref) => {
             props.requestClick && props.requestClick();
         }
     };
+    const isReadOnly = props.editable ? !editing : false;
 
     return (
         <div className={styles.input_container}>
@@ -145,37 +174,71 @@ const Input = forwardRef((props: InputInterface, ref) => {
                     </div>
                 )}
                 <div className={styles.el}>
-                    <div className={styles.input_content}>
-                        {!props.copy && props.edit ? (
-                            <>
-                                <input
-                                    ref={inputRef}
-                                    type={props.input_type ?? "text"}
-                                    placeholder={props.placeholder}
-                                    className={styles.input}
-                                    value={inputValue}
-                                    onChange={(e) => handleChange(e)}
-                                    readOnly={!editing}
-                                    autoFocus={true}
-                                    style={editing ? { boxShadow: "#191e29 4px 10px 30px 0 inset" } : {boxShadow: "none", border: "1px solid #191e29"}}
-                                />
-                                <div className={styles.edit} onClick={handleEditClick}>
-                                    <div className={styles.btn}>
-                                        <button type="button">{editing ? (hasChanges ? "Сохранить" : "Отмена") : "Изменить"}</button>
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
-                            <input
-                                type={props.input_type ?? "text"}
-                                placeholder={props.placeholder}
-                                className={styles.input}
-                                ref={ref}
-                                {...rest}
-                                style={props.background ? {boxShadow: "none", border: "1px solid #191e29"} : {boxShadow: "#191e29 4px 10px 30px 0 inset"}}
-                            />
-                            )}
-                    </div>
+                <div className={styles.input_content}>
+
+  <input
+  ref={inputRef}
+  type={props.input_type ?? "text"}
+  placeholder={props.placeholder}
+  className={styles.input}
+  value={inputValue}
+  onChange={handleChange}
+  readOnly={isReadOnly}
+  validation="email"
+
+  style={{
+    boxShadow: props.error || validationError ? 
+      "inset 4px 10px 30px 0 rgba(255, 0, 0, 0.3)" : 
+      (editing ? "#191e29 4px 10px 30px 0 inset" : 
+        (props.background ? "none" : "#191e29 4px 10px 30px 0 inset")),
+    border: !editing && props.background ? "1px solid #191e29" : "none",
+  }}
+/>
+{(props.error || validationError) && (
+  <p className={styles.error_message}>
+    {props.error || validationError}
+  </p>
+)}
+
+ <div className={styles.buttons}>
+    {props.editable && (
+        <button 
+  className={`${styles.edit} ${editing ? styles.save : ''}`}
+  onClick={handleEditClick}
+  disabled={validationError}
+  style={validationError ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+>
+        {editing ? (
+           <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+           <path d="M5 14L8.23309 16.4248C8.66178 16.7463 9.26772 16.6728 9.60705 16.2581L18 6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+           </svg>
+        ) : (
+          
+             <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+             <path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" fill="#fff"/>
+             </svg>
+        )}
+      </button>
+    )}
+    {props.clearable && inputValue && (
+      <button 
+        className={styles.clear}
+        onClick={(e) => {
+            e.preventDefault(); // Prevent form submission
+            e.stopPropagation(); // Prevent event bubbling
+            if (props.onClear) {
+                props.onClear();
+            }
+        }}
+              >
+        <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+      </button>
+    )}
+  </div>
+</div>
+
 
                     {props.copy && (
                         <div className={styles.copy} onClick={() => navigator.clipboard.writeText(String(props.value))}>
@@ -187,7 +250,6 @@ const Input = forwardRef((props: InputInterface, ref) => {
 
 
                 </div>
-                {validationError && <p className={styles.error_code}>{validationError}</p>}
             </label>
         </div>
     )

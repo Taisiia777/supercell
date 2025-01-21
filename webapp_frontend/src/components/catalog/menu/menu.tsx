@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 
-import img2 from "@/images/categories_mini/icon1.png";
-import img3 from "@/images/categories_mini/icon2.png";
-import img4 from "@/images/categories_mini/icon3.png";
-import img5 from "@/images/categories_mini/icon4.png";
+import img2 from "@/images/categories_mini/image2.png";
+import img3 from "@/images/categories_mini/image3.png";
+import img4 from "@/images/categories_mini/image1.png";
+import img5 from "@/images/categories_mini/image4.png";
 import NavIcon from "@/images/nav/catalog";
 
 interface Items {
@@ -41,7 +41,7 @@ export default function CatalogMenu() {
                             : styles.item
                     }>
                         {item.img ? (
-                            <Image src={item.img} alt={item.name} height={item.height ?? 16} width={item.width ?? 16}/>
+                            <Image src={item.img} alt={item.name} height={item.height ?? 16} width={item.width ?? 16} style={{borderRadius:"5px"}}/>
                         ) : (
                             <div className={styles.icon}>
                                 {item.icon}

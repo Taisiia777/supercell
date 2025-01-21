@@ -1,6 +1,7 @@
 .cart {
   padding: 0 19px;
   margin-top: 32px;
+  min-height: calc(100vh - 200px); // Добавим минимальную высоту
 
   .items {
     display: flex;
@@ -99,6 +100,9 @@
   .null {
     display: flex;
     justify-content: center;
+    align-items: center; // Центрируем по вертикали
+    min-height: 200px; // Добавим минимальную высоту
+    background: transparent; // Уберем фон
     p {
       font-weight: 600;
       font-size: 16px;
@@ -106,4 +110,29 @@
       color: #fff;
     }
   }
+}
+
+.error_message {
+  display: flex;
+  position: absolute;
+  top: 40px;
+  left: 0;
+  color: #ff4444 !important;
+  font-size: 12px !important;
+  margin-top: 4px;
+  font-weight: 500 !important;
+}
+
+.input {
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  filter: grayscale(100%);
 }

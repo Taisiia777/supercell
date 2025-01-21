@@ -55,25 +55,25 @@ class GameEmailSerializer(serializers.ModelSerializer):
     clash_royale = serializers.EmailField(
         source="clash_royale_email", allow_blank=True, allow_null=True
     )
-    stumble_guys = serializers.EmailField(
-        source="stumble_guys_email", allow_blank=True, allow_null=True
+    hay_day = serializers.EmailField(
+        source="hay_day_email", allow_blank=True, allow_null=True
     )
 
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        if "brawl_stars_email" in attrs and not attrs["brawl_stars_email"]:
-            attrs.pop("brawl_stars_email")
-        if "clash_of_clans_email" in attrs and not attrs["clash_of_clans_email"]:
-            attrs.pop("clash_of_clans_email")
-        if "clash_royale_email" in attrs and not attrs["clash_royale_email"]:
-            attrs.pop("clash_royale_email")
-        if "stumble_guys_email" in attrs and not attrs["stumble_guys_email"]:
-            attrs.pop("stumble_guys_email")
-        return attrs
+    # def validate(self, attrs):
+    #     attrs = super().validate(attrs)
+    #     if "brawl_stars_email" in attrs and not attrs["brawl_stars_email"]:
+    #         attrs.pop("brawl_stars_email")
+    #     if "clash_of_clans_email" in attrs and not attrs["clash_of_clans_email"]:
+    #         attrs.pop("clash_of_clans_email")
+    #     if "clash_royale_email" in attrs and not attrs["clash_royale_email"]:
+    #         attrs.pop("clash_royale_email")
+    #     if "hay_day_email" in attrs and not attrs["hay_day_email"]:
+    #         attrs.pop("hay_day_email")
+    #     return attrs
 
     class Meta:
         model = User
-        fields = ["brawl_stars", "clash_of_clans", "clash_royale", "stumble_guys"]
+        fields = ["brawl_stars", "clash_of_clans", "clash_royale", "hay_day"]
 
 
 class CustomerSerializer(serializers.ModelSerializer):

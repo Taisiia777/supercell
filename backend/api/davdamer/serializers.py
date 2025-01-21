@@ -273,8 +273,8 @@ def category_to_game_mapper(category_name: str) -> GameType | None:
             return GameType.CLASH_ROYALE
         case "Clash of Clans":
             return GameType.CLASH_OF_CLANS
-        case "Stumble Guys":
-            return GameType.STUMBLE_GUYS
+        case "Hay Day":
+            return GameType.HAY_DAY
         case _:
             return None
 

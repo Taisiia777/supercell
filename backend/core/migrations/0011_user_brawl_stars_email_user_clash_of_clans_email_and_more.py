@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="user",
-            name="stumble_guys_email",
+            name="hay_day_email",
             field=models.EmailField(max_length=254, null=True),
         ),
     ]

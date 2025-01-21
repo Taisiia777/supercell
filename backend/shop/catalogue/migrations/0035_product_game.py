@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                     ("brawl_stars", "Brawl Stars"),
                     ("clash_of_clans", "Clash of Clans"),
                     ("clash_royale", "Clash Royale"),
-                    ("stumble_guys", "Stumble Guys"),
+                    ("hay_day", "Hay Day"),
                 ],
                 max_length=50,
                 null=True,

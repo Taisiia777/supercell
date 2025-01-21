@@ -8,10 +8,9 @@ ENV API_URL $API_URL
 WORKDIR /app
 COPY ["package.json", "package-lock.json", "tsconfig.json", "next.config.mjs", "./"]
 RUN npm ci
-RUN npm i sharp
+# RUN npm i sharp
 COPY . .
 
 RUN npm run build
 
 ENTRYPOINT npm start
-

@@ -7,4 +7,7 @@ urlpatterns = [
     path("seller/", include("api.seller.urls")),
     path("davdamer/", include("api.davdamer.urls")),
     path("customer/", include("api.customer.urls")),
+    path('mailing/', include('api.mailing.urls')),
+    path('excel/', include('api.excel.urls')),
+
 ]

@@ -4,10 +4,10 @@ import {IProfile} from "@/types/profile.interface";
 import styles from "./profile.module.scss"
 import Input from "@/components/ui/input/input";
 import PrimaryButton from "@/components/ui/primary-button/primary-button";
-import img2 from "@/images/categories_mini/icon1.png";
-import img3 from "@/images/categories_mini/icon2.png";
-import img4 from "@/images/categories_mini/icon3.png";
-import img5 from "@/images/categories_mini/icon4.png";
+import img2 from "@/images/categories_mini/image2.png";
+import img3 from "@/images/categories_mini/image3.png";
+import img4 from "@/images/categories_mini/image1.png";
+import img5 from "@/images/categories_mini/image4.png";
 import Image from "next/image";
 import {useTelegram} from "@/app/useTg";
 import {useForm} from "react-hook-form";
@@ -20,59 +20,116 @@ import Link from "next/link";
 export default function Profile() {
     const { user, webApp } = useTelegram();
     const [profile, setProfile] = useState()
-
+    const [profileData, setProfileData] = useState({
+        brawl_stars: '',
+        clash_of_clans: '',
+        clash_royale: '',
+        hay_day: ''
+    });
     const [isLoading, setLoading] = useState(true)
+    const [formErrors, setFormErrors] = useState({});
 
-    useEffect(() => {
-        if(user && webApp?.initData) {
-            fetch(process.env.API_URL + "customer/me/", {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${webApp.initData}`,
-                },
-                cache: "no-cache"
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    if(data) {
-                        setProfile(data)
-                        console.log(data);
-
-                        setLoading(false)
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
+    // Функция валидации email
+    const validateEmail = (email) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return !email || emailRegex.test(email);
+    };
+  
+  const handleUpdateEmail = async (field: string, value: string) => {
+    if (!validateEmail(value)) {
+      return false;
+    }
+  
+    const updatedData = {
+      brawl_stars: field === 'brawl_stars' ? value : profile?.game_email?.brawl_stars,
+      clash_of_clans: field === 'clash_of_clans' ? value : profile?.game_email?.clash_of_clans,
+      clash_royale: field === 'clash_royale' ? value : profile?.game_email?.clash_royale,
+      hay_day: field === 'hay_day' ? value : profile?.game_email?.hay_day
+    };
+  
+    try {
+      await updateProfile(updatedData, webApp?.initData);
+      setProfile(prev => ({
+        ...prev,
+        game_email: updatedData
+      }));
+      return true;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      return false;
+    }
+  };
+  
+  useEffect(() => {
+    const fetchProfileData = async () => {
+        if (user && webApp?.initData) {
+            try {
+                const response = await fetch(process.env.API_URL + "customer/me/", {
+                    headers: {
+                        'Authorization': `Bearer ${webApp.initData}`,
+                    },
                 });
+                const data = await response.json();
+                setProfile(data);
+                
+                // Устанавливаем начальные значения в инпуты
+                if (data && data.game_email) {
+                    setInputValue('brawl_stars', data.game_email.brawl_stars || '');
+                    setInputValue('clash_of_clans', data.game_email.clash_of_clans || '');
+                    setInputValue('clash_royale', data.game_email.clash_royale || '');
+                    setInputValue('hay_day', data.game_email.hay_day || '');
+                }
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+            } finally {
+                setLoading(false);
+            }
         }
-    }, [user]);
+    };
+
+    fetchProfileData();
+}, [user, webApp?.initData]);
 
     const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm();
 
     const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
-    const onSubmit = async (data) => {
-        try {
-            await updateProfile(data, webApp?.initData);
-            setIsSubmitSuccessful(true);
-            setTimeout(() => {
-                setIsSubmitSuccessful(false);
-            }, 3000);
-        } catch (error) {
-            console.error('Ошибка при обновлении профиля:', error);
-        }
-    };
+
 
     useEffect(() => {
         if(profile && profile.game_email) {
             setValue("brawl_stars", profile.game_email.brawl_stars)
             setValue("clash_of_clans", profile.game_email.clash_of_clans)
             setValue("clash_royale", profile.game_email.clash_royale)
-            setValue("stumble_guys", profile.game_email.stumble_guys)
+            setValue("hay_day", profile.game_email.hay_day)
         }
 
     }, [profile]);
+
+
+
+
+    const clearEmail = async (field: string) => {
+        // Create an object that keeps existing values and only clears the specified field
+        const updatedData = {
+            brawl_stars: field === 'brawl_stars' ? '' : profile?.game_email?.brawl_stars || '',
+            clash_of_clans: field === 'clash_of_clans' ? '' : profile?.game_email?.clash_of_clans || '',
+            clash_royale: field === 'clash_royale' ? '' : profile?.game_email?.clash_royale || '',
+            hay_day: field === 'hay_day' ? '' : profile?.game_email?.hay_day || ''
+        };
+    
+        try {
+            await updateProfile(updatedData, webApp?.initData);
+            setProfile(prev => ({
+                ...prev,
+                game_email: updatedData
+            }));
+            setValue(field, '');
+        } catch (error) {
+            console.error('Error clearing email:', error);
+        }
+    };
+    
 
     return (
         <div className={styles.profile}>
@@ -84,56 +141,79 @@ export default function Profile() {
                     </svg>
                     <span>Обратиться в поддержку</span>
                 </Link>
-                <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
+                <form className={styles.form}>
 
 
                     <Input title="ID ВАШЕГО ПРОФИЛЯ" value={user?.id ?? ''} copy="true" name="id" background={true}/>
                     <p>Привязанные почты Supercell ID</p>
                     <Input title="Почта clash_royale" icon={
-                        <Image src={img4} alt="" height={20} width={20}/>
+                        <Image src={img4} alt="" height={35} width={35} style={{borderRadius:"5px"}}/>
                     }
                            {...register("clash_royale")}
                            name="clash_royale"
                            setValue={setValue}
                            value={watch().clash_royale}
                            rotate={true}
+                           onClear={() => clearEmail('clash_royale')}
+                           onUpdate={(value) => handleUpdateEmail('clash_royale', value)}
+                           editable={true} // добавляем флаг редактирования
+                           clearable={true} // добавляем возможность очистки
+                           validation="email"
+
                     />
 
                     <Input title="Почта brawl_stars" icon={
-                        <Image src={img2} alt="" height={20} width={20}/>
+                        <Image src={img2} alt="" height={35} width={35} style={{borderRadius:"5px"}}/>
                     }
                            {...register("brawl_stars")}
                            name="brawl_stars"
                            setValue={setValue}
                            value={watch().brawl_stars}
                            rotate={true}
+                           onClear={() => clearEmail('brawl_stars')}
+                           onUpdate={(value) => handleUpdateEmail('brawl_stars', value)}
+                           validation="email"
+
+                           editable={true} // добавляем флаг редактирования
+                           clearable={true} // добавляем возможность очистки
                     />
 
                     <Input title="Почта clash_of_clans" icon={
-                        <Image src={img3} alt="" height={20} width={20}/>
+                        <Image src={img3} alt="" height={35} width={35} style={{borderRadius:"5px"}}/>
                     }
                            {...register("clash_of_clans")}
                            name="clash_of_clans"
                            setValue={setValue}
                            value={watch().clash_of_clans}
                            rotate={true}
+                           onClear={() => clearEmail('clash_of_clans')}
+                           onUpdate={(value) => handleUpdateEmail('clash_of_clans', value)}
+                           validation="email"
+
+                           editable={true} // добавляем флаг редактирования
+                           clearable={true} // добавляем возможность очистки
                     />
 
                     <Input title="Почта stamble guys" icon={
-                        <Image src={img5} alt="" height={20} width={20}/>
+                        <Image src={img5} alt="" height={35} width={35} style={{borderRadius:"5px"}}/>
                     }
-                           {...register("stumble_guys")}
-                           name="stumble_guys"
+                           {...register("hay_day")}
+                           name="hay_day"
                            setValue={setValue}
-                           value={watch().stumble_guys}
+                           value={watch().hay_day}
                            rotate={true}
+                           onClear={() => clearEmail('hay_day')}
+                           onUpdate={(value) => handleUpdateEmail('hay_day', value)}
+                           validation="email"
+
+                           editable={true} // добавляем флаг редактирования
+                           clearable={true} // добавляем возможность очистки
                     />
 
-                    <PrimaryButton title={isSubmitSuccessful ? 'Отправлено' : 'Сохранить'} type="submit"/>
+                    {/* <PrimaryButton title={isSubmitSuccessful ? 'Отправлено' : 'Сохранить'} type="submit"/> */}
 
                 </form>
 
             </div>
     )
 }
-

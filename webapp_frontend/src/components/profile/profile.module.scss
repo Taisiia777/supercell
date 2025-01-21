@@ -31,3 +31,26 @@
     }
   }
 }
+.error_message {
+  display: flex;
+  position: absolute;
+  top: 40px;
+  left: 0;
+  color: #ff4444 !important;
+  font-size: 12px !important;
+  margin-top: 4px;
+  font-weight: 500 !important;
+}
+
+.input {
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}

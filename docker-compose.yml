@@ -96,6 +96,15 @@ services:
       BOT_LOGLEVEL_INFO: $BOT_LOGLEVEL_INFO
       API_HOST: http://backend:8000
 
+  order_bot:
+      build: ./order_bot
+      restart: unless-stopped
+      command: uvicorn main:app --host 0.0.0.0 --port 8001
+      environment:
+        TELEGRAM_TOKEN: $TELEGRAM_TOKEN
+        TELEGRAM_CHAT_ID: $TELEGRAM_CHAT_ID
+      ports:
+        - "8001:8001"
 
 volumes:
   pg_data: {}

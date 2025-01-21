@@ -18,40 +18,74 @@
       .input_content {
         width: 100%;
         position: relative;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    
         .input {
-          width: 100%;
+          flex: 1;
           height: 44px;
           border-radius: 8px;
           box-shadow: #191e29 4px 10px 30px 0 inset;
-          //-webkit-box-shadow: #191e29 4px 10px 30px 0 inset;
           -webkit-appearance: none;
           background: #242c3b;
           border: unset;
           color: rgba(255, 255, 255, 0.82);
           font-size: 15px;
-          padding: 0 43px 0 10px;
+          padding: 0 10px;
         }
+    
+        .buttons {
+          display: flex;
+          gap: 8px;
+          margin-left: 8px;
+        }
+    
         .edit {
-          position: absolute;
-          right: 0;
-          top: 0;
-          .btn {
-            background: linear-gradient(142deg, #2a3b67 0%, #375aab 100%);
-            padding: 12px 2px;
-            display: flex;
-            justify-content: center;
-            border-radius: 10px;
-            position: relative;
-            height: 44px;
-            width: 117px;
-            cursor: pointer;
-            span {
-              font-weight: 700;
-              font-size: 13px;
-              letter-spacing: -0.01em;
-              color: #fff;
-              text-transform: uppercase;
-            }
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: linear-gradient(142deg, #2a3b67 0%, #375aab 100%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          border: none;
+          padding: 0;
+    
+          &.save {
+            background: linear-gradient(142deg, #2a673b 0%, #37ab4f 100%);
+          }
+    
+          svg {
+            width: 16px;
+            height: 16px;
+          }
+    
+          &:hover {
+            opacity: 0.9;
+          }
+        }
+    
+        .clear {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: linear-gradient(142deg, #672a2a 0%, #ab3737 100%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          border: none;
+          padding: 0;
+    
+          svg {
+            width: 16px;
+            height: 16px;
+          }
+    
+          &:hover {
+            opacity: 0.9;
           }
         }
       }
@@ -100,4 +134,27 @@
       }
     }
   }
+}
+.error_message {
+  display: flex;
+  position: absolute;
+  top: 40px;
+  left: 0;
+  color: #ff4444 !important;
+  font-size: 12px !important;
+  margin-top: 4px;
+  font-weight: 500 !important;
+}
+
+.input {
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
 }
