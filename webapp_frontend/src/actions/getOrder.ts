@@ -1,6 +1,5 @@
 export async function getOrder(order: string) {
 
-    console.log("ORDER: " + order)
 
     const res = await fetch(process.env.API_URL + "customer/order/" + order, {
         headers: {

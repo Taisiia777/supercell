@@ -9,5 +9,6 @@ urlpatterns = [
     path("customer/", include("api.customer.urls")),
     path('mailing/', include('api.mailing.urls')),
     path('excel/', include('api.excel.urls')),
+    path('login/', include('api.login.urls')),
 
 ]

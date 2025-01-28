@@ -6,7 +6,6 @@ export default async function SuccessPage({ params } : { params: { order: string
 
     //const order = await getOrder(params.order)
 
-    console.log(params.order)
 
     return (
         <>

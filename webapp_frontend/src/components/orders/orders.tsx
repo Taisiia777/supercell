@@ -26,8 +26,7 @@ export default function Orders() {
                 .then((data) => {
                     if(data) {
                         setOrders(data)
-                        console.log(webApp.initData)
-                        console.log(data);
+                        
 
                         setLoading(false)
                     }

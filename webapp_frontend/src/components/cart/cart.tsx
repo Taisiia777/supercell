@@ -3,7 +3,7 @@
 import styles from "./cart.module.scss"
 import {useCart, useOrderData} from "@/components/store/store";
 import {IProduct} from "@/types/products.interface";
-import React, {useEffect, useId, useState} from "react";
+import React, {useEffect, useState} from "react";
 import Input from "@/components/ui/input/input";
 import PrimaryButton from "@/components/ui/primary-button/primary-button";
 import {CartItem} from "@/types/store.interface";
@@ -12,14 +12,11 @@ import Image from "next/image";
 import {Shimmer} from "react-shimmer";
 import shimmer from "@/components/ui/shimmer/shimmer.module.scss";
 import ActionButtons from "@/components/ui/action-buttons/action-buttons";
-import { useForm} from "react-hook-form";
-import { useRouter } from 'next/navigation';
-import {revalidatePath} from "next/cache";
+import {useForm} from "react-hook-form";
+import {useRouter} from 'next/navigation';
 import {useTelegram} from "@/app/useTg";
 
 const generateUniqueId = (baseId, index) => `${baseId}-${index}`;
-
-
 
 export default function Cart(props: { data: IProduct[] }) {
     const router = useRouter();
@@ -27,14 +24,6 @@ export default function Cart(props: { data: IProduct[] }) {
     const { user, webApp } = useTelegram();
     const [profile, setProfile] = useState()
     const [isLoadingProfile, setLoadingProfile] = useState(true)
-    const [formErrors, setFormErrors] = useState({});
-    const [validationStates, setValidationStates] = useState({});
-
-    // Функция валидации email
-    const validateEmail = (email) => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return !email || emailRegex.test(email);
-    };
 
     useEffect(() => {
         if(user && webApp?.initData) {
@@ -52,7 +41,6 @@ export default function Cart(props: { data: IProduct[] }) {
                         setProfile(data)
                         console.log(data);
                         setLoadingProfile(false)
-                        //setLoading(false)
                     }
                 })
                 .catch((error) => {
@@ -76,7 +64,7 @@ export default function Cart(props: { data: IProduct[] }) {
         }
     }, [profile]);
 
-    const [clientItems, setClientItems] = useState<CartItem[]>([]); // Замените `ClientItem` на ваш фактический тип
+    const [clientItems, setClientItems] = useState<CartItem[]>([]);
 
     useEffect(() => {
         setClientItems(items)
@@ -85,13 +73,11 @@ export default function Cart(props: { data: IProduct[] }) {
     const [filteredData, setFilteredData] = useState<IProduct[]>([]);
 
 
-
     useEffect(() => {
         const expandedItems = items.flatMap(item => {
             const product = props.data.find(p => p.id === item.id);
             if (!product) return [];
             
-            // Создаем отдельные записи для каждого экземпляра товара
             return Array(item.count).fill(0).map((_, index) => ({
                 ...product,
                 uniqueId: generateUniqueId(item.id, index),
@@ -99,7 +85,8 @@ export default function Cart(props: { data: IProduct[] }) {
                 count: 1,
                 email: item.email,
                 code: item.code,
-                type: item.type
+                type: item.type,
+                game: product.game // Убедимся, что game передается
             }));
         });
         
@@ -108,210 +95,117 @@ export default function Cart(props: { data: IProduct[] }) {
 
     const {setEmail, email} = useOrderData()
 
-
-
-
     type FormValues = {
         [key: string]: string | undefined;
     };
 
-    const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<FormValues>();
-
-    const handleValidationChange = (fieldName, hasError) => {
-        setValidationStates(prev => ({
-            ...prev,
-            [fieldName]: hasError
-        }));
-    };
+    const { register, handleSubmit, setValue, watch } = useForm<FormValues>();
 
 
     const onSubmit = handleSubmit((data) => {
-        let isValid = true;
-        const newErrors = {};
-      
-        // Валидация основного email
-        if (!validateEmail(data.email)) {
-          newErrors.email = 'Неверный формат email';
-          isValid = false;
-        }
-      
-        // Валидация email'ов Supercell ID
-        filteredData.forEach(item => {
-          const emailKey = `${item.uniqueId}-email`;
-          if (data[emailKey] && !validateEmail(data[emailKey])) {
-            newErrors[emailKey] = 'Неверный формат email';
-            isValid = false;
-          }
+        console.log("Форма отправляется", data);
+        const productFormData = [];
+        let emailFormData = null;
+    
+        Object.entries(data).forEach(([key, value]) => {
+            if (key.endsWith("-email")) {
+                const [productId] = key.split("-"); // Получаем ID продукта
+                const item = filteredData.find((item) => item.id.toString() === productId);
+                if (item) {
+                    const loginType = item.login_type;
+                    const game = item.game; // Добавляем информацию об игре
+                    productFormData.push({ 
+                        productId, 
+                        email: value, 
+                        loginType,
+                        game // Добавляем game в данные
+                    });
+                }
+            } else if (key === "email") {
+                emailFormData = { email: value };
+            }
         });
-      
-        setFormErrors(newErrors);
-      
-        if (!isValid) {
-          return;
-        }
-      
-        if (isValid) {
-            const productFormData = [];
-            let emailFormData = null;
     
-            console.log(data);
-            console.log("---")
-            // Обходим все данные из формы
-            Object.entries(data).forEach(([key, value]) => {
-                // Проверяем, является ли ключ идентификатором продукта
-                if (key.endsWith("-email")) {
-                    // Если это поле с электронной почтой для продукта, добавляем его в соответствующий объект
-                    const productId = key.split("-")[0];
-                    const productIndex = productFormData.findIndex(product => product.productId === productId);
-                    if (productIndex !== -1) {
-                        productFormData[productIndex].email = value;
-                    } else {
-                        const item = filteredData.find((item) => item.id.toString() === productId);
-                        if (item) {
-                            const loginType = item.login_type;
-                            productFormData.push({ productId, email: value, loginType });
-                        }
-                    }
-                } else if (key === "email") {
-                    // Если это поле с общей электронной почтой, сохраняем его в emailFormData
-                    emailFormData = { email: value };
-                } else {
-                    // Иначе, это поле с данными продукта
-                    // Находим соответствующий продукт из filteredData
-                    const item = filteredData.find((item) => item.id.toString() === key);
-                    if (item) {
-                        const loginType = item.login_type;
-                        productFormData.push({ productId: key, value, loginType });
-                    }
-                }
-            });
+        console.log("Подготовленные данные:", productFormData);
+        addProductData(productFormData);
+        setEmail(emailFormData.email);
     
-            // Выводим в консоль полученные данные для проверки
-            console.log("Product Form Data:", productFormData);
-            console.log("Email Form Data:", emailFormData);
-    
-            // Вызываем функцию для обновления данных продуктов
-            addProductData(productFormData);
-            setEmail(emailFormData.email);
-    
-            router.push('/checkout');
-                }
-        
+        router.push('/checkout');
     });
-    
-    // Add this to your component's state
-    const [formError, setFormError] = useState(null);
 
-  
     const [totalPrice, setTotalPrice] = useState(0)
 
     useEffect(() => {
-        filteredData.forEach((item, index) => {
+        filteredData.forEach((item) => {
             const uid = item.id.toString();
             const cartItem = clientItems.find((i) => i.id === item.id);
             const defaultValue = cartItem ? (item.login_type === "EMAIL_CODE" ? cartItem.account_id : cartItem.link) : '';
-            const game_email = cartItem ?
-                (item.game === "clash_of_clans" ? profile && profile.game_email.clash_of_clans :
-                    (item.game === "clash_royale" ? profile && profile.game_email.clash_royale :
-                        (item.game === "brawl_stars" ? profile && profile.game_email.brawl_stars :
-                            (item.game === "hay_day" ? profile && profile.game_email.hay_day : ""))))
-                : "";
-
-            // const defaultEmail = cartItem ? (item.login_type === "EMAIL_CODE" ? cartItem.account_id : cartItem.link) : '';
+            
             setValue(uid, defaultValue);
-            setValue("email", email)
-
-            if(!isLoadingProfile) {
-                if(item.login_type === "EMAIL_CODE") {
-                    setValue(uid + "-email", game_email)
-                }
-            }
-
-            //setValue(uid + "-email", game_email)
-
-            console.log("==========")
-            console.log(uid + "-email : " + game_email)
-            console.log("=========")
-
-            // Вычисляем общую стоимость товаров в корзине
+            setValue("email", email);
+    
+            // Считаем общую сумму
             const totalPrice = filteredData.reduce((total, item) => {
-                // Находим соответствующий продукт из списка всех продуктов
                 const product = filteredData.find(product => product.id === item.id);
                 if (product) {
-                    // Если продукт найден, учитываем его стоимость и количество в корзине
                     return total + (item.count * product.price.incl_tax);
-                } else {
-                    return total;
                 }
+                return total;
             }, 0);
-
-            // Устанавливаем общую стоимость
+    
             setTotalPrice(totalPrice);
-
-            console.log(filteredData)
-            console.log(cartItem)
         });
-        return () => {
-            if(!isLoadingProfile) {
-                setLoadingProfile(true)
-            }
-        }
-    }, [filteredData, profile]); // Пустой массив зависимостей гарантирует выполнение эффекта только при монтировании компонента
+    }, [filteredData]);
+
+    const [formInitialized, setFormInitialized] = useState(false);
 
     useEffect(() => {
-        if (profile?.game_email) {
-          // Автозаполнение почты для товаров
+        // Только при первой загрузке 
+        if (profile?.game_email && !isLoadingProfile && !formInitialized) {
           filteredData.forEach(item => {
             const emailKey = `${item.uniqueId}-email`;
+            // Проверяем текущее значение
+            const currentEmailValue = watch(emailKey);
             const gameEmail = profile.game_email[item.game];
-            if (gameEmail && item.login_type === "EMAIL_CODE") {
-              setValue(emailKey, gameEmail);
+
+            // Заполняем только если поле действительно пустое
+            if (!currentEmailValue || currentEmailValue === '') {
+              const gameEmail = profile.game_email[item.game];
+              if (gameEmail && item.login_type === "EMAIL_CODE") {
+                setValue(emailKey, gameEmail);
+              }
             }
           });
-          
-          // Для чека используем email из первой игры из корзины
-          const firstGameItem = filteredData.find(item => item.login_type === "EMAIL_CODE");
-          if (firstGameItem) {
-            const gameEmail = profile.game_email[firstGameItem.game];
-            if (gameEmail) {
-              setValue("email", gameEmail);
-            }
+      
+          // То же самое для основного email
+          const currentMainEmail = watch("email");
+          if (!currentMainEmail || currentMainEmail === '') {
+            setValue("email", gameEmail);
           }
+          
+          setFormInitialized(true);
         }
-      }, [profile, filteredData, setValue]);
-
-      const isFormValid = () => {
-        // Проверяем есть ли хоть одна ошибка валидации или пустое значение
-        const hasErrors = Object.values(validationStates).some(error => error);
-        const hasEmptyFields = watch("email") === "" || filteredData.some(item => {
-            const emailValue = watch(`${item.uniqueId}-email`);
-            return emailValue === undefined || emailValue === "";
-        });
-    
-        return !hasErrors && !hasEmptyFields;
-    };
-
-    console.log("filtred data")
-    console.log(filteredData)
+      }, [profile, isLoadingProfile]);
+      
+      // Добавьте очистку при размонтировании
+      useEffect(() => {
+        return () => {
+          setFormInitialized(false);
+        };
+      }, []);
 
     return (
         <div className={styles.cart}>
             {filteredData.length > 0 ? (
-                <form className={styles.items} onSubmit={onSubmit}>
-                    {formError && (
-    <div className={styles.error}>
-        {formError}
-    </div>
-)}
-                    {filteredData.map((item, index) => {
-
+                <form className={styles.items} onSubmit={onSubmit}     onError={(errors) => console.log('Form errors:', errors)}>
+                    {filteredData.map((item) => {
                         const uid = item.id.toString();
-                        const uid_email = item.id.toString() + "-email";
+                        const uid_email = item.uniqueId + "-email";
                         const cartItem = clientItems.find((i) => i.id === item.id)
                         const count = cartItem ? cartItem.count : 0
 
                         return (
-                            <div className={styles.item} key={item.id}>
+                            <div className={styles.item} key={item.uniqueId}>
                                 <Link href={`/product/${item.id}`} className={styles.content}>
                                     <div className={styles.container}>
                                         <div className={styles.img}>
@@ -333,7 +227,7 @@ export default function Cart(props: { data: IProduct[] }) {
                                                             fill="#6AEC3D"/>
                                                         <path fillRule="evenodd" clipRule="evenodd"
                                                               d="M6.48514 5.23396C6.23919 5.23764 6.00484 5.33307 5.83353 5.49928C5.66223 5.6655 5.56797 5.88892 5.57144 6.12051V10.492C5.57144 10.492 5.57051 11.0123 5.70515 11.6461C5.8398 12.2809 6.08865 13.0896 6.77207 13.7331C6.85773 13.8166 6.96019 13.8832 7.07347 13.929C7.18676 13.9749 7.30861 13.999 7.4319 14C7.55519 14.001 7.67747 13.9789 7.79158 13.9349C7.9057 13.891 8.00937 13.826 8.09656 13.7439C8.18374 13.6619 8.25269 13.5642 8.29938 13.4568C8.34607 13.3493 8.36956 13.2342 8.36849 13.1181C8.36742 13.002 8.34181 12.8873 8.29314 12.7806C8.24448 12.674 8.17374 12.5775 8.08505 12.4968C7.83898 12.266 7.62356 11.7633 7.52606 11.3052C7.42856 10.8461 7.42856 10.492 7.42856 10.492V6.12051C7.43032 6.00348 7.4071 5.88731 7.36029 5.77889C7.31347 5.67047 7.24402 5.572 7.15604 5.48932C7.06805 5.40664 6.96334 5.34144 6.8481 5.29757C6.73285 5.25371 6.60943 5.23208 6.48514 5.23396ZM3.69947 5.23396C3.45352 5.23764 3.21917 5.33307 3.04786 5.49928C2.87655 5.6655 2.78229 5.88892 2.78577 6.12051V6.99482C2.78577 7.2267 2.8836 7.44908 3.05774 7.61305C3.23187 7.77701 3.46806 7.86913 3.71433 7.86913C3.9606 7.86913 4.19678 7.77701 4.37092 7.61305C4.54505 7.44908 4.64288 7.2267 4.64288 6.99482V6.12051C4.64464 6.00348 4.62142 5.88731 4.57461 5.77889C4.5278 5.67047 4.45834 5.572 4.37036 5.48932C4.28238 5.40664 4.17766 5.34144 4.06242 5.29757C3.94718 5.25371 3.82376 5.23208 3.69947 5.23396ZM3.69947 8.73119C3.45352 8.73488 3.21917 8.8303 3.04786 8.99651C2.87655 9.16273 2.78229 9.38615 2.78577 9.61774V12.2407C2.78577 12.4725 2.8836 12.6949 3.05774 12.8589C3.23187 13.0229 3.46806 13.115 3.71433 13.115C3.9606 13.115 4.19678 13.0229 4.37092 12.8589C4.54505 12.6949 4.64288 12.4725 4.64288 12.2407V9.61774C4.64464 9.50071 4.62142 9.38454 4.57461 9.27612C4.5278 9.1677 4.45834 9.06923 4.37036 8.98655C4.28238 8.90387 4.17766 8.83867 4.06242 8.7948C3.94718 8.75094 3.82376 8.72931 3.69947 8.73119ZM9.27082 5.23396C9.02487 5.23764 8.79052 5.33307 8.61921 5.49928C8.4479 5.6655 8.35364 5.88892 8.35712 6.12051V10.492C8.35712 10.492 8.36547 10.8767 8.51962 11.3148C8.73403 11.8982 9.08941 12.4267 9.55774 12.8588C9.6434 12.9423 9.74586 13.0089 9.85915 13.0547C9.97244 13.1006 10.0943 13.1247 10.2176 13.1257C10.3409 13.1267 10.4631 13.1046 10.5773 13.0606C10.6914 13.0166 10.795 12.9517 10.8822 12.8696C10.9694 12.7875 11.0384 12.6899 11.0851 12.5825C11.1317 12.475 11.1552 12.3599 11.1542 12.2438C11.1531 12.1277 11.1275 12.013 11.0788 11.9063C11.0302 11.7997 10.9594 11.7032 10.8707 11.6225C10.5151 11.2885 10.36 10.979 10.2829 10.7622C10.2049 10.5445 10.2142 10.492 10.2142 10.492V6.12051C10.216 6.00348 10.1928 5.88731 10.146 5.77889C10.0991 5.67047 10.0297 5.572 9.94171 5.48932C9.85373 5.40664 9.74901 5.34144 9.63377 5.29757C9.51853 5.25371 9.39511 5.23208 9.27082 5.23396ZM12.0565 5.23396C11.8105 5.23764 11.5762 5.33307 11.4049 5.49928C11.2336 5.6655 11.1393 5.88892 11.1428 6.12051V6.99482C11.1428 7.2267 11.2406 7.44908 11.4148 7.61305C11.5889 7.77701 11.8251 7.86913 12.0714 7.86913C12.3176 7.86913 12.5538 7.77701 12.7279 7.61305C12.9021 7.44908 12.9999 7.2267 12.9999 6.99482V6.12051C13.0017 6.00348 12.9784 5.88731 12.9316 5.77889C12.8848 5.67047 12.8154 5.572 12.7274 5.48932C12.6394 5.40664 12.5347 5.34144 12.4194 5.29757C12.3042 5.25371 12.1808 5.23208 12.0565 5.23396Z"
-                                                              fill="#6AEC3D"/>
+                                                                fill="#6AEC3D"/>
                                                         <path
                                                             d="M6.56686 0.00032889C5.43366 -0.0107351 4.31709 0.257523 3.32805 0.778463C3.22154 0.834378 3.12776 0.9095 3.05208 0.999539C2.9764 1.08958 2.9203 1.19277 2.88697 1.30323C2.85365 1.41368 2.84375 1.52923 2.85785 1.64329C2.87196 1.75734 2.90978 1.86767 2.96917 1.96796C3.02855 2.06825 3.10833 2.15655 3.20396 2.22781C3.29958 2.29907 3.40918 2.35189 3.52649 2.38327C3.6438 2.41465 3.76652 2.42397 3.88765 2.41069C4.00879 2.39741 4.12595 2.36179 4.23247 2.30588C4.93889 1.93343 5.73653 1.7415 6.54612 1.74917C7.35571 1.75684 8.14908 1.96384 8.8474 2.34959C9.54628 2.73482 10.1259 3.28559 10.5286 3.94714C10.9313 4.60869 11.143 5.35798 11.1428 6.12048C11.1428 6.35237 11.2406 6.57475 11.4148 6.73871C11.5889 6.90268 11.8251 6.99479 12.0714 6.99479C12.3176 6.99479 12.5538 6.90268 12.7279 6.73871C12.9021 6.57475 12.9999 6.35237 12.9999 6.12048C12.9994 5.05312 12.7026 4.00442 12.1391 3.07829C11.5755 2.15217 10.7648 1.38077 9.7871 0.840539C8.81019 0.300899 7.70036 0.0112427 6.56779 0.00032889H6.56686Z"
                                                             fill="#6AEC3D"/>
@@ -365,11 +259,8 @@ export default function Cart(props: { data: IProduct[] }) {
                                                 <span>{item.categories}</span>
                                             </div>
                                             <div className={styles.actions}>
-
                                                 <p className={styles.price}>{item.price.incl_tax} ₽</p>
-
                                                 <div className={styles.add}>
-
                                                     <>
                                                         {
                                                             isLoading ? (
@@ -384,35 +275,24 @@ export default function Cart(props: { data: IProduct[] }) {
                                                             )
                                                         }
                                                     </>
-
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </Link>
                                 <div className={styles.data}>
-
                                     <Input
                                         title={item.login_type === "EMAIL_CODE" ? "Почта Supercell ID" : "Ссылка в друзья"}
                                         productId={item.id}
-                                        {...register(`${item.uniqueId}-email`, { 
+                                        {...register(uid_email, { 
                                             required: true,
-                                            validate: validateEmail
-                                          })}                                        
-                                        name={`${item.uniqueId}-email`}
-                                        editable={false}  
-                                        validation="email"
-
+                                          })}
+                                        name={uid_email}
                                         setValue={setValue}
-                                        // value={watch()[`${item.uniqueId}-email`]}
-                                        value={watch(`${item.uniqueId}-email`)}
-
-                                        error={formErrors[`${item.uniqueId}-email`]}
-                                        onValidationChange={(hasError) => 
-                                            handleValidationChange(`${item.uniqueId}-email`, hasError)
-                                        }
-                                        style={errors[`${item.uniqueId}-email`] ? { boxShadow: "inset 4px 10px 30px 0 #f006" } : {}}
-
+                                        value={watch(uid_email)}
+                                        validation="email"
+                                        editable={false}
+                                        
                                         icon={item.login_type !== "EMAIL_CODE" && <>
                                             <svg width="24" height="21" viewBox="0 0 24 21" fill="none"
                                                  xmlns="http://www.w3.org/2000/svg">
@@ -435,28 +315,22 @@ export default function Cart(props: { data: IProduct[] }) {
                     })}
                     <div className={styles.action}>
                     <Input
-  title="EMAIL для чека"
-  {...register("email", { 
-    required: true,
-    validate: validateEmail 
-  })}
-  name="email"
-  setValue={setValue}
-  value={watch().email}
-  error={formErrors["email"]}
-  validation="email"
-  editable={false}
-  onValidationChange={(hasError) => 
-    handleValidationChange('email', hasError)
-}
-/>
-<PrimaryButton 
-    type="submit" 
-    title="Оформить заказ" 
-    subtitle={`Сумма: ${totalPrice} ₽`}
-    disabled={!isFormValid()}
-    style={!isFormValid() ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-/>
+                        title="EMAIL для чека"
+                        {...register("email", { 
+                            required: true,
+                        })}
+                        name="email"
+                        setValue={setValue}
+                        value={watch().email}
+                        validation="email"
+                        editable={false}
+
+                        />
+                        <PrimaryButton 
+                            type="submit" 
+                            title="Оформить заказ" 
+                            subtitle={`Сумма: ${totalPrice} ₽`}
+                        />
                     </div>
                 </form>
             ) : (
@@ -468,4 +342,3 @@ export default function Cart(props: { data: IProduct[] }) {
         </div>
     )
 }
-

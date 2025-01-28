@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-05c)iy4$p8bn5ex^+kgfp79wj9^y)miofa!7y7=9t^t0tw9a_#
 DEBUG = os.getenv("DJANGO_DEBUG", "False") in ("True", "true", "1", "on")
 
 ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split()
+CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
 
 # Application definition
 
@@ -84,6 +84,8 @@ INSTALLED_APPS = [
     "core",
     "api",
     "django_filters",
+    'django_extensions',
+
 ]
 SITE_ID = 1
 
@@ -210,6 +212,22 @@ OSCAR_ORDER_STATUS_PIPELINE = {
 }
 SKIP_PAYMENT_CHOICES = True
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'supercell_auth': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#     },
+# }
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -230,6 +248,7 @@ LOGGING = {
             "level": "WARNING",
             "propagate": True,
         },
+        
     },
 }
 

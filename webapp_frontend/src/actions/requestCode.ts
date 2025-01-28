@@ -11,7 +11,6 @@ export async function requestCode(data: any) {
         body: JSON.stringify({emails: data})
     });
 
-    console.log({emails: data})
 
     return await res.json();
 }

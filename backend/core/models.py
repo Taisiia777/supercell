@@ -4,9 +4,36 @@ from oscar.core.loading import get_model
 
 Order = get_model("order", "Order")
 
+class ScheduledMailing(models.Model):
+    message = models.TextField()
+    image = models.ImageField(upload_to='mailings/', null=True, blank=True)
+    scheduled_time = models.DateTimeField()
+    is_sent = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-scheduled_time']
+
+class Role(models.Model):
+    ADMIN = 'ADMIN'
+    ORDER_MANAGER = 'ORDER_MANAGER' 
+    PRODUCT_MANAGER = 'PRODUCT_MANAGER'
+
+    ROLE_CHOICES = [
+        (ADMIN, 'Администратор'),
+        (ORDER_MANAGER, 'Менеджер заказов'),
+        (PRODUCT_MANAGER, 'Менеджер товаров')
+    ]
+
+    name = models.CharField(max_length=20, choices=ROLE_CHOICES)
+
+    class Meta:
+        verbose_name = 'Роль'
+        verbose_name_plural = 'Роли'
 
 class User(AbstractUser):
     telegram_chat_id = models.BigIntegerField(null=True, blank=True, unique=True)
+    roles = models.ManyToManyField(Role, related_name='users')
 
     receiver_name = models.CharField(
         max_length=50, verbose_name="Имя получателя", blank=True, null=True
@@ -33,6 +60,7 @@ class User(AbstractUser):
     clash_of_clans_email = models.EmailField(null=True)
     clash_royale_email = models.EmailField(null=True)
     hay_day_email = models.EmailField(null=True)
+   
 
 class DavDamer(models.Model):
     name = models.CharField(max_length=128, db_index=True)

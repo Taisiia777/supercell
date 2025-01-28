@@ -21,7 +21,6 @@ export default function Order({id}: {id: string}) {
     const [isLoading, setLoading] = useState(true)
     const [isUpdateProduct, setUpdateProduct] = useState(false)
 
-    console.log(id);
 
     useEffect(() => {
         if(user && webApp && webApp.initData) {
@@ -36,9 +35,7 @@ export default function Order({id}: {id: string}) {
                 .then((response) => response.json())
                 .then((data) => {
                     if(data) {
-                        console.log(webApp.initData)
                         setOrder(data)
-                        console.log(data);
                         setUpdateProduct(false)
                         setLoading(false)
                     }
@@ -53,11 +50,7 @@ export default function Order({id}: {id: string}) {
         setUpdateProduct(false)
         const line = order.order.lines.find(line => line.id === line_id)
 
-        console.log("LINEID: ", line_id)
-
-        console.log(order.order);
-
-        console.log(line);
+      
 
         let obj = {}
 
@@ -74,12 +67,10 @@ export default function Order({id}: {id: string}) {
                 "code": value
             }
         }
-        console.log(obj);
 
 
         const update = await updateLoginData(obj, id, webApp?.initData);
         setUpdateProduct(true)
-        console.log(update)
     }
 
     return (
@@ -91,7 +82,18 @@ export default function Order({id}: {id: string}) {
                             <div className={styles.container}>
                                 <div className={styles.img}>
                                     <div className={styles.bg}>
-                                        <Image src={item.product.images[0].original} alt={item.product.title} height={70} width={60}/>
+                                        {/* <Image src={item.product.images[0].original} alt={item.product.title} height={70} width={60}/> */}
+                                        <Image 
+  src={item.product.images[0].original}
+  alt={item.product.titl}
+  height={70}
+  width={60}
+  style={{ objectFit: 'contain', width: 'auto', height: '70px' }}
+  quality={100}
+  unoptimized={true}
+  loading="eager"
+  priority
+/>
                                     </div>
                                     <div className={styles.type}>
                                         {item.product.login_type === "EMAIL_CODE" ? (

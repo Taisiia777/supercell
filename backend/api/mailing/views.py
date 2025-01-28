@@ -1,24 +1,22 @@
 import logging
 import asyncio
 from typing import Optional
-
+from django.utils import timezone
 from aiogram import Bot, types
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
-from aiogram.types import InputFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
-
+from celery_app import app as celery_app
 from .serializers import MassMailingSerializer
+from core.models import ScheduledMailing, User, Role
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
-
 class MassMailingView(APIView):
-    """View для массовой рассылки сообщений пользователям через Telegram"""
     permission_classes = [IsAdminUser]
     serializer_class = MassMailingSerializer
 
@@ -29,24 +27,18 @@ class MassMailingView(APIView):
         message: str, 
         image: Optional[InMemoryUploadedFile] = None
     ) -> bool:
-        """Отправка сообщения конкретному пользователю"""
         try:
             keyboard = types.InlineKeyboardMarkup(
-                inline_keyboard=[
-                    [
-                        types.InlineKeyboardButton(
-                            text="В магазин",
-                            web_app=types.WebAppInfo(url="https://shop.mamostore.ru")
-                        )
-                    ]
-                ]
+                inline_keyboard=[[
+                    types.InlineKeyboardButton(
+                        text="В магазин",
+                        web_app=types.WebAppInfo(url="https://shop.mamostore.ru")
+                    )
+                ]]
             )
 
             if image:
-                # Сбрасываем указатель в начало файла
                 image.seek(0)
-                
-                # Читаем содержимое файла
                 image_content = image.read()
                 
                 if not image_content:
@@ -74,20 +66,57 @@ class MassMailingView(APIView):
             logger.error(f"Ошибка отправки сообщения пользователю {chat_id}: {str(e)}")
             return False
 
+  
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         message = serializer.validated_data['message']
         image = serializer.validated_data.get('image')
-        
-        # Проверяем, что файл существует и не пустой
-        if image and image.size == 0:
-            return Response({
-                'status': 'error',
-                'message': 'Empty image file'
-            }, status=400)
+        scheduled_time = serializer.validated_data.get('scheduled_time')
 
+        if scheduled_time:
+            if scheduled_time <= timezone.now():
+                return Response({
+                    'status': 'error',
+                    'message': 'Scheduled time must be in the future'
+                }, status=400)
+
+            try:
+                # Создаем запись в базе данных
+                mailing = ScheduledMailing.objects.create(
+                    message=message,
+                    image=image,
+                    scheduled_time=scheduled_time,
+                    is_sent=False
+                )
+
+                # Если есть изображение, читаем его содержимое
+                image_content = None
+                if image:
+                    image.seek(0)
+                    image_content = image.read()
+
+                # Отправляем задачу в Celery
+                celery_app.send_task(
+                    "api.mailing.process_scheduled",
+                    args=[message, image_content],
+                    eta=scheduled_time
+                )
+
+                return Response({
+                    'status': 'success',
+                    'message': 'Mailing scheduled successfully',
+                    'mailing_id': mailing.id
+                })
+            except Exception as e:
+                logger.error(f"Error scheduling mailing: {str(e)}")
+                return Response({
+                    'status': 'error',
+                    'message': 'Failed to schedule mailing'
+                }, status=500)
+
+        # Немедленная отправка
         users = User.objects.exclude(telegram_chat_id__isnull=True)
         success_count = 0
         failed_count = 0

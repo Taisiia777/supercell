@@ -55,38 +55,6 @@ export const useCart = create<CartState>(persist(
         },
 
 
-        // addProductData: (formData) => set((state) => ({
-        //     items: state.items.map((item) => {
-        //         const matchingFormData = formData.find((data) => data.productId === String(item.id));
-        //         if (matchingFormData) {
-        //             if (matchingFormData.loginType === "EMAIL_CODE") {
-        //                 return { ...item, account_id: matchingFormData.email, code: "", email: matchingFormData.email, type: "EMAIL_CODE" };
-        //             } else if (matchingFormData.loginType === "LINK") {
-        //                 return { ...item, account_id: matchingFormData.email, code: "", type: "LINK" };
-        //             }
-        //         }
-        //         return item;
-        //     })
-        // })),
-        // addProductData: (formData) => set((state) => {
-        //     const updatedItems = state.items.map((item) => {
-        //         const productEntries = formData.filter(
-        //             (data) => data.productId === String(item.id)
-        //         );
-        
-        //         if (productEntries.length > 0) {
-        //             const emails = productEntries.map(entry => entry.email);
-        //             return {
-        //                 ...item,
-        //                 emails: emails,
-        //                 type: productEntries[0].loginType
-        //             };
-        //         }
-        //         return item;
-        //     });
-        
-        //     return { items: updatedItems };
-        // }),
         addProductData: (formData) => set((state) => ({
             items: state.items.map((item) => {
                 const matchingFormData = formData.find((data) => data.productId === String(item.id));
@@ -94,16 +62,26 @@ export const useCart = create<CartState>(persist(
                     if (matchingFormData.loginType === "EMAIL_CODE") {
                         return { 
                             ...item, 
-                            account_id: matchingFormData.email,
-                            code: "",
-                            email: matchingFormData.email, // Важно установить email
-                            type: "EMAIL_CODE"
+                            account_id: matchingFormData.email, 
+                            code: "", 
+                            email: matchingFormData.email, 
+                            type: "EMAIL_CODE",
+                            game: matchingFormData.game // Сохраняем game
+                        };
+                    } else if (matchingFormData.loginType === "LINK") {
+                        return { 
+                            ...item, 
+                            account_id: matchingFormData.email, 
+                            code: "", 
+                            type: "LINK",
+                            game: matchingFormData.game // Сохраняем game
                         };
                     }
                 }
                 return item;
             })
         })),
+
         removeItem: (id) => set((state) => ({
             items: state.items.filter((item) => item.id !== id || item.count > 1)
                 .map((item) => item.id === id ? { ...item, count: item.count - 1 } : item)
@@ -150,4 +128,3 @@ export const useOrderData = create<IOrderData>(persist(
         setEmail: (email) => set(({email}))
     }), {name: 'orderdata-supercell', getStorage: () => localStorage}
 ))
-

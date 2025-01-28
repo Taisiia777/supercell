@@ -34,10 +34,21 @@ export default function Product(props: { data: IProduct }) {
         return () => clearTimeout(timeoutId);
     }, []);
 
+    
     return (
         <div className={styles.product}>
             <div className={styles.img}>
-                <Image src={props.data.images[0].original} alt={props.data.title} objectFit="cover" fill quality={100} unoptimized={true}/>
+                {/* <Image src={props.data.images[0].original} alt={props.data.title} objectFit="cover" fill quality={100} unoptimized={true}/> */}
+                <Image 
+  src={props.data.images[0].original}
+  alt={props.data.title}
+  fill
+  style={{ objectFit: 'contain' }}
+  quality={100}
+  unoptimized={true}
+  loading="eager"
+  priority
+/>
             </div>
             <div className={styles.card}>
                 <div className={styles.name}>

@@ -73,7 +73,15 @@ export default function Products(props: { data: IProduct[] }) {
                             </div>
                             <div className={styles.content}>
                                 <div className={styles.img}>
-                                    <Image src={product.images[0].original} alt={product.title} objectFit="cover" fill/>
+                                    {/* <Image src={product.images[0].original} alt={product.title} objectFit="cover" fill/> */}
+                                    <Image 
+  src={product.images[0].original}
+  alt={product.title}
+  fill
+  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+  priority
+  className="object-contain"
+/>
                                 </div>
                                 <div className={styles.container}>
                                     <div className={styles.name}>

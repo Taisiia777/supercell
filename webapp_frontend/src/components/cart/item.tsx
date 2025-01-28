@@ -13,16 +13,14 @@ export default function ProductItem(props: {item: IProduct, count?: number, isLo
     const handleSupercell = (data: any) => {
         if(props.handleEnd) {
             props.handleEnd(data)
-            console.log("SUPERCELL")
-            console.log(data)
+           
         }
     }
 
     const handleLink = (data: any) => {
         if(props.handleEnd) {
             props.handleEnd(data)
-            console.log("LINK")
-            console.log(data)
+           
         }
     }
 
@@ -32,7 +30,19 @@ export default function ProductItem(props: {item: IProduct, count?: number, isLo
                 <div className={styles.container}>
                     <div className={styles.img}>
                         <div className={styles.bg}>
-                            <Image src={props.item.images[0].original} alt={props.item.title} height={70} width={60}/>
+                            {/* <Image src={props.item.images[0].original} alt={props.item.title} height={70} width={60}/> */}
+                            <Image 
+  src={props.item.images[0].original} 
+  alt={props.item.title} 
+  height={70} 
+  width={60}
+  style={{ objectFit: 'contain', width: 'auto', height: '70px' }}
+  priority
+  quality={100}
+  unoptimized={true}
+  loading="eager"
+/>
+
                         </div>
                         <div className={styles.type}>
                             {props.item.login_type === "EMAIL_CODE" ? (

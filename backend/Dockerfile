@@ -18,6 +18,7 @@ RUN apt-get update --yes --quiet && apt-get install --yes --quiet --no-install-r
 
 COPY requirements.txt .
 RUN pip install --no-cache -r requirements.txt
+RUN pip install django-extensions
 
 WORKDIR /app
 RUN chown web:web /app

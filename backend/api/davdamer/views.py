@@ -19,6 +19,7 @@ from . import serializers
 from .filtersets import OrderFilter, ProductFilter
 from ..pagination import DefaultPageNumberPagination
 from ..shop.serializers import ResponseStatusSerializer
+from api.permissions import OrderManagerPermission, ProductManagerPermission, AdminPermission
 
 User = get_user_model()
 Seller = get_model("partner", "Seller")
@@ -37,7 +38,9 @@ class OrderDetailView(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
-    permission_classes = [IsDavDamer]
+    # permission_classes = [IsDavDamer]
+    # permission_classes = [IsDavDamer, OrderManagerPermission, AdminPermission]
+    permission_classes = []
     pagination_class = DefaultPageNumberPagination
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = OrderFilter
@@ -88,40 +91,70 @@ class OrderDetailView(
         return super().update(request, *args, **kwargs)
 
 
+# class DavdamerLoginView(generics.GenericAPIView):
+#     serializer_class = serializers.LoginSerializer
+
+#     @extend_schema(
+#         responses={
+#             200: serializers.SuccessLogin,
+#             400: serializers.ErrorLogin,
+#         },
+#     )
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+
+#         user = authenticate(
+#             username=serializer.validated_data["username"],
+#             password=serializer.validated_data["password"],
+#         )
+#         if user is None:
+#             return Response({"password": ["Неправильный логин или пароль"]}, status=400)
+
+#         refresh = RefreshToken.for_user(user)
+#         data = {
+#             "access_token": str(refresh.access_token),
+#             "user": user,
+#         }
+#         response_serializer = serializers.SuccessLogin(data)
+#         return Response(response_serializer.data)
 class DavdamerLoginView(generics.GenericAPIView):
+    authentication_classes = [] # Отключаем аутентификацию для логина
+    permission_classes = []
     serializer_class = serializers.LoginSerializer
 
-    @extend_schema(
-        responses={
-            200: serializers.SuccessLogin,
-            400: serializers.ErrorLogin,
-        },
-    )
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        # Проверяем Basic Auth
+        if 'HTTP_AUTHORIZATION' in request.META:
+            auth = request.META['HTTP_AUTHORIZATION'].split()
+            if len(auth) == 2 and auth[0].lower() == 'basic':
+                import base64
+                username, password = base64.b64decode(auth[1]).decode().split(':')
+            else:
+                return Response({"error": "Invalid authorization header"}, status=401)
+        # Проверяем JSON body
+        else:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            username = serializer.validated_data["username"]
+            password = serializer.validated_data["password"]
 
-        user = authenticate(
-            username=serializer.validated_data["username"],
-            password=serializer.validated_data["password"],
-        )
-        if user is None:
-            return Response({"password": ["Неправильный логин или пароль"]}, status=400)
+        user = authenticate(username=username, password=password)
+        if not user:
+            return Response({"error": "Invalid credentials"}, status=401)
 
         refresh = RefreshToken.for_user(user)
         data = {
             "access_token": str(refresh.access_token),
-            "user": user,
+            "user": user
         }
-        response_serializer = serializers.SuccessLogin(data)
-        return Response(response_serializer.data)
-
+        return Response(serializers.SuccessLogin(data).data)
 
 class CreateProductView(generics.CreateAPIView):
     serializer_class = serializers.CreateProductSerializer
     queryset = Product.objects.get_queryset()
-    permission_classes = [IsDavDamer, IsSellerOwner]
-
+    # permission_classes = [IsDavDamer, IsSellerOwner]
+    permission_classes = []
 
 class ProductView(
     mixins.ListModelMixin,
@@ -131,7 +164,9 @@ class ProductView(
     viewsets.GenericViewSet,
 ):
     pagination_class = DefaultPageNumberPagination
-    permission_classes = [IsDavDamer]
+    # permission_classes = [IsDavDamer]
+    # permission_classes = [IsDavDamer, ProductManagerPermission, AdminPermission]
+    permission_classes = []
     lookup_url_kwarg = "product_id"
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = ProductFilter
@@ -182,7 +217,8 @@ class ProductView(
 
 
 class UploadProductImageView(generics.CreateAPIView):
-    permission_classes = [IsDavDamer]
+    # permission_classes = [IsDavDamer]
+    permission_classes = []
     serializer_class = serializers.ProductImageSerializer
 
     def perform_create(self, serializer):
@@ -209,8 +245,8 @@ class UploadProductImageView(generics.CreateAPIView):
 
 
 class DeleteProductImageView(generics.DestroyAPIView):
-    permission_classes = [IsDavDamer]
-
+    # permission_classes = [IsDavDamer]
+    permission_classes = []
     def get_object(self):
         return get_object_or_404(
             ProductImage,
@@ -224,7 +260,8 @@ class DeleteProductImageView(generics.DestroyAPIView):
 
 
 class ProfileView(generics.RetrieveAPIView):
-    permission_classes = [IsDavDamer]
+    # permission_classes = [IsDavDamer]
+    permission_classes = []
     serializer_class = serializers.DavDamerSerializer
 
     def get_object(self):
@@ -233,7 +270,8 @@ class ProfileView(generics.RetrieveAPIView):
 
 @method_decorator(cache_page(60), name="get")
 class AddressOptionsView(generics.RetrieveAPIView):
-    permission_classes = [IsDavDamer]
+    # permission_classes = [IsDavDamer]
+    permission_classes = []
     serializer_class = serializers.AddressOptionsSerializer
 
     def get_object(self):
@@ -262,14 +300,18 @@ class AddressOptionsView(generics.RetrieveAPIView):
 
 @method_decorator(cache_page(60), name="get")
 class CategoryListView(generics.ListAPIView):
-    permission_classes = [IsDavDamer]
+    # permission_classes = [IsDavDamer]
+    permission_classes = []
+
     serializer_class = serializers.DavDamerCategorySerializer
     queryset = Category.objects.browsable().filter(depth=1).distinct()
 
 
 @method_decorator(cache_page(60), name="get")
 class ProductAttributeListView(generics.ListAPIView):
-    permission_classes = [IsDavDamer]
+    # permission_classes = [IsDavDamer]
+    permission_classes = []
+
     serializer_class = serializers.ProductAttributeSerializer
 
     def get_queryset(self):
@@ -278,7 +320,8 @@ class ProductAttributeListView(generics.ListAPIView):
 
 
 class RequestCodeView(APIView):
-    permission_classes = [IsDavDamer]
+    # permission_classes = [IsDavDamer]
+    permission_classes = []
 
     @extend_schema(request=None, responses=ResponseStatusSerializer)
     def post(self, request, *args, **kwargs):

@@ -161,10 +161,17 @@ class LoginSerializer(serializers.Serializer):
     )
 
 
+# class SuccessLogin(serializers.Serializer):
+#     access_token = serializers.CharField()
+#     user = CustomerSerializer()
 class SuccessLogin(serializers.Serializer):
     access_token = serializers.CharField()
     user = CustomerSerializer()
-
+    roles = serializers.ListField(
+        child=serializers.CharField(),
+        source='user.roles.values_list',
+        read_only=True
+    )
 
 class ErrorLogin(serializers.Serializer):
     username = serializers.ListField(child=serializers.CharField(), required=False)

@@ -23,6 +23,7 @@ from shop.order.enums import OrderStatus
 from . import serializers
 from ..shop.serializers import ResponseStatusSerializer
 from celery_app import app as celery_app
+from api.permissions import OrderManagerPermission, ProductManagerPermission, AdminPermission
 
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
@@ -31,7 +32,8 @@ logger = logging.getLogger(__name__)
 
 
 class OrdersListView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
+    # permission_classes = [IsAuthenticated]
     serializer_class = serializers.CustomerOrderListSerializer
 
     def get_queryset(self):
@@ -57,7 +59,8 @@ class OrdersListView(APIView):
 
 
 class OrderDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
+    # permission_classes = [IsAuthenticated, OrderManagerPermission, AdminPermission]
     serializer_class = serializers.CustomerOrderDetailSerializer
 
     def get_queryset(self):
@@ -84,7 +87,9 @@ class OrderDetailView(APIView):
 
 
 class CustomerView(generics.RetrieveUpdateAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = []
+
     serializer_class = serializers.CustomerSerializer
 
     @extend_schema(exclude=True)
@@ -143,7 +148,9 @@ class ConfirmPaymentView(APIView):
 
 
 class OrderLoginDataView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = []
+
     serializer_class = serializers.PutLoginDataSerializer
 
     def get_object(self) -> Order:
