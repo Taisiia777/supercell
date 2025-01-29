@@ -26,7 +26,7 @@
         //   justify-content: center;
         //   align-items: center;
         // }
-        position: relative;
+          position: relative;
         .bg {
           width: 100px;
           height: 90px;
@@ -35,13 +35,15 @@
           display: flex;
           justify-content: center;
           align-items: center;
-          
           img {
-            width: auto;
-            height: 70px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
-            margin: auto;
           }
+
         }
         .type {
           position: absolute;

@@ -22,6 +22,7 @@ from api.shop import serializers
 from core.exceptions import InvalidProductError, AppError
 from core.models import City, EmailCodeRequest
 from celery_app import app as celery_app
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ Seller = get_model("partner", "Seller")
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
 Order = get_model("order", "Order")
+Option = get_model('catalogue', 'Option')
 
 
 @method_decorator(cache_page(30), name="list")
@@ -172,6 +174,109 @@ class CheckoutAPIView(CoreCheckoutView):
             except Exception as err:
                 logger.exception(err)
                 raise AppError(str(err)) from err
+
+    # def _fill_basket(self):
+    #     for index, product_data in enumerate(self.serializer.validated_data["products"], start=1):
+    #         try:
+    #             # Получаем продукт
+    #             product = Product.objects.public().get(id=product_data["product_id"])
+    #             qnt = product_data["quantity"]
+
+    #             # Получаем стратегию ценообразования
+    #             strategy = Selector().strategy()
+    #             purchase_info = strategy.fetch_for_product(product)
+
+    #             # Проверяем доступность продукта
+    #             if not purchase_info.availability.is_purchase_permitted(qnt):
+    #                 raise ValidationError(f"Недостаточно товара {product.title} на складе")
+
+    #             # Получаем stockrecord
+    #             stockrecord = product.stockrecords.first()
+    #             if not stockrecord:
+    #                 raise ValidationError(f"Нет доступных записей о складе для товара {product.title}")
+
+    #             # Создаем уникальный line_reference 
+    #             line_reference = f"{product.id}_{index}_{uuid.uuid4().hex}"
+
+    #             # Создаем новую линию в корзине с уникальным reference
+    #             line = self.request.basket.lines.create(
+    #                 basket=self.request.basket, 
+    #                 product=product, 
+    #                 stockrecord=stockrecord,
+    #                 quantity=qnt,
+    #                 price_currency=purchase_info.price.currency,
+    #                 price_excl_tax=purchase_info.price.excl_tax,
+    #                 price_incl_tax=purchase_info.price.incl_tax,
+    #                 line_reference=line_reference  # Добавляем уникальный line_reference
+    #             )
+
+    #             # Дополнительная обработка (если необходимо)
+    #             line.save()
+
+    #         except Product.DoesNotExist:
+    #             raise InvalidProductError(f"Продукт с ID {product_data['product_id']} не найден")
+    #         except ValidationError as err:
+    #             raise InvalidProductError(str(err))
+    #         except Exception as err:
+    #             logger.exception(f"Ошибка при добавлении продукта в корзину: {err}")
+    #             raise AppError(f"Не удалось добавить продукт {product.title} в корзину") from err
+    # def _fill_basket(self):
+    #     product_data_dict = {
+    #         product_data["product_id"]: {
+    #             "email": product_data.get("email", ""),
+    #             "code": product_data.get("code", ""),
+    #             "quantity": product_data["quantity"]
+    #         }
+    #         for product_data in self.serializer.validated_data["products"]
+    #     }
+
+    #     for index, product_data in enumerate(self.serializer.validated_data["products"], start=1):
+    #         try:
+    #             # Получаем продукт
+    #             product = Product.objects.public().get(id=product_data["product_id"])
+                
+    #             # Получаем стратегию ценообразования
+    #             strategy = Selector().strategy()
+    #             purchase_info = strategy.fetch_for_product(product)
+                
+    #             # Проверяем доступность продукта
+    #             if not purchase_info.availability.is_purchase_permitted(product_data_dict[product.id]["quantity"]):
+    #                 raise ValidationError(f"Недостаточно товара {product.title} на складе")
+                
+    #             # Получаем stockrecord
+    #             stockrecord = product.stockrecords.first()
+    #             if not stockrecord:
+    #                 raise ValidationError(f"Нет доступных записей о складе для товара {product.title}")
+                
+    #             # Создаем уникальный line_reference
+    #             line_reference = f"{product.id}_{index}_{uuid.uuid4().hex}"
+                
+    #             # Создаем новую линию в корзине с уникальным reference
+    #             line = self.request.basket.lines.create(
+    #                 basket=self.request.basket,
+    #                 product=product,
+    #                 stockrecord=stockrecord,
+    #                 quantity=product_data_dict[product.id]["quantity"],
+    #                 price_currency=purchase_info.price.currency,
+    #                 price_excl_tax=purchase_info.price.excl_tax,
+    #                 price_incl_tax=purchase_info.price.incl_tax,
+    #                 line_reference=line_reference
+    #             )
+                
+    #             # Сохраняем уникальные данные для каждого товара
+    #             line.email = product_data_dict[product.id]["email"]
+    #             line.code = product_data_dict[product.id]["code"]
+    #             line.save()
+                
+    #         except Product.DoesNotExist:
+    #             raise InvalidProductError(f"Продукт с ID {product_data['product_id']} не найден")
+    #         except ValidationError as err:
+    #             raise InvalidProductError(str(err))
+    #         except Exception as err:
+    #             logger.exception(f"Ошибка при добавлении продукта в корзину: {err}")
+    #             raise AppError(f"Не удалось добавить продукт {product.title} в корзину") from err
+    
+
 
     def _parse_products_and_fill_basket(self):
         serializer = self.products_serializer_class(data=self.request.data)

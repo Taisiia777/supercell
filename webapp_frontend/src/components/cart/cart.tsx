@@ -102,6 +102,36 @@ export default function Cart(props: { data: IProduct[] }) {
     const { register, handleSubmit, setValue, watch } = useForm<FormValues>();
 
 
+    // const onSubmit = handleSubmit((data) => {
+    //     console.log("Форма отправляется", data);
+    //     const productFormData = [];
+    //     let emailFormData = null;
+    
+    //     Object.entries(data).forEach(([key, value]) => {
+    //         if (key.endsWith("-email")) {
+    //             const [productId] = key.split("-"); // Получаем ID продукта
+    //             const item = filteredData.find((item) => item.id.toString() === productId);
+    //             if (item) {
+    //                 const loginType = item.login_type;
+    //                 const game = item.game; // Добавляем информацию об игре
+    //                 productFormData.push({ 
+    //                     productId, 
+    //                     email: value, 
+    //                     loginType,
+    //                     game // Добавляем game в данные
+    //                 });
+    //             }
+    //         } else if (key === "email") {
+    //             emailFormData = { email: value };
+    //         }
+    //     });
+    
+    //     console.log("Подготовленные данные:", productFormData);
+    //     addProductData(productFormData);
+    //     setEmail(emailFormData.email);
+    
+    //     router.push('/checkout');
+    // });
     const onSubmit = handleSubmit((data) => {
         console.log("Форма отправляется", data);
         const productFormData = [];
@@ -109,16 +139,19 @@ export default function Cart(props: { data: IProduct[] }) {
     
         Object.entries(data).forEach(([key, value]) => {
             if (key.endsWith("-email")) {
-                const [productId] = key.split("-"); // Получаем ID продукта
-                const item = filteredData.find((item) => item.id.toString() === productId);
+                // Получаем uniqueId без "-email" (например "123-0")
+                const uniqueId = key.slice(0, -6);
+                const item = filteredData.find((item) => item.uniqueId === uniqueId);
+                
                 if (item) {
                     const loginType = item.login_type;
-                    const game = item.game; // Добавляем информацию об игре
-                    productFormData.push({ 
-                        productId, 
-                        email: value, 
+                    const game = item.game;
+                    productFormData.push({
+                        productId: item.id.toString(),
+                        uniqueId: uniqueId,
+                        email: value,
                         loginType,
-                        game // Добавляем game в данные
+                        game
                     });
                 }
             } else if (key === "email") {
@@ -159,33 +192,39 @@ export default function Cart(props: { data: IProduct[] }) {
 
     const [formInitialized, setFormInitialized] = useState(false);
 
-    useEffect(() => {
-        // Только при первой загрузке 
-        if (profile?.game_email && !isLoadingProfile && !formInitialized) {
-          filteredData.forEach(item => {
-            const emailKey = `${item.uniqueId}-email`;
-            // Проверяем текущее значение
-            const currentEmailValue = watch(emailKey);
-            const gameEmail = profile.game_email[item.game];
 
-            // Заполняем только если поле действительно пустое
-            if (!currentEmailValue || currentEmailValue === '') {
-              const gameEmail = profile.game_email[item.game];
-              if (gameEmail && item.login_type === "EMAIL_CODE") {
-                setValue(emailKey, gameEmail);
-              }
-            }
-          });
-      
-          // То же самое для основного email
-          const currentMainEmail = watch("email");
-          if (!currentMainEmail || currentMainEmail === '') {
-            setValue("email", gameEmail);
-          }
-          
-          setFormInitialized(true);
+useEffect(() => {
+  // Только при первой загрузке 
+  if (profile?.game_email && !isLoadingProfile && !formInitialized) {
+    filteredData.forEach(item => {
+      const emailKey = `${item.uniqueId}-email`;
+      // Проверяем текущее значение
+      const currentEmailValue = watch(emailKey);
+
+      // Заполняем только если поле действительно пустое
+      if (!currentEmailValue || currentEmailValue === '') {
+        const gameEmail = profile.game_email[item.game];
+        if (gameEmail && item.login_type === "EMAIL_CODE") {
+          setValue(emailKey, gameEmail);
         }
-      }, [profile, isLoadingProfile]);
+      }
+          // То же самое для основного email
+    const currentMainEmail = watch("email");
+    if (!currentMainEmail || currentMainEmail === '') {
+      const mainGameEmail = profile.game_email[filteredData[0]?.game];
+      if (mainGameEmail) {
+        setValue("email", mainGameEmail);  
+      }
+    }
+    });
+
+
+    
+    setFormInitialized(true);
+  }
+}, [profile, isLoadingProfile]);
+
+
       
       // Добавьте очистку при размонтировании
       useEffect(() => {

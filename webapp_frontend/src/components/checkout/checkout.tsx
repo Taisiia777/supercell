@@ -1,3 +1,4 @@
+
 // 'use client'
 // import styles from "./checkout.module.scss"
 // import {useCart, useOrderData} from "@/components/store/store";
@@ -10,137 +11,152 @@
 // import {IProduct} from "@/types/products.interface";
 // import {useRouter} from "next/navigation";
 // import {useTelegram} from "@/app/useTg";
-// import {IOrders} from "@/types/orders.interface";
+
 // export default function CheckOut(props: {data : IProduct[]}) {
-
 //     const { user, webApp } = useTelegram();
-
-//     const router = useRouter()
-
-//     const {items, updateCode, removeAll} = useCart()
-//     const {email} = useOrderData()
-//     const [state, setState] = useState<any>([])
+//     const router = useRouter();
+//     const {items, updateCode, removeAll} = useCart();
+//     const {email} = useOrderData();
+//     const [state, setState] = useState<any>([]);
 
 //     useEffect(() => {
-//         setState(items)
+//         // Создаем развернутый массив элементов, учитывая количество каждого товара
+//         const expandedItems = items.flatMap(item => 
+//             Array.from({ length: item.count }, (_, index) => ({
+//                 ...item,
+//                 uniqueId: `${item.id}_${index}`, // Добавляем уникальный идентификатор
+//             }))
+//         );
+//         setState(expandedItems);
 //     }, [items]);
 
 //     const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm();
 
-//     const [getOrder, setOrder] = useState<any>()
-//     const [isCanPay, setCanPay] = useState(false)
-//     const onSubmit = (data: any) => {
-//         console.log(data)
+//     const [getOrder, setOrder] = useState<any>();
+//     const [isCanPay, setCanPay] = useState(false);
 
+   
+//     const onSubmit = (data: any) => {
+//         console.log("Raw form data:", data);
+    
+//         // Преобразуем данные формы обратно в формат по ID товара
+//         const processedData: { [key: string]: any } = {};
+//         Object.entries(data).forEach(([key, value]) => {
+//             // Извлекаем ID товара из уникального ключа (например, из "123_0" получаем "123")
+//             const productId = key.split('_')[0];
+//             processedData[productId] = value;
+//         });
+    
+//         console.log("Processed data:", processedData);
+    
 //         const totalPrice = items.reduce((total, item) => {
-//             // Находим соответствующий продукт из списка всех продуктов
 //             const product = props.data.find(product => product.id === item.id);
 //             if (product) {
-//                 // Если продукт найден, учитываем его стоимость и количество в корзине
 //                 return total + (Number(item.count) * Number(product.price.incl_tax));
 //             } else {
 //                 return total;
 //             }
 //         }, 0);
-
-
-//         setCanPay(true)
-
-//         const update = updateCode(data, email, totalPrice);
+    
+//         setCanPay(true);
+    
+//         // Передаем обработанные данные в updateCode
+//         const update = updateCode(processedData, email, totalPrice);
 //         setOrder(update);
-
-//         // Получаем order из состояния
-//         if (update) {
-
-//         } else {
-//             setCanPay(false)
-//             console.log("Нет обновлений"); // Если updateCode не вернул никаких обновлений
+    
+//         if (!update) {
+//             setCanPay(false);
+//             console.log("Нет обновлений");
 //         }
 //     };
-
-
 //     useEffect(() => {
 //         if(isCanPay) {
 //             const fetchData = async () => {
 //                 const updatedItems = getOrder.items;
 //                 const order = getOrder.order;
-//                 console.log("@@@@@@@@@@@@@@@@@@")
-//                 console.log(order)
-//                 console.log("@@@@@@@@@@@@@@@@@@")
+//                 console.log("@@@@@@@@@@@@@@@@@@");
+//                 console.log(order);
+//                 console.log("@@@@@@@@@@@@@@@@@@");
 
 //                 const res = await checkout(order, webApp?.initData);
-//                 console.log(res)
+//                 console.log(res);
 //                 if(res && res.payment_url) {
 //                     router.push(res.payment_url);
-//                     setCanPay(false)
-//                     removeAll()
+//                     setCanPay(false);
+//                     removeAll();
 //                 }
 //             };
 //             fetchData();
 //         }
-
 //     }, [isCanPay]);
-
-//     const emails = items.filter(items => items.account_id).map(item => item.account_id)
 
 //     const emailsWithGame = items
 //         .filter(item => item.account_id && item.game && item.type === "EMAIL_CODE")
-//         .map(item => ({ game: item.game, email: item.account_id }))
+//         .map(item => ({ game: item.game, email: item.account_id }));
 
 //     useEffect(() => {
 //         const fetchEmail = async () => {
-//             console.log(items)
-
-//             const codes = await requestCode(emailsWithGame)
-//             console.log("REQUEST ALL")
-//             console.log(emailsWithGame)
-//         }
-//         fetchEmail()
+//             console.log(items);
+//             const codes = await requestCode(emailsWithGame);
+//             console.log("REQUEST ALL");
+//             console.log(emailsWithGame);
+//         };
+//         fetchEmail();
 //     }, []);
 
 //     const handleRequest = async (email: string, game: string) => {
-//         console.log({email, game})
-//         await requestCode([{ email, game }])
-//     }
+//         console.log({email, game});
+//         await requestCode([{ email, game }]);
+//     };
 
-//     // const handleRequest = async (email: number) => {
-//     //     console.log(email)
-//     //     await requestCode([email])
-//     // }
-    
 //     return (
 //         <div className={styles.checkout}>
 //             <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-//                 {state && state.filter((item: { email: string, account_id: string, game: string }) => item.email).map((item: { id: number, account_id: string, game: string }, index: number) => {
-//                     const uid = item.id.toString();
+//                 {state.filter((item: any) => item.type === "EMAIL_CODE").map((item: any) => {
+//                     const uid = item.uniqueId;
 //                     return (
 //                         <div key={uid} className={styles.code}>
-//                             <Input title="Введите код"
-//                                    productId={item.id}
-//                                    {...register(uid, { required: true, minLength: 6, maxLength: 6, pattern: /^[0-9]*$/ })}
-//                                    name={uid}
-//                                 // setValue={setValue}
-//                                    value={watch().uid}
-//                                    style={errors[uid] ? { boxShadow: "inset 4px 10px 30px 0 #f006" } : {}}
-//                                    type_action="request_code"
-//                                    requestClick={() => handleRequest(item.account_id, item.game)}
+//                             <Input 
+//                                 title="Введите код"
+//                                 productId={item.id}
+//                                 {...register(uid, { 
+//                                     required: true, 
+//                                     minLength: 6, 
+//                                     maxLength: 6, 
+//                                     pattern: /^[0-9]*$/ 
+//                                 })}
+//                                 name={uid}
+//                                 value={watch()[uid]}
+//                                 style={errors[uid] ? { 
+//                                     boxShadow: "inset 4px 10px 30px 0 #f006" 
+//                                 } : {}}
+//                                 type_action="request_code"
+//                                 validation="code"
+//                                 requestClick={() => handleRequest(item.account_id, item.game)}
 //                             />
-//                             {errors[uid] ? <p className={styles.error}>Код должен содержать 6 цифр</p> : null}
-//                             <p>На вашу почту <span>{item.account_id}</span> пришел код для входа. Его нужно ввести в поле выше без пробелов для игр(ы)</p>
+//                             {errors[uid] && (
+//                                 <p className={styles.error}>
+//                                     Код должен содержать 6 цифр
+//                                 </p>
+//                             )}
+//                             <p>
+//                                 На вашу почту <span>{item.account_id}</span> пришел код для входа. 
+//                                 Его нужно ввести в поле выше без пробелов для игр(ы)
+//                             </p>
 //                         </div>
-//                     )
+//                     );
 //                 })}
 //                 <PrimaryButton title="Оплатить" type="submit"/>
 //             </form>
 //         </div>
-//     )
+//     );
 // }
 'use client'
 import styles from "./checkout.module.scss"
 import {useCart, useOrderData} from "@/components/store/store";
 import Input from "@/components/ui/input/input";
 import PrimaryButton from "@/components/ui/primary-button/primary-button";
-import {useForm} from "react-hook-form";
+import {useForm, SubmitHandler} from "react-hook-form";
 import {useEffect, useState} from "react";
 import {requestCode} from "@/actions/requestCode";
 import {checkout} from "@/actions/checkout";
@@ -148,150 +164,141 @@ import {IProduct} from "@/types/products.interface";
 import {useRouter} from "next/navigation";
 import {useTelegram} from "@/app/useTg";
 
+interface FormValues {
+    [key: string]: string;
+}
+
+interface ExpandedItem {
+    id: number;
+    uniqueId: string;
+    account_id: string;
+    game: string;
+    type: string;
+    count: number;
+}
+
 export default function CheckOut(props: {data : IProduct[]}) {
     const { user, webApp } = useTelegram();
     const router = useRouter();
     const {items, updateCode, removeAll} = useCart();
     const {email} = useOrderData();
-    const [state, setState] = useState<any>([]);
+    const [state, setState] = useState<ExpandedItem[]>([]);
 
     useEffect(() => {
-        // Создаем развернутый массив элементов, учитывая количество каждого товара
-        const expandedItems = items.flatMap(item => 
-            Array.from({ length: item.count }, (_, index) => ({
+        const expandedItems = items.flatMap(item => {
+            const emails = Array.isArray(item.account_id) ? 
+                item.account_id : 
+                (item.account_id ? [item.account_id] : []);
+            
+            return emails.map((email, index) => ({
                 ...item,
-                uniqueId: `${item.id}_${index}`, // Добавляем уникальный идентификатор
-            }))
-        );
+                uniqueId: `${item.id}_${index}`,
+                account_id: email,
+            })) as ExpandedItem[];
+        });
         setState(expandedItems);
+
+        const sendCodeRequests = async () => {
+            const emailGroups = items
+                .filter(item => Array.isArray(item.account_id))
+                .flatMap(item => 
+                    (Array.isArray(item.account_id) ? item.account_id : [])
+                        .map(email => ({
+                            game: item.game,
+                            email: email
+                        }))
+                );
+
+            for (const emailGroup of emailGroups) {
+                await requestCode([emailGroup]);
+            }
+        };
+
+        sendCodeRequests();
     }, [items]);
 
-    const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm();
+    const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<FormValues>();
 
-    const [getOrder, setOrder] = useState<any>();
-    const [isCanPay, setCanPay] = useState(false);
-
-    // const onSubmit = (data: any) => {
-    //     console.log(data);
-
-    //     const totalPrice = items.reduce((total, item) => {
-    //         const product = props.data.find(product => product.id === item.id);
-    //         if (product) {
-    //             return total + (Number(item.count) * Number(product.price.incl_tax));
-    //         } else {
-    //             return total;
-    //         }
-    //     }, 0);
-
-    //     setCanPay(true);
-
-    //     const update = updateCode(data, email, totalPrice);
-    //     setOrder(update);
-
-    //     if (!update) {
-    //         setCanPay(false);
-    //         console.log("Нет обновлений");
-    //     }
-    // };
-    const onSubmit = (data: any) => {
+    const onSubmit: SubmitHandler<FormValues> = async (data) => {
         console.log("Raw form data:", data);
-    
-        // Преобразуем данные формы обратно в формат по ID товара
-        const processedData: { [key: string]: any } = {};
-        Object.entries(data).forEach(([key, value]) => {
-            // Извлекаем ID товара из уникального ключа (например, из "123_0" получаем "123")
-            const productId = key.split('_')[0];
-            processedData[productId] = value;
-        });
-    
-        console.log("Processed data:", processedData);
-    
+        
+        const products = state.map(item => ({
+            product_id: item.id,
+            quantity: 1,
+            code: data[item.uniqueId] || null,
+            account_id: item.account_id
+        }));
+
         const totalPrice = items.reduce((total, item) => {
             const product = props.data.find(product => product.id === item.id);
             if (product) {
                 return total + (Number(item.count) * Number(product.price.incl_tax));
-            } else {
-                return total;
             }
+            return total;
         }, 0);
-    
-        setCanPay(true);
-    
-        // Передаем обработанные данные в updateCode
-        const update = updateCode(processedData, email, totalPrice);
-        setOrder(update);
-    
-        if (!update) {
-            setCanPay(false);
-            console.log("Нет обновлений");
-        }
-    };
-    useEffect(() => {
-        if(isCanPay) {
-            const fetchData = async () => {
-                const updatedItems = getOrder.items;
-                const order = getOrder.order;
-                console.log("@@@@@@@@@@@@@@@@@@");
-                console.log(order);
-                console.log("@@@@@@@@@@@@@@@@@@");
 
-                const res = await checkout(order, webApp?.initData);
-                console.log(res);
-                if(res && res.payment_url) {
-                    router.push(res.payment_url);
+        const orderData = {
+            products,
+            email,
+            total: totalPrice
+        };
+
+        setCanPay(true);
+        setOrder({ items: state, order: orderData });
+    };
+
+    const [isCanPay, setCanPay] = useState(false);
+    const [getOrder, setOrder] = useState<any>();
+
+    useEffect(() => {
+        if(isCanPay && getOrder) {
+            const processCheckout = async () => {
+                try {
+                    const res = await checkout(getOrder.order, webApp?.initData);
+                    if(res && res.payment_url) {
+                        router.push(res.payment_url);
+                        setCanPay(false);
+                        removeAll();
+                    }
+                } catch (error) {
+                    console.error("Checkout error:", error);
                     setCanPay(false);
-                    removeAll();
                 }
             };
-            fetchData();
+            processCheckout();
         }
-    }, [isCanPay]);
-
-    const emailsWithGame = items
-        .filter(item => item.account_id && item.game && item.type === "EMAIL_CODE")
-        .map(item => ({ game: item.game, email: item.account_id }));
-
-    useEffect(() => {
-        const fetchEmail = async () => {
-            console.log(items);
-            const codes = await requestCode(emailsWithGame);
-            console.log("REQUEST ALL");
-            console.log(emailsWithGame);
-        };
-        fetchEmail();
-    }, []);
+    }, [isCanPay, getOrder]);
 
     const handleRequest = async (email: string, game: string) => {
-        console.log({email, game});
         await requestCode([{ email, game }]);
     };
 
     return (
         <div className={styles.checkout}>
             <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-                {state.filter((item: any) => item.type === "EMAIL_CODE").map((item: any) => {
-                    const uid = item.uniqueId;
-                    return (
-                        <div key={uid} className={styles.code}>
+                {state
+                    .filter((item) => item.type === "EMAIL_CODE")
+                    .map((item) => (
+                        <div key={item.uniqueId} className={styles.code}>
                             <Input 
                                 title="Введите код"
                                 productId={item.id}
-                                {...register(uid, { 
+                                {...register(item.uniqueId, { 
                                     required: true, 
                                     minLength: 6, 
                                     maxLength: 6, 
                                     pattern: /^[0-9]*$/ 
                                 })}
-                                name={uid}
-                                value={watch()[uid]}
-                                style={errors[uid] ? { 
+                                name={item.uniqueId}
+                                value={watch()[item.uniqueId]}
+                                style={errors[item.uniqueId] ? { 
                                     boxShadow: "inset 4px 10px 30px 0 #f006" 
                                 } : {}}
                                 type_action="request_code"
                                 validation="code"
                                 requestClick={() => handleRequest(item.account_id, item.game)}
                             />
-                            {errors[uid] && (
+                            {errors[item.uniqueId] && (
                                 <p className={styles.error}>
                                     Код должен содержать 6 цифр
                                 </p>
@@ -301,8 +308,7 @@ export default function CheckOut(props: {data : IProduct[]}) {
                                 Его нужно ввести в поле выше без пробелов для игр(ы)
                             </p>
                         </div>
-                    );
-                })}
+                    ))}
                 <PrimaryButton title="Оплатить" type="submit"/>
             </form>
         </div>

@@ -28,7 +28,6 @@ function ProductsShowEdit(props: IProps) {
     }
     if (isLoading) return (<h2>Загрузка данных</h2>)
     if (error || editError || !data) return (<ErrorPages></ErrorPages>)
-
     return (
         <>
             <CreateHead title="Карточка заказа" redirect={false} nameFunc={nameFunc} saveFunc={clickSave} namePage="orders" />

@@ -25,56 +25,120 @@ export const useCart = create<CartState>(persist(
             }
         },
 
-        updateCode: (updatedItems, email, totalPrice) => {
-            const state = get()
-            const newItems = state.items.map((item) => {
-                if (updatedItems[item.id]) {
-                    return {
-                        ...item,
-                        code: updatedItems[item.id]
-                    };
-                } else {
-                    return item;
-                }
-            });
+        // updateCode: (updatedItems, email, totalPrice) => {
+        //     const state = get()
+        //     const newItems = state.items.map((item) => {
+        //         if (updatedItems[item.id]) {
+        //             return {
+        //                 ...item,
+        //                 code: updatedItems[item.id]
+        //             };
+        //         } else {
+        //             return item;
+        //         }
+        //     });
 
-            // Возвращаем обновленные items вместе с order
-            return {
-                items: newItems,
-                order: {
-                    products: newItems.map(item => ({
+        //     // Возвращаем обновленные items вместе с order
+        //     return {
+        //         items: newItems,
+        //         order: {
+        //             products: newItems.map(item => ({
+        //                 product_id: item.id,
+        //                 quantity: item.count,
+        //                 code: item.code || null,
+        //                 account_id: item.account_id || item.link
+        //             })),
+        //             email: email,
+        //             total: totalPrice
+        //         }
+        //     };
+        // },
+
+
+        // addProductData: (formData) => set((state) => ({
+        //     items: state.items.map((item) => {
+        //         const matchingFormData = formData.find((data) => data.productId === String(item.id));
+        //         if (matchingFormData) {
+        //             if (matchingFormData.loginType === "EMAIL_CODE") {
+        //                 return { 
+        //                     ...item, 
+        //                     account_id: matchingFormData.email, 
+        //                     code: "", 
+        //                     email: matchingFormData.email, 
+        //                     type: "EMAIL_CODE",
+        //                     game: matchingFormData.game // Сохраняем game
+        //                 };
+        //             } else if (matchingFormData.loginType === "LINK") {
+        //                 return { 
+        //                     ...item, 
+        //                     account_id: matchingFormData.email, 
+        //                     code: "", 
+        //                     type: "LINK",
+        //                     game: matchingFormData.game // Сохраняем game
+        //                 };
+        //             }
+        //         }
+        //         return item;
+        //     })
+        // })),
+        updateCode: (updatedItems, email, totalPrice) => {
+            const state = get();
+            
+            // Преобразуем items в массив отдельных продуктов
+            const products = state.items.flatMap(item => {
+                // Если у товара есть массив email-ов (для типа EMAIL_CODE)
+                if (Array.isArray(item.account_id)) {
+                    return item.account_id.map((email, index) => ({
                         product_id: item.id,
-                        quantity: item.count,
-                        code: item.code || null,
-                        account_id: item.account_id || item.link
-                    })),
-                    email: email,
+                        quantity: 1,
+                        code: updatedItems[item.uniqueIds[index]] || null,
+                        account_id: email
+                    }));
+                }
+                
+                // Для товаров типа LINK или без массива email-ов
+                return [{
+                    product_id: item.id,
+                    quantity: 1,
+                    code: updatedItems[item.id] || null,
+                    account_id: item.account_id || item.link
+                }];
+            });
+        
+            return {
+                items: state.items,
+                order: {
+                    products,
+                    email,
                     total: totalPrice
                 }
             };
         },
-
-
         addProductData: (formData) => set((state) => ({
             items: state.items.map((item) => {
-                const matchingFormData = formData.find((data) => data.productId === String(item.id));
-                if (matchingFormData) {
-                    if (matchingFormData.loginType === "EMAIL_CODE") {
-                        return { 
-                            ...item, 
-                            account_id: matchingFormData.email, 
-                            code: "", 
-                            email: matchingFormData.email, 
+                // Находим все данные для этого товара
+                const itemDataArray = formData.filter((data) => 
+                    data.productId === String(item.id)
+                );
+        
+                if (itemDataArray.length > 0) {
+                    if (itemDataArray[0].loginType === "EMAIL_CODE") {
+                        return {
+                            ...item,
+                            account_id: itemDataArray.map(data => data.email), // Массив email
+                            code: "",
+                            email: itemDataArray[0].email,
                             type: "EMAIL_CODE",
-                            game: matchingFormData.game // Сохраняем game
+                            game: itemDataArray[0].game,
+                            uniqueIds: itemDataArray.map(data => data.uniqueId) // Сохраняем uniqueIds
                         };
-                    } else if (matchingFormData.loginType === "LINK") {
-                        return { 
-                            ...item, 
-                            account_id: matchingFormData.email, 
-                            code: "", 
+                    } else if (itemDataArray[0].loginType === "LINK") {
+                        return {
+                            ...item,
+                            account_id: itemDataArray[0].email,
+                            code: "",
                             type: "LINK",
-                            game: matchingFormData.game // Сохраняем game
+                            game: itemDataArray[0].game
                         };
                     }
                 }
