@@ -18,6 +18,7 @@ import { davDamerAPI } from "../../store/api/DavdamerAPI";
 import Filter from "../Filter/Filter";
 
 import ErrorPages from "../../pages/Error/ErrorPages";
+import { useLanguage } from "../../context/LanguageContext";
 
 interface IProps {
     edit: boolean,
@@ -31,6 +32,8 @@ interface IProps {
 
 
 function ProductForm(props: IProps) {
+    const { translations, language } = useLanguage();
+    const t = translations.productForm; // для краткости
     const { edit, data, refBtn, funcRequest, sendFormFilters, id } = props;
 
     console.log(data);
@@ -71,19 +74,29 @@ function ProductForm(props: IProps) {
     }
 
 
+    // const filterCategory = {
+    //     title: dataArea.category ? dataArea.category : "Выберите игру",
+    //     nameFilter: "category",
+    //     category: categories ? categories.map((item) => item.full_name) : [],
+    // }
+
+
+    // const filterMeasurement = {
+    //     title: data?.price.measurement ? data.price.measurement : "Выберите измерение",
+    //     nameFilter: "measurement",
+    //     measurement: ["1 шт."],
+    // }
     const filterCategory = {
-        title: dataArea.category ? dataArea.category : "Выберите игру",
+        title: dataArea.category ? dataArea.category : t.selectGame[language],
         nameFilter: "category",
         category: categories ? categories.map((item) => item.full_name) : [],
     }
 
-
     const filterMeasurement = {
-        title: data?.price.measurement ? data.price.measurement : "Выберите измерение",
+        title: data?.price.measurement ? data.price.measurement : t.selectUnit[language],
         nameFilter: "measurement",
         measurement: ["1 шт."],
     }
-
 
 
     const [valuesFilter, setValuesFilter] = useState({
@@ -291,25 +304,51 @@ function ProductForm(props: IProps) {
 
                     </div>
                     }
-                    <label className="form__name form__label">
+                    {/* <label className="form__name form__label">
                         {edit && <span>Название</span>}
                         <input placeholder="Заполните название" type="text"  {...register("title", { validate: (value) => ((value.length > 2) && (value.length < 30)), disabled: edit ? false : true })} />
                         {errors.title && <span className="form__error">Длина строки от 3 до 30 символов</span>}
-                    </label>
+                    </label> */}
+                <label className="form__name form__label">
+                    {edit && <span>{t.name[language]}</span>}
+                    <input 
+                        placeholder={t.namePlaceholder[language]} 
+                        type="text"  
+                        {...register("title", { 
+                            validate: (value) => ((value.length > 2) && (value.length < 30)), 
+                            disabled: edit ? false : true 
+                        })} 
+                    />
+                    {errors.title && <span className="form__error">{t.errors.titleLength[language]}</span>}
+                </label>
                 </div>
                 <div className={style.form__general}>
-                    <h3 className="form__title"><img src={urlIconGeneral} alt="desc" />Общее</h3>
+                    {/* <h3 className="form__title"><img src={urlIconGeneral} alt="desc" />Общее</h3>
                     <div className={"form__label" + " " + (valuesFilter.category ? "value" : "")}>
                         <span>Наименование игры</span>
                         {!edit && data && <span className={style.spanName}>{dataArea.category}</span>}
                         {edit && <Filter data={filterCategory as any} setParamsFilter={setParamsFilter}></Filter>}
 
                         {sendFormFilters && edit && !valuesFilter.category && <span className="form__error">Выберите игру</span>}
-                    </div>
-
+                    </div> */}
+                <h3 className="form__title">
+                    <img src={urlIconGeneral} alt="desc" />
+                    {t.general[language]}
+                </h3>
+                
+                <div className={"form__label" + " " + (valuesFilter.category ? "value" : "")}>
+                    <span>{t.gameName[language]}</span>
+                    {!edit && data && <span className={style.spanName}>{dataArea.category}</span>}
+                    {edit && <Filter data={filterCategory as any} setParamsFilter={setParamsFilter} />}
+                    {sendFormFilters && edit && !valuesFilter.category && 
+                        <span className="form__error">{t.errors.selectGameRequired[language]}</span>
+                    }
+                </div>
 
                     <div className={"form__label " + style.form__price}>
-                        <span>Стоимость</span>
+                        {/* <span>Стоимость</span> */}
+                        <span>{t.price[language]}</span>
+
                         {!edit && data && <span className={style.spanName + " "}>{dataArea.price}</span>}
                         {edit && <input placeholder="0.00 ₽" type="number"  {...register("price", {
                             validate: (value) => ((value > 10) && ((value <= 100000))), disabled: edit ? false : true
@@ -318,7 +357,9 @@ function ProductForm(props: IProps) {
                         {errors.price && <span className="form__error">Введите стоимость от 10 ₽ до 100 000 ₽ </span>}
                     </div>
                     {(edit || (data?.price.old_price)) && <div className={"form__label " + style.form__price}>
-                        <span>Акционная цена</span>
+                        {/* <span>Акционная цена</span> */}
+                        <span>{t.promoPrice[language]}</span>
+
                         {!edit && data && <span className={style.spanName + " "}>{dataArea.old_price}</span>}
                         {edit && <input placeholder="0.00 ₽" type="number"  {...register("old_price", {
 
@@ -330,7 +371,9 @@ function ProductForm(props: IProps) {
                         {errors.old_price && errors.old_price.type === "checkPrice" && <span className="form__error">Акционная цена должна быть ниже стоимости товара </span>}
                     </div>}
                     <div className={"form__label" + " " + (valuesFilter.measurement ? "value" : "")}>
-                        <span>Единица измерения</span>
+                        {/* <span>Единица измерения</span> */}
+                        <span>{t.unit[language]}</span>
+
                         {!edit && data && <span className={style.spanName}>{dataArea.measurement}</span>}
                         {edit && <Filter data={filterMeasurement as any} setParamsFilter={setParamsFilter}></Filter>}
 
@@ -338,7 +381,9 @@ function ProductForm(props: IProps) {
                     </div>
                     <label className={"form__label label__check"}>
                         <input type="checkbox" {...register("login_type", { disabled: edit ? false : true })} />
-                        <span>С входом</span>
+                        {/* <span>С входом</span> */}
+                        <span>{t.withLogin[language]}</span>
+
                     </label>
 
 
@@ -347,7 +392,11 @@ function ProductForm(props: IProps) {
 
 
                 <div className={style.form__files}>
-                    <h3 className="form__title"> <img src={urlIconPhoto} alt="photoIcon" />Фото товара</h3>
+                    <h3 className="form__title"> <img src={urlIconPhoto} alt="photoIcon" />
+                    {t.photos[language]}
+
+                    {/* Фото товара */}
+                    </h3>
                     <div className={style.form__addFile}>
                         <div className={"form__file " + style.form__fileImg}>
                             {uploadFiles.map((item, index) => {
@@ -378,12 +427,19 @@ function ProductForm(props: IProps) {
 
                 </div>
                 <div className={"form__desc " + style.form__desc}>
-                    <h3 className="form__title"> <img src={urlIconDesc} alt="desc" />Описание</h3>
+                    <h3 className="form__title"> <img src={urlIconDesc} alt="desc" />
+                    {t.description[language]}
+                    </h3>
                     <div className="form__textarea">
                         <label className="form__label">
-                            <span>Общее описание товара</span>
+                            {/* <span>Общее описание товара</span> */}
+                            <span>{t.productDescription[language]}</span>
+
                             {edit && <textarea name="description" onChange={changeDesc} id="" cols={30} rows={3} value={desc}></textarea>}
-                            {!edit && <textarea disabled name="description" value={desc ? desc : "Не заполнено"} onChange={changeDesc} id="" cols={30} rows={3}></textarea>}
+                            {!edit && <textarea disabled name="description" 
+                            // value={desc ? desc : "Не заполнено"} 
+                            value={desc ? desc : t.notFilled[language]} 
+                            onChange={changeDesc} id="" cols={30} rows={3}></textarea>}
                         </label>
                     </div>
 

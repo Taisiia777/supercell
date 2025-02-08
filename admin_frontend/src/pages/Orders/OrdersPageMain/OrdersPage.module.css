@@ -26,3 +26,41 @@
     border-radius: 8px;
     width: max-content;
 }
+.orderSearch {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 40px;
+    background: var(--bg-block);
+    margin-bottom: 20px;
+    box-shadow: 1px 1px 2px 0px rgba(186, 186, 186, 0.40);
+}
+
+.orderSearch__select {
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(212, 224, 250, 0.20);
+    border: none;
+    color: var(--color-title);
+    font-family: "Rubik";
+    font-size: 16px;
+    min-width: 200px;
+    outline: none;
+}
+
+.orderSearch__input {
+    flex: 1;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(212, 224, 250, 0.20);
+    border: none;
+    color: var(--color-title);
+    font-family: "Rubik";
+    font-size: 16px;
+    outline: none;
+}
+
+.orderSearch__select:focus,
+.orderSearch__input:focus {
+    background: rgba(212, 224, 250, 0.30);
+}

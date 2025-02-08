@@ -11,10 +11,16 @@ import ActionButtons from "@/components/ui/action-buttons/action-buttons";
 import {useEffect, useState} from "react";
 import {useCart} from "@/components/store/store";
 import {CartItem} from "@/types/store.interface";
-
+import Filters from "../Filters/Filters";
+interface Filters {
+    newAccount: boolean;
+    promotions: boolean;
+    passesGems: boolean;
+}
 export default function Products(props: { data: IProduct[] }) {
     const { items } = useCart()
     const [clientItems, setClientItems] = useState<CartItem[]>([]); // Замените `ClientItem` на ваш фактический тип
+    const [filteredProducts, setFilteredProducts] = useState(props.data);
 
     useEffect(() => {
         setClientItems(items)
@@ -30,10 +36,27 @@ export default function Products(props: { data: IProduct[] }) {
 
         return () => clearTimeout(timeoutId);
     }, []);
+    const handleFilterChange = (filters: Filters) => {
+        const filtered = props.data.filter(product => {
+            if (!filters.newAccount && !filters.promotions && !filters.passesGems) {
+                return true;
+            }
+            
+            return (
+                (filters.newAccount && product.categories.includes('Новый аккаунт')) ||
+                (filters.promotions && product.categories.includes('Акции')) ||
+                (filters.passesGems && product.categories.includes('Пропуски/Гемы'))
+            );
+        });
+    
+        setFilteredProducts(filtered);
+    };
     return (
         <div className={styles.products}>
 
             <CatalogMenu/>
+            <Filters onFilterChange={handleFilterChange} />
+
             <div className={styles.items}>
                 {props.data.map((product: IProduct) => {
                     const cartItem = clientItems.find((i) => i.id === product.id)

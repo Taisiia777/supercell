@@ -78,6 +78,7 @@
     gap: 8px;
     align-items: start;
     justify-content: start;
+    min-width: 200px;
 }
 
 .title {

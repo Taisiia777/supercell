@@ -87,6 +87,7 @@ div.form__head {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    zoom:0.8
 }
 
 .infoOrder {

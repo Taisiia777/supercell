@@ -15,6 +15,7 @@ import ActionButtons from "@/components/ui/action-buttons/action-buttons";
 import {useForm} from "react-hook-form";
 import {useRouter} from 'next/navigation';
 import {useTelegram} from "@/app/useTg";
+import LinkInstructionModal from "../LinkInstructionModal/LinkInstructionModal";
 
 const generateUniqueId = (baseId, index) => `${baseId}-${index}`;
 
@@ -24,6 +25,7 @@ export default function Cart(props: { data: IProduct[] }) {
     const { user, webApp } = useTelegram();
     const [profile, setProfile] = useState()
     const [isLoadingProfile, setLoadingProfile] = useState(true)
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         if(user && webApp?.initData) {
@@ -235,7 +237,10 @@ useEffect(() => {
 
     return (
         <div className={styles.cart}>
+
             {filteredData.length > 0 ? (
+              <>
+              
                 <form className={styles.items} onSubmit={onSubmit}     onError={(errors) => console.log('Form errors:', errors)}>
                     {filteredData.map((item) => {
                         const uid = item.id.toString();
@@ -245,6 +250,11 @@ useEffect(() => {
 
                         return (
                             <div className={styles.item} key={item.uniqueId}>
+                                              <LinkInstructionModal 
+                                                isOpen={isModalOpen}
+                                                onClose={() => setIsModalOpen(false)}
+                                                game={item.game}
+                                              />
                                 <Link href={`/product/${item.id}`} className={styles.content}>
                                     <div className={styles.container}>
                                         <div className={styles.img}>
@@ -333,7 +343,13 @@ useEffect(() => {
                                         editable={false}
                                         
                                         icon={item.login_type !== "EMAIL_CODE" && <>
-                                            <svg width="24" height="21" viewBox="0 0 24 21" fill="none"
+                                            <svg
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setIsModalOpen(true);
+                                              }}
+                                            width="24" height="21" viewBox="0 0 24 21" fill="none"
                                                  xmlns="http://www.w3.org/2000/svg">
                                                 <path opacity="0.5"
                                                       d="M1 10.5C1 6.02165 1 3.78248 2.61092 2.39125C4.22182 1 6.81455 1 12 1C17.1854 1 19.7782 1 21.389 2.39125C23 3.78248 23 6.02165 23 10.5C23 14.9783 23 17.2175 21.389 18.6087C19.7782 20 17.1854 20 12 20C6.81455 20 4.22182 20 2.61092 18.6087C1 17.2175 1 14.9783 1 10.5Z"
@@ -372,10 +388,111 @@ useEffect(() => {
                         />
                     </div>
                 </form>
-            ) : (
-                <div className={styles.null}>
-                    <p>Корзина пуста</p>
+                <div className={styles.popular}>
+                  <h3>Может пригодиться</h3>
+                  <div className={styles.items}>
+                    {props.data.slice(0, 4).map((item) => (
+                      <Link href={`/product/${item.id}`} key={item.id} className={styles['popular-item']}>
+                        <div className={styles.like}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 21L10.55 19.7C5.4 15.1 2 12.1 2 8.5C2 5.5 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.5 22 8.5C22 12.1 18.6 15.1 13.45 19.7L12 21Z" 
+                                  stroke="white" strokeWidth="2"/>
+                          </svg>
+                        </div>
+                        {Math.random() > 0.5 && (
+                          <div className={styles.discount}>
+                            -{Math.floor(Math.random() * 30 + 10)}%
+                          </div>
+                        )}
+                        <div className={styles['image-container']}>
+                          <Image 
+                            src={item.images[0].original}
+                            alt={item.title}
+                            fill
+                            className={styles.img}
+                          />
+                        </div>
+                        <div className={styles.details}>
+                          <div className={styles.price}>
+                            {item.price.incl_tax} ₽
+                            {Math.random() > 0.5 && (
+                              <span className={styles['old-price']}>
+                                {Math.floor(Number(item.price.incl_tax) * 1.2)} ₽
+                              </span>
+                            )}
+                          </div>
+                          <div className={styles.title}>
+                            {item.title}
+                          </div>
+                          <button className={styles['add-to-cart']}>
+                            <svg viewBox="0 0 24 24">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
+                </>
+            ) : (
+                // <div className={styles.null}>
+                //     <p>Корзина пуста</p>
+                // </div>
+                <div className={styles.null}>
+                <h2>Корзина пустая</h2>
+                <p>А товаров полно — забегайте посмотреть</p>
+                <Link href="/catalog" className={styles['to-catalog']}>
+                  К товарам
+                </Link>
+                
+                <div className={styles.popular}>
+                  <h3>Может пригодиться</h3>
+                  <div className={styles.items}>
+                    {props.data.slice(0, 4).map((item) => (
+                      <Link href={`/product/${item.id}`} key={item.id} className={styles['popular-item']}>
+                        <div className={styles.like}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 21L10.55 19.7C5.4 15.1 2 12.1 2 8.5C2 5.5 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.5 22 8.5C22 12.1 18.6 15.1 13.45 19.7L12 21Z" 
+                                  stroke="white" strokeWidth="2"/>
+                          </svg>
+                        </div>
+                        {Math.random() > 0.5 && (
+                          <div className={styles.discount}>
+                            -{Math.floor(Math.random() * 30 + 10)}%
+                          </div>
+                        )}
+                        <div className={styles['image-container']}>
+                          <Image 
+                            src={item.images[0].original}
+                            alt={item.title}
+                            fill
+                            className={styles.img}
+                          />
+                        </div>
+                        <div className={styles.details}>
+                          <div className={styles.price}>
+                            {item.price.incl_tax} ₽
+                            {Math.random() > 0.5 && (
+                              <span className={styles['old-price']}>
+                                {Math.floor(Number(item.price.incl_tax) * 1.2)} ₽
+                              </span>
+                            )}
+                          </div>
+                          <div className={styles.title}>
+                            {item.title}
+                          </div>
+                          <button className={styles['add-to-cart']}>
+                            <svg viewBox="0 0 24 24">
+                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
             )}
 
         </div>

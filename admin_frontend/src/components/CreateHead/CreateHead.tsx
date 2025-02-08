@@ -1,6 +1,7 @@
 import "./CreateHead.css"
 
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { useLanguage } from "../../context/LanguageContext";
 
 interface IProps {
     title: string;
@@ -10,8 +11,9 @@ interface IProps {
     redirect: boolean;
 }
 function CreateHead(props: IProps) {
+    const { translations, language } = useLanguage();
     const { id } = useParams();
-    const { title, namePage, nameFunc, saveFunc, redirect } = props;
+    const { namePage, nameFunc, saveFunc, redirect } = props;
     const navigate = useNavigate();
     const saveClick = () => {
         if (saveFunc) {
@@ -24,13 +26,36 @@ function CreateHead(props: IProps) {
 
     return (
         <>
-            <div className="page">
+            {/* <div className="page">
                 <div className="page__head">
                     <h2 className="page__title">{title}</h2>
                     <div className="page__btns head__btns">
                         <Link to={`/${namePage}`} className="btn__cancel btn__head">Отмена</Link>
                         {nameFunc === "show" && <Link to={`/${namePage}/edit/${id}`} className="btn__active btn__head">Редактировать</Link>}
                         {nameFunc === "save" && <button className="btn__active btn__head" onClick={saveClick}>Сохранить</button>}
+                    </div>
+                </div>
+            </div> */}
+            <div className="page">
+                <div className="page__head">
+                    <h2 className="page__title">
+                        {/* Используем соответствующий перевод для заголовка */}
+                        {translations[namePage === 'products' ? 'productCard' : 'orderCard'][language]}
+                    </h2>
+                    <div className="page__btns head__btns">
+                        <Link to={`/${namePage}`} className="btn__cancel btn__head">
+                            {translations.cancel[language]}
+                        </Link>
+                        {nameFunc === "show" && (
+                            <Link to={`/${namePage}/edit/${id}`} className="btn__active btn__head">
+                                {translations.edit[language]}
+                            </Link>
+                        )}
+                        {nameFunc === "save" && (
+                            <button className="btn__active btn__head" onClick={saveClick}>
+                                {translations.save[language]}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

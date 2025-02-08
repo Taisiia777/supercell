@@ -23,8 +23,52 @@ export const TelegramProvider = ({
             app.ready();
             app.expand();
             app.enableClosingConfirmation()
+            app.disableVerticalSwipes(); // Добавьте это
             setWebApp(app);
         }
+          // Устанавливаем высоту для main
+  const main = document.querySelector('main');
+  if (main) {
+    main.style.height = `${window.innerHeight}px`;
+  }
+    }, []);
+
+    // useEffect(() => {
+    //     const overflow = 100;
+    //     document.body.style.overflowY = "hidden";
+    //     document.body.style.marginTop = `${overflow}px`;
+    //     document.body.style.height = window.innerHeight + overflow + "px";
+    //     document.body.style.paddingBottom = `${overflow}px`;
+    //     document.body.style.minHeight = "100vh";
+    //     document.documentElement.style.overflow = "hidden";
+    //     document.documentElement.style.height = "auto";
+    
+    //     window.scrollTo(0, overflow);
+        
+    //   }, []);
+    useEffect(() => {
+        const overflow = 100;
+        let lastScrollPosition = overflow;
+    
+        const handleScroll = () => {
+            lastScrollPosition = window.scrollY;
+            if (lastScrollPosition < overflow) {
+                window.scrollTo(0, overflow);
+            }
+        };
+    
+        document.body.style.overflowY = "hidden";
+        document.body.style.marginTop = `${overflow}px`;
+        document.body.style.height = window.innerHeight + overflow + "px";
+        document.body.style.paddingBottom = `${overflow}px`;
+        document.body.style.minHeight = "100vh";
+        document.documentElement.style.overflow = "hidden";
+        document.documentElement.style.height = "auto";
+    
+        window.scrollTo(0, overflow);
+        window.addEventListener('scroll', handleScroll);
+        
+        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
     const value = useMemo(() => {

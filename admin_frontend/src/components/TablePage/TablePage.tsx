@@ -19,9 +19,11 @@ import TitleProduct from "../TitleProduct/TitleProduct";
 
 import Modal from "../Modal/Modal";
 import { disablePageScroll, enablePageScroll } from 'scroll-lock';
-
+import { OrderSearch } from "../../pages/Orders/OrdersPageMain/OrdersPage"; 
 
 import { davDamerAPI } from "../../store/api/DavdamerAPI";
+
+import { useLanguage } from "../../context/LanguageContext";
 
 
 type TSortingState = "asc" | "desc" | "none"
@@ -53,21 +55,22 @@ interface ITables {
 
 
 
-const dataTables: ITables = {
-    products: {
-        title: "Товары",
-        nameColumns: [{ nameColumn: "Наименование", nameResponse: "title" }, { nameColumn: "Описание", nameResponse: "description" }, { nameColumn: "Продавец", nameResponse: "seller" }, { nameColumn: "Кол-во продаж", nameResponse: "orders_count" }, { nameColumn: "Стоимость", nameResponse: "price" }],
-        countRow: 4,
-        filterParams: [{ title: "Игра", filter: "category", }]
-    },
-    orders: {
-        title: "Заказы",
-        nameColumns: [{ nameColumn: "№ заказа", nameResponse: "number" }, { nameColumn: "Дата и время", nameResponse: "date_placed" }, { nameColumn: "Статус", nameResponse: "status" }, { nameColumn: "ID Клиента", nameResponse: "user" }, { nameColumn: "Сумма", nameResponse: "total" }],
-        countRow: 4,
-        filterParams: [{ title: "Статус", filter: "statusName" }, { title: "Дата заказа", filter: "date", type: "date" }]
-    },
+// const dataTables: ITables = {
+//     products: {
+//         title: "Товары",
+//         nameColumns: [{ nameColumn: "Наименование", nameResponse: "title" }, { nameColumn: "Описание", nameResponse: "description" }, { nameColumn: "Продавец", nameResponse: "seller" }, { nameColumn: "Кол-во продаж", nameResponse: "orders_count" }, { nameColumn: "Стоимость", nameResponse: "price" }],
+//         countRow: 4,
+//         filterParams: [{ title: "Игра", filter: "category", }]
+//     },
+//     orders: {
+//         title: "Заказы",
+//         nameColumns: [{ nameColumn: "№ заказа", nameResponse: "number" }, { nameColumn: "Дата и время", nameResponse: "date_placed" }, { nameColumn: "Статус", nameResponse: "status" }, { nameColumn: "Telegram ID Клиента", nameResponse: "user" }, { nameColumn: "Сумма", nameResponse: "total" }],
+//         countRow: 4,
+//         filterParams: [{ title: "Статус", filter: "statusName" }, { title: "Дата заказа", filter: "date", type: "date" }]
+//     },
 
-}
+// }
+
 
 export interface IDataFilter {
     [key: string]: any,
@@ -82,11 +85,46 @@ interface IProps {
     lengthRow: number,
     style: IStyle,
     setParamsFilter: (key: string, value: string | number) => void
+    onSearch?: (params: { type: 'number' | 'telegram_id', query: string }) => void // добавляем новый пропс
+
 
 }
 
 function TablePage(props: IProps) {
-    const { nameTable, orders, style, lengthRow, products, setParamsFilter } = props;
+    const { translations, language } = useLanguage(); // Переместили хук внутрь компонента
+    const t = translations.table;
+
+    const dataTables: ITables = {
+        products: {
+            title: t.products.title[language],
+            nameColumns: [
+                { nameColumn: t.products.columns.name[language], nameResponse: "title" },
+                { nameColumn: t.products.columns.description[language], nameResponse: "description" },
+                { nameColumn: t.products.columns.seller[language], nameResponse: "seller" },
+                { nameColumn: t.products.columns.salesCount[language], nameResponse: "orders_count" },
+                { nameColumn: t.products.columns.price[language], nameResponse: "price" }
+            ],
+            countRow: 4,
+            filterParams: [{ title: t.products.filters.game[language], filter: "category" }]
+        },
+        orders: {
+            title: t.orders.title[language],
+            nameColumns: [
+                { nameColumn: t.orders.columns.orderNumber[language], nameResponse: "number" },
+                { nameColumn: t.orders.columns.dateTime[language], nameResponse: "date_placed" },
+                { nameColumn: t.orders.columns.status[language], nameResponse: "status" },
+                { nameColumn: t.orders.columns.clientId[language], nameResponse: "user" },
+                { nameColumn: t.orders.columns.sum[language], nameResponse: "total" }
+            ],
+            countRow: 4,
+            filterParams: [
+                { title: t.orders.filters.status[language], filter: "statusName" },
+                { title: t.orders.filters.orderDate[language], filter: "date", type: "date" }
+            ]
+        }
+    };
+
+    const { nameTable, orders, style, lengthRow, products, setParamsFilter, onSearch } = props;
     const [arrRowActive, setArrRowActive] = useState<boolean[]>(Array(lengthRow).fill(false));
     const [nameColumns, setNameColumns] = useState<IColumns[]>([]);
 
@@ -120,12 +158,11 @@ function TablePage(props: IProps) {
 
         setArrRowActive(Array(lengthRow).fill(false))
         setNameColumns(dataTables[nameTable].nameColumns.map((item) => {
-
-            return {
-                nameColumn: item.nameColumn,
-                nameResponse: item.nameResponse,
-                stateSort: "none"
-            }
+          return {
+            nameColumn: item.nameColumn,
+            nameResponse: item.nameResponse, 
+            stateSort: "none"
+          }
         }))
         setDataFilters(dataTables[nameTable].filterParams.map((item) => {
             const title = item.title;
@@ -140,7 +177,7 @@ function TablePage(props: IProps) {
             return Object.assign({ type: type }, { title: title }, { nameFilter: keyFilter }, { [keyFilter]: [...arr] }, { id: item.id })
 
         }))
-    }, [lengthRow])
+    }, [lengthRow, language])
 
 
     const { isMobile } = useMatchMedia();
@@ -198,15 +235,27 @@ function TablePage(props: IProps) {
 
     return (
         <div onClick={clickTable} className={styles.table}>
-            {idDelProduct && <Modal text="Удалить товар?" funcRequest={deleteProduct} id={idDelProduct} closeModal={closeModal}></Modal>}
+            {/* {idDelProduct && <Modal text="Удалить товар?" funcRequest={deleteProduct} id={idDelProduct} closeModal={closeModal}></Modal>} */}
+            {idDelProduct && (
+                <Modal 
+                    text={t.products.actions.deleteConfirm[language]} 
+                    funcRequest={deleteProduct} 
+                    id={idDelProduct} 
+                    closeModal={closeModal}
+                />
+            )}
             <Pages title={dataTables[nameTable].title} />
             <div className={styles.head__table}>
+                {onSearch && <OrderSearch onSearch={onSearch} />}
+
                 <div>
                     {(products) && <Link to={`/${nameTable}/create`} className={"btn__head btn__active " + styles.btn}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
                             <path d="M19 12.998H13V18.998H11V12.998H5V10.998H11V4.99805H13V10.998H19V12.998Z" fill="white" />
                         </svg>
-                        <span>Добавить</span>
+                        {/* <span>Добавить</span> */}
+                        <span>{t.products.actions.add[language]}</span>
+
                     </Link>}
                 </div>
                 <div className={styles.head__filters}>
@@ -259,10 +308,14 @@ function TablePage(props: IProps) {
                                 </div>
                                 <div className={"col " + style.col}>
                                     <Link to={`/products/${item.id}`} className="btn btn__table">
-                                        Перейти
+                                        {/* Перейти */}
+                                        {t.products.actions.goto[language]}
+
                                     </Link>
                                     <button onClick={() => clickDel(item.id)} className="btn btn__table btn__error">
-                                        Удалить
+                                        {/* Удалить */}
+                                        {t.products.actions.delete[language]}
+
                                     </button>
                                 </div>
                             </div>
@@ -276,11 +329,17 @@ function TablePage(props: IProps) {
                                     <span>{moment(item.date_placed).format("DD.MM.YYYY")}</span>
                                     <span>{moment(item.date_placed).format("HH:mm")}</span></div>
                                 <div className={"col " + style.col} style={{ background: statusOrderColor[item.status.toUpperCase()] }}>{statusOrder[item.status.toUpperCase()]}</div>
-                                <div className={"col " + style.col}>{String(item.user.id).slice(0, 10)}</div>
+                                <div className={"col " + style.col}>  
+                                    {/* {item.user.username || 'Не указан'} */}
+                                    {item.user.username || t.orders.notSpecified[language]}
+
+                                </div>
                                 <div className={"col " + style.col}>{item.total_incl_tax + " ₽"}</div>
                                 <div className={"col " + style.col}>
                                     <Link to={`/orders/${item.id}`} className="btn btn__table">
-                                        Перейти
+                                        {/* Перейти */}
+                                        {t.products.actions.goto[language]}
+
                                     </Link>
 
                                 </div>

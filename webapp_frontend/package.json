@@ -20,6 +20,7 @@
     "telegram-webapps-types": "^1.0.5",
     "uuid": "^9.0.1",
     "zustand": "^4.5.2"
+    
   },
   "devDependencies": {
     "@types/node": "^20",

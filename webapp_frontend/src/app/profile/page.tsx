@@ -11,9 +11,7 @@ export default function ProfilePage() {
 
     return (
         <>
-            <Header component={
-                <Button3D name="Мои заказы" href="/order"/>
-            }/>
+            <Header/>
             <GoBack/>
             {/*<Profile data={profile}/>*/}
             <Profile/>

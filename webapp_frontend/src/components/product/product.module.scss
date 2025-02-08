@@ -1,16 +1,10 @@
+
 .product {
-  margin-top: 32px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  // padding-bottom: 90px; // Отступ для фиксированной кнопки
 
-  // .img {
-  //   position: relative;
-  //   height: 283px;
-  //   width: 100%;
-  //   max-width: 249px;
-  //   margin: 0 auto;
-  // }
   .img {
     position: relative;
     width: 100%;
@@ -33,28 +27,24 @@
       object-fit: contain;
     }
   }
-  
+
   .card {
-    margin-top: 100px;
-    padding: 19px 16px 41px 16px;
-    //position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    padding: 19px 16px;
     width: 100%;
-    z-index: 3;
-    box-shadow: 0 -4px 20px 2px rgba(0, 0, 0, 0.25);
     background: linear-gradient(225deg, #2a3b67 0%, #375aab 100%);
-    border-top-left-radius: 30px;
-    border-top-right-radius: 30px;
+    // border-radius: 30px;
+    // border-top-right-radius: 30px;
     display: flex;
     flex-direction: column;
     grid-gap: 16px;
+    height: max-content;
+    padding-bottom: 70px;
 
     .name {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      
       .title {
         display: flex;
         grid-gap: 11px;
@@ -66,6 +56,7 @@
           color: #fff;
         }
       }
+      
       .type {
         display: flex;
         align-items: center;
@@ -78,30 +69,39 @@
         }
       }
     }
+
     .product_name {
       font-weight: 500;
-      font-size: 24px;
+      font-size: 18px;
       letter-spacing: 0.05em;
       color: #fff;
-      text-transform: uppercase;
+      text-transform: none;
     }
+
     .price {
       font-weight: 600;
-      font-size: 24px;
+      font-size: 18px;
       letter-spacing: 0.05em;
       color: #fff;
     }
+
     .desc {
       font-weight: 400;
       font-size: 17px;
       letter-spacing: 0.05em;
       color: #fff;
     }
-    .add {
-      display: flex;
-      width: 100%;
-      justify-content: center;
-    }
   }
 
+  .add {
+    position: fixed;
+    bottom: 73px;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    // background: linear-gradient(225deg, #2a3b67 0%, #375aab 100%);
+    display: flex;
+    justify-content: center;
+    z-index: 10;
+  }
 }

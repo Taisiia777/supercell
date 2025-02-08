@@ -20,6 +20,7 @@ from .filtersets import OrderFilter, ProductFilter
 from ..pagination import DefaultPageNumberPagination
 from ..shop.serializers import ResponseStatusSerializer
 from api.permissions import OrderManagerPermission, ProductManagerPermission, AdminPermission
+from .serializers import ProductImageSerializer
 
 User = get_user_model()
 Seller = get_model("partner", "Seller")
@@ -91,33 +92,6 @@ class OrderDetailView(
         return super().update(request, *args, **kwargs)
 
 
-# class DavdamerLoginView(generics.GenericAPIView):
-#     serializer_class = serializers.LoginSerializer
-
-#     @extend_schema(
-#         responses={
-#             200: serializers.SuccessLogin,
-#             400: serializers.ErrorLogin,
-#         },
-#     )
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-
-#         user = authenticate(
-#             username=serializer.validated_data["username"],
-#             password=serializer.validated_data["password"],
-#         )
-#         if user is None:
-#             return Response({"password": ["Неправильный логин или пароль"]}, status=400)
-
-#         refresh = RefreshToken.for_user(user)
-#         data = {
-#             "access_token": str(refresh.access_token),
-#             "user": user,
-#         }
-#         response_serializer = serializers.SuccessLogin(data)
-#         return Response(response_serializer.data)
 class DavdamerLoginView(generics.GenericAPIView):
     authentication_classes = [] # Отключаем аутентификацию для логина
     permission_classes = []
@@ -216,10 +190,35 @@ class ProductView(
         return Response(response_serializer.data)
 
 
+# class UploadProductImageView(generics.CreateAPIView):
+#     # permission_classes = [IsDavDamer]
+#     permission_classes = []
+#     serializer_class = serializers.ProductImageSerializer
+
+#     def perform_create(self, serializer):
+#         product = get_object_or_404(
+#             Product,
+#             pk=self.kwargs["product_id"],
+#         )
+
+#         max_display_order = product.images.all().aggregate(Max("display_order"))[
+#             "display_order__max"
+#         ]
+#         display_order = 0 if max_display_order is None else max_display_order + 1
+#         serializer.save(product=product, display_order=display_order)
+
+#     @extend_schema(
+#         summary="Добавление фотографии товара",
+#         description="В теле запроса в поле original передается сама фотография "
+#         "бинарником",
+#         request=None,
+#         responses={201: None, 404: None},
+#     )
+#     def post(self, request, *args, **kwargs):
+#         return super().post(request, *args, **kwargs)
 class UploadProductImageView(generics.CreateAPIView):
-    # permission_classes = [IsDavDamer]
     permission_classes = []
-    serializer_class = serializers.ProductImageSerializer
+    serializer_class = ProductImageSerializer
 
     def perform_create(self, serializer):
         product = get_object_or_404(
@@ -231,18 +230,29 @@ class UploadProductImageView(generics.CreateAPIView):
             "display_order__max"
         ]
         display_order = 0 if max_display_order is None else max_display_order + 1
-        serializer.save(product=product, display_order=display_order)
+
+        # Создаем все изображения пакетно
+        images_to_create = []
+        for image in serializer.validated_data['images']:
+            images_to_create.append(
+                ProductImage(
+                    product=product, 
+                    original=image,
+                    display_order=display_order
+                )
+            )
+            display_order += 1
+            
+        ProductImage.objects.bulk_create(images_to_create)
 
     @extend_schema(
-        summary="Добавление фотографии товара",
-        description="В теле запроса в поле original передается сама фотография "
-        "бинарником",
-        request=None,
+        summary="Загрузка фотографий товара",
+        description="Загрузка одной или нескольких фотографий товара. В теле запроса передаются файлы в поле images[]",
+        request=ProductImageSerializer,
         responses={201: None, 404: None},
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
-
 
 class DeleteProductImageView(generics.DestroyAPIView):
     # permission_classes = [IsDavDamer]

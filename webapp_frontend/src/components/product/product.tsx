@@ -10,6 +10,7 @@ import {Shimmer} from "react-shimmer";
 import shimmer from "@/components/ui/shimmer/shimmer.module.scss";
 import ActionButtons from "@/components/ui/action-buttons/action-buttons";
 import {CartItem} from "@/types/store.interface";
+import ImageCarousel from '../ImageCarousel/ImageCarousel';
 
 export default function Product(props: { data: IProduct }) {
 
@@ -37,8 +38,7 @@ export default function Product(props: { data: IProduct }) {
     
     return (
         <div className={styles.product}>
-            <div className={styles.img}>
-                {/* <Image src={props.data.images[0].original} alt={props.data.title} objectFit="cover" fill quality={100} unoptimized={true}/> */}
+            {/* <div className={styles.img}>
                 <Image 
   src={props.data.images[0].original}
   alt={props.data.title}
@@ -49,7 +49,9 @@ export default function Product(props: { data: IProduct }) {
   loading="eager"
   priority
 />
-            </div>
+            </div> */}
+                  <ImageCarousel images={props.data.images} title={props.data.title} />
+
             <div className={styles.card}>
                 <div className={styles.name}>
                     <div className={styles.title}>
@@ -98,3 +100,4 @@ export default function Product(props: { data: IProduct }) {
         </div>
     )
 }
+

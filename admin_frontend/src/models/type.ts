@@ -90,6 +90,7 @@ export interface IOrder {
         id: number,
         first_name: string,
         last_name: string,
+        username: string,
         delivery: {
             address: string,
             first_name: string,

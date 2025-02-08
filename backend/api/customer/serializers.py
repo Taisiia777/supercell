@@ -80,10 +80,11 @@ class CustomerSerializer(serializers.ModelSerializer):
     game_email = GameEmailSerializer(source="*")
     first_name = serializers.CharField(read_only=True)
     last_name = serializers.CharField(read_only=True)
+    username = serializers.CharField(read_only=True)  # Добавляем это поле
 
     class Meta:
         model = User
-        fields = ["id", "first_name", "last_name", "game_email"]
+        fields = ["id", "first_name", "last_name", "game_email", "username"]
 
 
 class CustomerMixin:

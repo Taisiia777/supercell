@@ -19,6 +19,7 @@ import { statusOrder } from "../../models/type";
 import { davDamerAPI } from "../../store/api/DavdamerAPI";
 import Modal from "../Modal/Modal";
 import urlCopy from "../../assets/images/copy.svg"
+import { useLanguage } from "../../context/LanguageContext";
 
 
 interface IProps {
@@ -33,6 +34,8 @@ interface IProps {
 
 
 function OrderForm(props: IProps) {
+    const { translations, language } = useLanguage();
+    const t = translations.orderReader;
     const { edit, data, id, refBtn, funcRequest } = props;
     console.log(data);
 
@@ -151,12 +154,15 @@ function OrderForm(props: IProps) {
                 <div className={"form__head" + " " + style.form__head} ref={refHead}>
                     <div className={"form__name " + style.form__name}>
                         <div className={style.form__orderTitle}>
-                            <p>Номер заказа: </p>
+                            <p>
+                                {/* Номер заказа:  */}
+                                {t.orderNumber[language]}
+                                </p>
                             <p>{data.number}</p>
 
                         </div>
-                        {data && data.date_placed && <span>Дата заказа: {moment(data.date_placed).format("DD.MM.YYYY")}</span>}
-                        {data && data.updated_dt && <span>Дата изменения: {moment(data.updated_dt).format("DD.MM.YYYY")}</span>}
+                        {data && data.date_placed && <span>{t.orderDate[language]}: {moment(data.date_placed).format("DD.MM.YYYY")}</span>}
+                        {data && data.updated_dt && <span> {t.updateDate[language]}: {moment(data.updated_dt).format("DD.MM.YYYY")}</span>}
                     </div>
                     {!edit && <div className={style.status}>
                         {data.statusName}
@@ -164,33 +170,50 @@ function OrderForm(props: IProps) {
                     {edit && <Filter data={filterStatus as any} setParamsFilter={setParamsFilter}></Filter>}
                 </div>
                 <div className={style.form__client} ref={refClient}>
-                    <h3 className="form__title"><img src={urlIconClient} alt="desc" />О платеже</h3>
+                    <h3 className="form__title"><img src={urlIconClient} alt="desc" />
+                    {t.paymentInfo[language]}
+
+                    {/* О платеже */}
+                    </h3>
                     <label className="form__label">
-                        <span>Код платежа</span>
+                        <span>
+                            {/* Код платежа */}
+                            {t.paymentCode[language]}
+                            </span>
                         <input defaultValue={data.payment_id} type="text" disabled />
                     </label>
 
 
                 </div>
                 <div className={style.form__pay} ref={refPay}>
-                    <h3 className="form__title"><img src={urlIconPay} alt="pay" />Оплата</h3>
+                    <h3 className="form__title"><img src={urlIconPay} alt="pay" />
+                    {/* Оплата */}
+                    {t.payment[language]}
+                    </h3>
                     <label className="form__label">
                         <span>{data.total_incl_tax} ₽</span>
                         <input defaultValue={`${data.lines.length} ${declOfNum(data.lines.length)}`} type="text" disabled />
                     </label>
                     <label className="form__label">
-                        <span>Способ оплаты</span>
+                        <span>
+                            {/* Способ оплаты */}
+                            {t.paymentMethod[language]}
+                            </span>
                         <input defaultValue={"Кредитная карта"} type="text" disabled />
                     </label>
                 </div>
                 <div className={style.form__cart + " "}>
-                    <h3 className="form__title"><img src={urlIconCart} alt="cart" />Детали заказа</h3>
+                    <h3 className="form__title"><img src={urlIconCart} alt="cart" />
+                    {/* Детали заказа */}
+                    {t.orderDetails[language]}
+
+                    </h3>
                     <div className={style.order + " " + (isScroll ? "scroll__elem" : "")} ref={refOrder}>
 
                         {data.lines.map((item, index) => <div key={index} className={style.infoOrder}>
 
                             <TitleProduct active={true} categories={item.product.categories} images={item.product.images} title={item.product.title} ></TitleProduct>
-                            <p className={style.infoPace}> {item.product.login_type === "EMAIL_CODE" ? "С входом" : "Без входа"}</p>
+                            <p className={style.infoPace}> {item.product.login_type === "EMAIL_CODE" ? t.withLogin[language] : t.withoutLogin[language]}</p>
 
 
                             <div className={style.infoCount}>
@@ -199,21 +222,35 @@ function OrderForm(props: IProps) {
                             </div>
                             <div className={style.formInfoProduct}>
                                 <label className="form__label">
-                                    <span>{item.product.login_type === "EMAIL_CODE" ? "Аккаунт" : "Пригласительная ссылка"}</span>
+                                    <span>
+                                        {/* {item.product.login_type === "EMAIL_CODE" ? "Аккаунт" : "Пригласительная ссылка"} */}
+                                        {item.product.login_type === "EMAIL_CODE" ? 
+                                            t.account[language] : 
+                                            t.inviteLink[language]
+                                        }
+                                        </span>
                                     <div className={style.code}>
                                         <input className={style.input} defaultValue={item.login_data.account_id} type="text" readOnly onClick={() => clickCopyCode(item.login_data.account_id)} />
                                         <img src={urlCopy} alt="copy" />
                                     </div>
                                 </label>
                                 {item.product.login_type === "EMAIL_CODE" && <label className="form__label">
-                                    <span>Код</span>
+                                    <span>
+                                        {/* Код */}
+                                        {t.code[language]}
+
+                                        </span>
                                     <div className={style.formCode}>
                                         <div className={style.code}>
                                             <input className={style.input} defaultValue={item.login_data.code} type="text" readOnly onClick={() => clickCopyCode(item.login_data.code)} />
                                             <img src={urlCopy} alt="copy" />
                                         </div>
 
-                                        <div className={"btn btn__table " + style.btn} onClick={() => clickSendCode(item.id)}>Отправить новый код</div>
+                                        <div className={"btn btn__table " + style.btn} onClick={() => clickSendCode(item.id)}>
+                                            {/* Отправить новый код */}
+                                            {t.newCode[language]}
+
+                                            </div>
                                     </div>
                                 </label>}</div>
 
@@ -228,6 +265,7 @@ function OrderForm(props: IProps) {
             </form >
         </>
     )
+    
 }
 
 export default OrderForm

@@ -502,11 +502,20 @@ class ProductClassSerializer(serializers.Serializer):
     name = serializers.CharField()
 
 
+# class ProductImageSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ProductImage
+#         fields = ["original"]
 class ProductImageSerializer(serializers.ModelSerializer):
+    images = serializers.ListField(
+        child=serializers.ImageField(allow_empty_file=False, use_url=False),
+        required=True,
+        write_only=True
+    )
+    
     class Meta:
         model = ProductImage
-        fields = ["original"]
-
+        fields = ["images"]
 
 class AddressOptionsSerializer(serializers.Serializer):
     countries = serializers.ListSerializer(child=serializers.CharField())
