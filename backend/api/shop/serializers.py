@@ -36,6 +36,7 @@ class BasketProductSerializer(serializers.Serializer):
     quantity = serializers.IntegerField(min_value=1, max_value=99)
     account_id = serializers.CharField(max_length=100)
     code = serializers.CharField(max_length=100, required=False, allow_null=True)
+    friend_url = serializers.URLField(required=False, allow_null=True)
 
     def validate(self, data):
         # todo: if product.login_type is EMAIL_CODE, then account_id should be an email
@@ -113,12 +114,12 @@ class ProductSerializer(CoreProductSerializer):
         return ser.data
 
     class Meta(CoreProductSerializer.Meta):
-        fields = settings.PRODUCTDETAIL_FIELDS + ("seller", "login_type")
+        fields = settings.PRODUCTDETAIL_FIELDS + ("seller", "login_type", "filters_type")
 
 
 class ProductLinkSerializer(ProductSerializer):
     class Meta(CoreProductLinkSerializer.Meta):
-        fields = settings.PRODUCT_FIELDS + ["seller", "login_type"]
+        fields = settings.PRODUCT_FIELDS + ["seller", "login_type", "filters_type"]
 
 
 class CategorySerializer(serializers.Serializer):

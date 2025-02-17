@@ -213,8 +213,16 @@ function OrderForm(props: IProps) {
                         {data.lines.map((item, index) => <div key={index} className={style.infoOrder}>
 
                             <TitleProduct active={true} categories={item.product.categories} images={item.product.images} title={item.product.title} ></TitleProduct>
-                            <p className={style.infoPace}> {item.product.login_type === "EMAIL_CODE" ? t.withLogin[language] : t.withoutLogin[language]}</p>
+                            {/* <p className={style.infoPace}> {item.product.login_type === "EMAIL_CODE" ? t.withLogin[language] : t.withoutLogin[language]}</p> */}
 
+                            <p className={style.infoPace}>
+                                {item.product.login_type === "EMAIL_CODE" 
+                                    ? t.withLogin[language] 
+                                    : item.product.login_type === "URL_EMAIL"
+                                        ? "Вход + ссылка в друзья"
+                                        : t.withoutLogin[language]
+                                }
+                            </p>
 
                             <div className={style.infoCount}>
                                 <span>x {item.quantity} </span>
@@ -252,7 +260,40 @@ function OrderForm(props: IProps) {
 
                                             </div>
                                     </div>
-                                </label>}</div>
+                                </label>}
+                                {item.product.login_type === "URL_EMAIL" && (
+                                        <>
+                                            <label className="form__label">
+                                                <span>{t.code[language]}</span>
+                                                <div className={style.formCode}>
+                                                    <div className={style.code}>
+                                                        <input className={style.input} defaultValue={item.login_data.code} type="text" readOnly onClick={() => clickCopyCode(item.login_data.code)} />
+                                                        <img src={urlCopy} alt="copy" />
+                                                    </div>
+
+                                                    <div className={"btn btn__table " + style.btn} onClick={() => clickSendCode(item.id)}>
+                                                        {t.newCode[language]}
+                                                    </div>
+                                                </div>
+                                            </label>
+                                            {item.login_data.friend_url && (
+                                                <label className="form__label">
+                                                    <span>Ссылка в друзья</span>
+                                                    <div className={style.code}>
+                                                        <input 
+                                                            className={style.input} 
+                                                            defaultValue={item.login_data.friend_url} 
+                                                            type="text" 
+                                                            readOnly 
+                                                            onClick={() => item.login_data.friend_url && clickCopyCode(item.login_data.friend_url)} 
+                                                        />
+                                                        <img src={urlCopy} alt="copy" />
+                                                    </div>
+                                                </label>
+                                            )}
+                                        </>
+                                    )}
+                            </div>
 
                         </div>
                         )}

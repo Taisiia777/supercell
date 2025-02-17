@@ -5,6 +5,6 @@ export async function getProducts() {
         },
         cache: "no-cache"
     })
-
+    
     return await res.json()
 }

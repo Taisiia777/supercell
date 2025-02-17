@@ -11,6 +11,7 @@ export default function ProfilePage() {
 
     return (
         <>
+                
             <Header/>
             <GoBack/>
             {/*<Profile data={profile}/>*/}

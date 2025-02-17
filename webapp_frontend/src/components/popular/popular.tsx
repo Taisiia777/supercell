@@ -20,16 +20,16 @@ function Popular(props: { data: IProduct[] }) {
         setClientItems(items)
     }, [items])
 
-    const [isLoading, setLoading] = useState(true);
+    const [isLoading, setLoading] = useState(false);
 
-    useEffect(() => {
-        setLoading(true);
-        const timeoutId = setTimeout(() => {
-            setLoading(false);
-        }, 1000);
+    // useEffect(() => {
+    //     setLoading(true);
+    //     const timeoutId = setTimeout(() => {
+    //         setLoading(false);
+    //     }, 1000);
 
-        return () => clearTimeout(timeoutId);
-    }, []);
+    //     return () => clearTimeout(timeoutId);
+    // }, []);
 
     return (
         <div className={styles.popular}>

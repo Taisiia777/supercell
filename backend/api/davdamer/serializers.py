@@ -290,6 +290,11 @@ def category_to_game_mapper(category_name: str) -> GameType | None:
     examples=[OpenApiExample("Создание товара", examples.CreateProductExample)]
 )
 class CreateProductSerializer(AdminProductSerializer):
+    description = serializers.CharField(
+        style={'base_template': 'textarea.html'},
+        allow_blank=True,
+        required=False
+    )
     attributes = CustomProductAttributeValueSerializer(
         many=True,
         required=False,
@@ -317,6 +322,7 @@ class CreateProductSerializer(AdminProductSerializer):
         max_length=100,
         label="Единица измерения",
     )
+    friend_url = serializers.URLField(required=False, allow_null=True)
 
     uploaded_images = serializers.ListField(
         child=serializers.ImageField(allow_empty_file=False, use_url=False),
@@ -434,6 +440,9 @@ class CreateProductSerializer(AdminProductSerializer):
             "stockrecords",
             "attributes",
             "login_type",
+            "filters_type",
+            "friend_url"
+
         ]
 
 

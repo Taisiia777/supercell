@@ -122,6 +122,8 @@ type ProductForm = {
   unit: Translation;
   selectUnit: Translation;
   withLogin: Translation;
+  withoutLogin: Translation;
+  withlinkLogin: Translation;
   photos: Translation;
   description: Translation;
   productDescription: Translation;
@@ -263,6 +265,14 @@ export const translations: Translations = {
       ru: 'С входом',
       zh: '需要登录'
     },
+    withoutLogin: {
+      ru: 'Без входа',
+      zh: '无需登录'
+    },
+    withlinkLogin: {
+      ru: 'Ссылка',
+      zh: '链接'
+      },
     photos: {
       ru: 'Фото товара',
       zh: '商品图片'

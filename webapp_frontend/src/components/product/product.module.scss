@@ -1,50 +1,170 @@
 
+// .product {
+//   display: flex;
+//   flex-direction: column;
+//   justify-content: center;
+//   // padding-bottom: 90px; // Отступ для фиксированной кнопки
+
+//   .img {
+//     position: relative;
+//     width: 100%;
+//     max-width: 249px;
+//     height: 283px;
+//     margin: 0 auto;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+
+//     img {
+//       position: absolute;
+//       max-width: 100%;
+//       max-height: 100%;
+//       margin: auto;
+//       left: 0;
+//       right: 0;
+//       top: 0;
+//       bottom: 0;
+//       object-fit: contain;
+//     }
+//   }
+
+//   .card {
+//     padding: 19px 16px;
+//     width: 100%;
+//     background: linear-gradient(225deg, #2a3b67 0%, #375aab 100%);
+//     // border-radius: 30px;
+//     // border-top-right-radius: 30px;
+//     display: flex;
+//     flex-direction: column;
+//     grid-gap: 16px;
+//     height: max-content;
+//     padding-bottom: 70px;
+
+//     .name {
+//       display: flex;
+//       justify-content: space-between;
+//       align-items: center;
+      
+//       .title {
+//         display: flex;
+//         grid-gap: 11px;
+//         align-items: center;
+//         span {
+//           font-weight: 500;
+//           font-size: 16px;
+//           letter-spacing: 0.07em;
+//           color: #fff;
+//         }
+//       }
+      
+//       .type {
+//         display: flex;
+//         align-items: center;
+//         grid-gap: 7px;
+//         span {
+//           font-weight: 500;
+//           font-size: 10px;
+//           letter-spacing: 0.1em;
+//           color: #fff;
+//         }
+//       }
+//     }
+
+//     .product_name {
+//       font-weight: 500;
+//       font-size: 18px;
+//       letter-spacing: 0.05em;
+//       color: #fff;
+//       text-transform: none;
+//     }
+
+//     .price {
+//       font-weight: 600;
+//       font-size: 18px;
+//       letter-spacing: 0.05em;
+//       color: #fff;
+//     }
+
+//     // .desc {
+//     //   font-weight: 400;
+//     //   font-size: 17px;
+//     //   letter-spacing: 0.05em;
+//     //   color: #fff;
+//     // }
+//     .desc {
+//       font-weight: 400;
+//       font-size: 17px;
+//       letter-spacing: 0.05em;
+//       color: #fff;
+      
+//       p {
+//         margin: 0;
+//         line-height: 1.6;
+        
+//         // Отступ между параграфами
+//         & + p {
+//           margin-top: 0.8em;
+//         }
+        
+//         // Стиль для пустых параграфов (пустых строк)
+//         &:empty {
+//           height: 1em;
+//         }
+//       }
+
+//       // Убираем отступ после последнего параграфа
+//       p:last-child {
+//         margin-bottom: 0;
+//       }
+//     }
+//   }
+
+//   .add {
+//     position: fixed;
+//     bottom: 73px;
+//     left: 0;
+//     right: 0;
+//     padding: 16px;
+//     // background: linear-gradient(225deg, #2a3b67 0%, #375aab 100%);
+//     display: flex;
+//     justify-content: center;
+//     z-index: 10;
+//   }
+// }
+
+
+
 .product {
+  margin-top: 32px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  // padding-bottom: 90px; // Отступ для фиксированной кнопки
 
   .img {
     position: relative;
+    height: 283px;
     width: 100%;
     max-width: 249px;
-    height: 283px;
     margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    img {
-      position: absolute;
-      max-width: 100%;
-      max-height: 100%;
-      margin: auto;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      object-fit: contain;
-    }
   }
 
   .card {
-    padding: 19px 16px;
+    margin-top: 100px;
+    padding: 19px 16px 41px 16px;
     width: 100%;
+    z-index: 1; // Уменьшаем z-index чтобы карточка была под навигацией
+    box-shadow: 0 -4px 20px 2px rgba(0, 0, 0, 0.25);
     background: linear-gradient(225deg, #2a3b67 0%, #375aab 100%);
-    // border-radius: 30px;
-    // border-top-right-radius: 30px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
     display: flex;
     flex-direction: column;
     grid-gap: 16px;
-    height: max-content;
-    padding-bottom: 70px;
-
+    margin-bottom: -73px; // Компенсируем высоту навигации
     .name {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      
       .title {
         display: flex;
         grid-gap: 11px;
@@ -56,7 +176,6 @@
           color: #fff;
         }
       }
-      
       .type {
         display: flex;
         align-items: center;
@@ -69,39 +188,35 @@
         }
       }
     }
-
     .product_name {
       font-weight: 500;
-      font-size: 18px;
+      font-size: 24px;
       letter-spacing: 0.05em;
       color: #fff;
-      text-transform: none;
     }
-
     .price {
       font-weight: 600;
-      font-size: 18px;
+      font-size: 24px;
       letter-spacing: 0.05em;
       color: #fff;
     }
-
     .desc {
       font-weight: 400;
       font-size: 17px;
       letter-spacing: 0.05em;
       color: #fff;
+      margin-bottom: 120px;
     }
   }
 
   .add {
     position: fixed;
-    bottom: 73px;
+    bottom: 73px; // Отступ для навигации
     left: 0;
     right: 0;
     padding: 16px;
-    // background: linear-gradient(225deg, #2a3b67 0%, #375aab 100%);
     display: flex;
     justify-content: center;
-    z-index: 10;
+    z-index: 2; // Больше чем у карточки, но меньше чем у навигации
   }
 }

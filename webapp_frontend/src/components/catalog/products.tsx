@@ -15,7 +15,9 @@ import Filters from "../Filters/Filters";
 interface Filters {
     newAccount: boolean;
     promotions: boolean;
-    passesGems: boolean;
+    passes: boolean;
+    gems: boolean;
+
 }
 export default function Products(props: { data: IProduct[] }) {
     const { items } = useCart()
@@ -26,31 +28,35 @@ export default function Products(props: { data: IProduct[] }) {
         setClientItems(items)
     }, [items])
 
-    const [isLoading, setLoading] = useState(true);
+    const [isLoading, setLoading] = useState(false);
 
-    useEffect(() => {
-        setLoading(true);
-        const timeoutId = setTimeout(() => {
-            setLoading(false);
-        }, 1000);
+    // useEffect(() => {
+    //     setLoading(true);
+    //     const timeoutId = setTimeout(() => {
+    //         setLoading(false);
+    //     }, 1000);
 
-        return () => clearTimeout(timeoutId);
-    }, []);
-    const handleFilterChange = (filters: Filters) => {
-        const filtered = props.data.filter(product => {
-            if (!filters.newAccount && !filters.promotions && !filters.passesGems) {
-                return true;
-            }
-            
-            return (
-                (filters.newAccount && product.categories.includes('Новый аккаунт')) ||
-                (filters.promotions && product.categories.includes('Акции')) ||
-                (filters.passesGems && product.categories.includes('Пропуски/Гемы'))
-            );
-        });
+    //     return () => clearTimeout(timeoutId);
+    // }, []);
     
-        setFilteredProducts(filtered);
-    };
+    const handleFilterChange = (filters: Filters) => {
+        // Если все фильтры false - показываем все товары
+        if (!filters.newAccount && !filters.promotions && !filters.passes && !filters.gems ) {
+          setFilteredProducts(props.data);
+        } else {
+          // Иначе фильтруем по активному фильтру
+          const filtered = props.data.filter(product => {
+            return (
+              (filters.newAccount && product.filters_type === "NEW_ACCOUNT") ||
+              (filters.promotions && product.filters_type === "PROMO") ||
+              (filters.passes && product.filters_type === "PASS") || 
+              (filters.gems && product.filters_type === "GEMS")
+
+            );
+          });
+          setFilteredProducts(filtered);
+        }
+      };
     return (
         <div className={styles.products}>
 
@@ -58,7 +64,9 @@ export default function Products(props: { data: IProduct[] }) {
             <Filters onFilterChange={handleFilterChange} />
 
             <div className={styles.items}>
-                {props.data.map((product: IProduct) => {
+                {/* {props.data.map((product: IProduct) => { */}
+                    {filteredProducts.map((product: IProduct) => {
+
                     const cartItem = clientItems.find((i) => i.id === product.id)
                     const count = cartItem ? cartItem.count : 0
 

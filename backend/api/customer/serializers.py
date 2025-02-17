@@ -104,15 +104,16 @@ class ProductImageSerializer(serializers.ModelSerializer):
 class ProductSerializer(CoreProductSerializer):
     images = ProductImageSerializer(many=True)
     categories = CategoryField(many=True)
+    friend_url = serializers.URLField(required=False, allow_null=True)
 
     class Meta(CoreProductSerializer.Meta):
-        fields = ["id", "title", "images", "categories", "login_type", "game"]
+        fields = ["id", "title", "images", "categories", "login_type", "game", "filters_type", "friend_url"]
 
 
 class OrderLoginDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderLoginData
-        fields = ["account_id", "code"]
+        fields = ["account_id", "code", "friend_url"]
 
 
 class PutLoginDataSerializer(serializers.ModelSerializer):

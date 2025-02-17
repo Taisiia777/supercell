@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import ForeignKey
 from oscar.apps.catalogue.abstract_models import AbstractProduct
 from oscar.core.loading import get_model
-from shop.catalogue.enums import LoginType, GameType
+from shop.catalogue.enums import LoginType, GameType, FiltersType
 
 OrderLine = get_model("order", "Line")
 
@@ -26,7 +26,11 @@ class Product(AbstractProduct):
     login_type = models.CharField(
         choices=LoginType.choices, max_length=20, default=LoginType.LINK
     )
+    filters_type = models.CharField(
+        choices=FiltersType.choices, max_length=20, default=FiltersType.NEW_ACCOUNT
+    )
     game = models.CharField(max_length=50, choices=GameType.choices, null=True)
+    friend_url = models.URLField(null=True, blank=True, verbose_name="Ссылка в друзья")
 
     def get_orders_count(self) -> int:
         return OrderLine.objects.filter(product=self).count()

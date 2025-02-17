@@ -12,6 +12,7 @@ import Image from "next/image";
 import {Shimmer} from "react-shimmer";
 import shimmer from "@/components/ui/shimmer/shimmer.module.scss";
 import ActionButtons from "@/components/ui/action-buttons/action-buttons";
+import ButtonAdd from "@/components/ui/button-add/button";
 import {useForm} from "react-hook-form";
 import {useRouter} from 'next/navigation';
 import {useTelegram} from "@/app/useTg";
@@ -51,20 +52,21 @@ export default function Cart(props: { data: IProduct[] }) {
         }
     }, [user]);
 
-    const { items, addProductData } = useCart()
+    const { items, addProductData, addItem } = useCart()
 
-    const [isLoading, setLoading] = useState(true);
 
-    useEffect(() => {
-        setLoading(true);
-        if(profile) {
-            const timeoutId = setTimeout(() => {
-                setLoading(false);
-            }, 1000);
+    const [isLoading, setLoading] = useState(false);
 
-            return () => clearTimeout(timeoutId);
-        }
-    }, [profile]);
+    // useEffect(() => {
+    //     setLoading(true);
+    //     if(profile) {
+    //         const timeoutId = setTimeout(() => {
+    //             setLoading(false);
+    //         }, 1000);
+
+    //         return () => clearTimeout(timeoutId);
+    //     }
+    // }, [profile]);
 
     const [clientItems, setClientItems] = useState<CartItem[]>([]);
 
@@ -104,36 +106,6 @@ export default function Cart(props: { data: IProduct[] }) {
     const { register, handleSubmit, setValue, watch } = useForm<FormValues>();
 
 
-    // const onSubmit = handleSubmit((data) => {
-    //     console.log("Форма отправляется", data);
-    //     const productFormData = [];
-    //     let emailFormData = null;
-    
-    //     Object.entries(data).forEach(([key, value]) => {
-    //         if (key.endsWith("-email")) {
-    //             const [productId] = key.split("-"); // Получаем ID продукта
-    //             const item = filteredData.find((item) => item.id.toString() === productId);
-    //             if (item) {
-    //                 const loginType = item.login_type;
-    //                 const game = item.game; // Добавляем информацию об игре
-    //                 productFormData.push({ 
-    //                     productId, 
-    //                     email: value, 
-    //                     loginType,
-    //                     game // Добавляем game в данные
-    //                 });
-    //             }
-    //         } else if (key === "email") {
-    //             emailFormData = { email: value };
-    //         }
-    //     });
-    
-    //     console.log("Подготовленные данные:", productFormData);
-    //     addProductData(productFormData);
-    //     setEmail(emailFormData.email);
-    
-    //     router.push('/checkout');
-    // });
     const onSubmit = handleSubmit((data) => {
         console.log("Форма отправляется", data);
         const productFormData = [];
@@ -235,6 +207,15 @@ useEffect(() => {
         };
       }, []);
 
+      // Получаем игру из первого товара в корзине
+      const cartGame = filteredData[0]?.game;
+
+      // Фильтруем и сортируем рекомендуемые товары
+      const recommendedItems = props.data
+          .filter(item => item.game === cartGame)
+          // .sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+  
+          
     return (
         <div className={styles.cart}>
 
@@ -259,7 +240,21 @@ useEffect(() => {
                                     <div className={styles.container}>
                                         <div className={styles.img}>
                                             <div className={styles.bg}>
-                                                <Image src={item.images[0].original} alt={item.title} height={70} width={60}/>
+                                                {/* <Image src={item.images[0].original} alt={item.title} height={70} width={60}/> */}
+                                                <div className={styles.imageWrapper}>
+
+                                                  <Image 
+                                                    src={item.images[0].original} 
+                                                    alt={item.title} 
+                                                    height={70} 
+                                                    width={60}
+                                                    style={{ objectFit: 'contain', width: 'auto', height: '70px' }}
+                                                    quality={100}
+                                                    unoptimized={true}
+                                                    loading="eager"
+                                                    priority
+                                                    />
+                                                  </div>
                                             </div>
                                             <div className={styles.type}>
                                                 {item.login_type === "EMAIL_CODE" ? (
@@ -342,7 +337,15 @@ useEffect(() => {
                                         validation="email"
                                         editable={false}
                                         
-                                        icon={item.login_type !== "EMAIL_CODE" && <>
+
+                                        icon={item.login_type === "EMAIL_CODE" ? (
+                                          <>
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="28" viewBox="0 0 43 38" fill="none">
+                                            <rect x="6.32373" y="5.60498" width="30.2835" height="26.7893" rx="8.60124" fill="black"/>
+                                            <path fill="white" d="M13.4914 11.0942V27.2645H16.7975V11.0942H13.4914ZM30.7922 14.3283C30.7205 14.0588 30.5682 13.7623 30.3352 13.4389C30.1381 13.1694 29.8604 12.855 29.502 12.4957C29.1615 12.1363 28.8479 11.8578 28.5612 11.6602C28.2387 11.4266 27.943 11.2739 27.6742 11.202C27.4054 11.1302 27.0739 11.0942 26.6797 11.0942H18.616V27.2645H26.6797C27.0739 27.2645 27.4054 27.2285 27.6742 27.1567C27.943 27.0848 28.2387 26.9321 28.5612 26.6985C28.83 26.5188 29.1436 26.2493 29.502 25.89C29.8604 25.5306 30.1381 25.2072 30.3352 24.9198C30.5682 24.5964 30.7205 24.2999 30.7922 24.0304C30.8638 23.7609 30.8997 23.4285 30.8997 23.0333V15.3254C30.8997 14.9302 30.8638 14.5978 30.7922 14.3283ZM27.1635 14.7056C27.4681 15.011 27.6205 15.1907 27.6205 15.2446V23.1141C27.6205 23.168 27.4681 23.3477 27.1635 23.6531C26.8589 23.9585 26.6797 24.1113 26.6259 24.1113H21.8953V14.2474H26.6259C26.6797 14.2474 26.8589 14.4002 27.1635 14.7056Z"/>
+                                          </svg>
+                                          </>): (
+                                             <>
                                             <svg
                                               onClick={(e) => {
                                                 e.preventDefault();
@@ -361,7 +364,8 @@ useEffect(() => {
                                                     d="M12 15C12.5523 15 13 14.5523 13 14C13 13.4477 12.5523 13 12 13C11.4477 13 11 13.4477 11 14C11 14.5523 11.4477 15 12 15Z"
                                                     fill="white"/>
                                             </svg>
-                                        </>}
+                                             </>
+                                          )}
                                     />
 
                                 </div>
@@ -388,110 +392,99 @@ useEffect(() => {
                         />
                     </div>
                 </form>
-                <div className={styles.popular}>
-                  <h3>Может пригодиться</h3>
-                  <div className={styles.items}>
-                    {props.data.slice(0, 4).map((item) => (
-                      <Link href={`/product/${item.id}`} key={item.id} className={styles['popular-item']}>
-                        <div className={styles.like}>
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 21L10.55 19.7C5.4 15.1 2 12.1 2 8.5C2 5.5 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.5 22 8.5C22 12.1 18.6 15.1 13.45 19.7L12 21Z" 
-                                  stroke="white" strokeWidth="2"/>
-                          </svg>
+
+                      <div className={styles.popular}>
+                        <h3>Может пригодиться</h3>
+                        <div className={styles.items}>
+                            {recommendedItems.map((item) => {
+                                const cartItem = clientItems.find((i) => i.id === item.id)
+                                const count = cartItem ? cartItem.count : 0
+                                
+                                return (
+                                    <div key={item.id} className={styles['popular-item']}>
+                                        <Link href={`/product/${item.id}`}>
+                                            <div className={styles['image-container']}>
+                                                <Image 
+                                                    src={item.images[0].original}
+                                                    alt={item.title}
+                                                    fill
+                                                    className={styles.img}
+                                                />
+                                            </div>
+                                            <div className={styles.details}>
+                                                <div className={styles.price}>
+                                                    {item.price.incl_tax} ₽
+                                                </div>
+                                                <div className={styles.title}>
+                                                    {item.title}
+                                                </div>
+                                            </div>
+                                        </Link>
+                                            {isLoading ? (
+                                                <Shimmer width={120} height={31}
+                                                         className={`${shimmer.shimmer_btn} shimmer`}/>
+                                            ) : count < 1 ? (
+                                                <ButtonAdd id={item.id} game={item.game}/>
+                                            ) : (
+                                                <ActionButtons id={item.id} count={count} game={item.game}/>
+                                            )}
+                                    
+                                    </div>
+                                )
+                            })}
                         </div>
-                        {Math.random() > 0.5 && (
-                          <div className={styles.discount}>
-                            -{Math.floor(Math.random() * 30 + 10)}%
-                          </div>
-                        )}
-                        <div className={styles['image-container']}>
-                          <Image 
-                            src={item.images[0].original}
-                            alt={item.title}
-                            fill
-                            className={styles.img}
-                          />
-                        </div>
-                        <div className={styles.details}>
-                          <div className={styles.price}>
-                            {item.price.incl_tax} ₽
-                            {Math.random() > 0.5 && (
-                              <span className={styles['old-price']}>
-                                {Math.floor(Number(item.price.incl_tax) * 1.2)} ₽
-                              </span>
-                            )}
-                          </div>
-                          <div className={styles.title}>
-                            {item.title}
-                          </div>
-                          <button className={styles['add-to-cart']}>
-                            <svg viewBox="0 0 24 24">
-                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
-                            </svg>
-                          </button>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+                      </div>
+
                 </>
             ) : (
-                // <div className={styles.null}>
-                //     <p>Корзина пуста</p>
-                // </div>
-                <div className={styles.null}>
+
+              <div className={styles.null}>
                 <h2>Корзина пустая</h2>
                 <p>А товаров полно — забегайте посмотреть</p>
                 <Link href="/catalog" className={styles['to-catalog']}>
                   К товарам
                 </Link>
                 
-                <div className={styles.popular}>
-                  <h3>Может пригодиться</h3>
-                  <div className={styles.items}>
-                    {props.data.slice(0, 4).map((item) => (
-                      <Link href={`/product/${item.id}`} key={item.id} className={styles['popular-item']}>
-                        <div className={styles.like}>
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 21L10.55 19.7C5.4 15.1 2 12.1 2 8.5C2 5.5 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.5 22 8.5C22 12.1 18.6 15.1 13.45 19.7L12 21Z" 
-                                  stroke="white" strokeWidth="2"/>
-                          </svg>
+                    <div className={styles.popular}>
+                        <h3>Может пригодиться</h3>
+                        <div className={styles.items}>
+                            {props.data.slice(0, 16).map((item) => {
+                                const cartItem = clientItems.find((i) => i.id === item.id)
+                                const count = cartItem ? cartItem.count : 0
+                                
+                                return (
+                                    <div key={item.id} className={styles['popular-item']}>
+                                        <Link href={`/product/${item.id}`}>
+                                            <div className={styles['image-container']}>
+                                                <Image 
+                                                    src={item.images[0].original}
+                                                    alt={item.title}
+                                                    fill
+                                                    className={styles.img}
+                                                />
+                                            </div>
+                                            <div className={styles.details}>
+                                                <div className={styles.price}>
+                                                    {item.price.incl_tax} ₽
+                                                </div>
+                                                <div className={styles.title}>
+                                                    {item.title}
+                                                </div>
+                                            </div>
+                                        </Link>
+                                        {isLoading ? (
+                                                <Shimmer width={120} height={31}
+                                                         className={`${shimmer.shimmer_btn} shimmer`}/>
+                                            ) : count < 1 ? (
+                                                <ButtonAdd id={item.id} game={item.game}/>
+                                            ) : (
+                                                <ActionButtons id={item.id} count={count} game={item.game}/>
+                                            )}
+                                    </div>
+                                )
+                            })}
                         </div>
-                        {Math.random() > 0.5 && (
-                          <div className={styles.discount}>
-                            -{Math.floor(Math.random() * 30 + 10)}%
-                          </div>
-                        )}
-                        <div className={styles['image-container']}>
-                          <Image 
-                            src={item.images[0].original}
-                            alt={item.title}
-                            fill
-                            className={styles.img}
-                          />
-                        </div>
-                        <div className={styles.details}>
-                          <div className={styles.price}>
-                            {item.price.incl_tax} ₽
-                            {Math.random() > 0.5 && (
-                              <span className={styles['old-price']}>
-                                {Math.floor(Number(item.price.incl_tax) * 1.2)} ₽
-                              </span>
-                            )}
-                          </div>
-                          <div className={styles.title}>
-                            {item.title}
-                          </div>
-                          <button className={styles['add-to-cart']}>
-                            <svg viewBox="0 0 24 24">
-                              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
-                            </svg>
-                          </button>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+                    </div>
               </div>
             )}
 

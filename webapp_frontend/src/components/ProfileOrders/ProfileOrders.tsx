@@ -1,89 +1,4 @@
-// import { useState, useEffect } from 'react';
-// import { useTelegram } from '@/app/useTg';
-// import { formatDate } from '@/utils/formatDate';
-// import Link from 'next/link';
-// import styles from './profile-orders.module.scss';
-// import { IOrder } from '@/types/orders.interface';
 
-// const ProfileOrders = () => {
-//   const [activeTab, setActiveTab] = useState('active');
-//   const [orders, setOrders] = useState<IOrder[]>([]);
-//   const { webApp } = useTelegram();
-  
-//   useEffect(() => {
-//     if (webApp?.initData) {
-//       fetch(process.env.API_URL + "customer/orders/", {
-//         headers: {
-//           'Authorization': `Bearer ${webApp.initData}`,
-//         },
-//         cache: "no-cache"
-//       })
-//       .then(response => response.json())
-//       .then(data => {
-//         if (data?.orders) {
-//           setOrders(data.orders);
-//         }
-//       })
-//       .catch(error => console.error('Error fetching orders:', error));
-//     }
-//   }, [webApp?.initData]);
-
-//   const activeOrders = orders.filter(order => 
-//     order.status === "PAID" || 
-//     order.status === "PROCESSING"
-//   );
-
-//   const completedOrders = orders.filter(order => 
-//     order.status === "DELIVERED"
-//   );
-
-//   return (
-//     <div className={styles.orders}>
-//       <div className={styles.tabs}>
-//         <button
-//           className={`${styles.tab} ${activeTab === 'active' ? styles.active : ''}`}
-//           onClick={() => setActiveTab('active')}
-//         >
-//           Актуальные
-//         </button>
-//         <button
-//           className={`${styles.tab} ${activeTab === 'completed' ? styles.active : ''}`}
-//           onClick={() => setActiveTab('completed')}
-//         >
-//           Завершённые
-//         </button>
-//       </div>
-
-//       <div className={styles.orders_list}>
-//         {(activeTab === 'active' ? activeOrders : completedOrders).map((order: IOrder) => (
-//           <Link 
-//             href={`/order/${order.number}`}
-//             key={order.id}
-//             className={styles.order_item}
-//           >
-//             <div className={styles.order_header}>
-//               <span className={styles.order_number}>
-//                 ЗАКАЗ № {order.number}
-//               </span>
-//             </div>
-//             <div className={styles.order_details}>
-//               ДАТА: {formatDate(order.date_placed)} СУММА: {order.total_incl_tax} ₽
-//             </div>
-//           </Link>
-//         ))}
-        
-//         {(activeTab === 'active' ? activeOrders : completedOrders).length === 0 && (
-//           <div className={styles.empty_state}>
-//             {activeTab === 'active' ? 'Нет актуальных заказов' : 'Нет завершённых заказов'}
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default ProfileOrders;
-// src/components/ProfileOrders/ProfileOrders.tsx
 import { useState, useEffect } from 'react';
 import { useTelegram } from '@/app/useTg';
 import { formatDate } from '@/utils/formatDate';
@@ -147,18 +62,52 @@ const ProfileOrders = () => {
 
       <div className={styles.orders_list}>
         {(activeTab === 'active' ? activeOrders : completedOrders).map((order) => (
+          // <Link
+          //   href={`/order/${order.number}`}
+          //   key={order.id}
+          //   className={styles.order_item}
+          // >
+          //   <div className={styles.order_header}>
+          //     <span className={styles.order_number}>
+          //       ЗАКАЗ № {order.number}
+          //     </span>
+          //   </div>
+          //   <div className={styles.order_details}>
+          //     ДАТА: {formatDate(order.date_placed)} СУММА: {order.total_incl_tax} ₽
+          //   </div>
+          // </Link>
           <Link
             href={`/order/${order.number}`}
             key={order.id}
             className={styles.order_item}
           >
-            <div className={styles.order_header}>
-              <span className={styles.order_number}>
-                ЗАКАЗ № {order.number}
-              </span>
+            <div className={styles.content}>
+              <div className={styles.order_header}>
+                <span className={styles.order_number}>
+                  ЗАКАЗ № {order.number}
+                </span>
+              </div>
+              <div className={styles.order_details}>
+                дата: {formatDate(order.date_placed)} сумма: {order.total_incl_tax} ₽
+              </div>
             </div>
-            <div className={styles.order_details}>
-              ДАТА: {formatDate(order.date_placed)} СУММА: {order.total_incl_tax} ₽
+            <div className={styles.route}>
+              <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0.00244141" width="24" height="24" rx="5" fill="url(#paint0_linear_35_2230)"/>
+                <rect x="0.252441" y="0.25" width="23.5" height="23.5" rx="4.75" stroke="url(#paint1_linear_35_2230)" strokeOpacity="0.6" strokeWidth="0.5"/>
+                <path d="M19.9615 12.1141C19.9556 11.4893 19.6988 10.892 19.2467 10.4516L14.0492 5.34532C13.8222 5.12414 13.5152 5 13.1951 5C12.875 5 12.568 5.12414 12.341 5.34532C12.2274 5.45571 12.1373 5.58705 12.0758 5.73176C12.0143 5.87646 11.9826 6.03168 11.9826 6.18844C11.9826 6.3452 12.0143 6.50042 12.0758 6.64512C12.1373 6.78983 12.2274 6.92117 12.341 7.03156L16.3269 10.9266H4.21154C3.89022 10.9266 3.58206 11.0517 3.35485 11.2744C3.12764 11.4971 3 11.7991 3 12.1141C3 12.429 3.12764 12.731 3.35485 12.9537C3.58206 13.1764 3.89022 13.3016 4.21154 13.3016H16.3269L12.341 17.2084C12.1128 17.4305 11.984 17.7322 11.9829 18.0474C11.9817 18.3625 12.1084 18.6651 12.3349 18.8887C12.5614 19.1123 12.8693 19.2386 13.1908 19.2397C13.5123 19.2408 13.8211 19.1167 14.0492 18.8947L19.2467 13.7884C19.7018 13.3451 19.9588 12.7429 19.9615 12.1141Z" fill="white"/>
+                <defs>
+                  <linearGradient id="paint0_linear_35_2230" x1="1.20244" y1="-1.27508e-07" x2="17.9187" y2="32.4172" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#2A3B67"/>
+                    <stop offset="0.635" stopColor="#4578EE"/>
+                    <stop offset="1" stopColor="#2A3B67"/>
+                  </linearGradient>
+                  <linearGradient id="paint1_linear_35_2230" x1="0.00244141" y1="0" x2="13.6325" y2="28.8921" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="white"/>
+                    <stop offset="1"/>
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
           </Link>
         ))}

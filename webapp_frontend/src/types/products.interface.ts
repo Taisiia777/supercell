@@ -13,6 +13,7 @@ export interface IProduct {
     code?: string
     link?: string
     game: string
+    filters_type?: string
 }
 interface IProductImage {
     id: number

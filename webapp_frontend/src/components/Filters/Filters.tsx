@@ -1,75 +1,13 @@
 
-// import { useState } from 'react';
-// import styles from './filters.module.scss';
-
-// interface Filters {
-//   newAccount: boolean;
-//   promotions: boolean;
-//   passesGems: boolean;
-// }
-
-// interface FiltersProps {
-//   onFilterChange: (filters: Filters) => void;
-// }
-
-// const filterCategories = [
-//   { id: 'newAccount' as const, label: 'Новый аккаунт' },
-//   { id: 'promotions' as const, label: 'Акции' },
-//   { id: 'passesGems' as const, label: 'Пропуски/Гемы' }
-// ] as const;
-
-// export default function Filters({ onFilterChange }: FiltersProps) {
-//   const [isOpen, setIsOpen] = useState(false);
-//   const [selectedFilters, setSelectedFilters] = useState<Filters>({
-//     newAccount: false,
-//     promotions: false,
-//     passesGems: false
-//   });
-
-//   const handleFilterClick = (filterId: keyof Filters) => {
-//     const newFilters = {
-//       ...selectedFilters,
-//       [filterId]: !selectedFilters[filterId]
-//     };
-//     setSelectedFilters(newFilters);
-//     onFilterChange(newFilters);
-//   };
-
-//   return (
-//     <div className={styles.filters}>
-//       <div className={styles.header} onClick={() => setIsOpen(!isOpen)}>
-//         <span>Фильтры</span>
-//         <svg 
-//           className={`${styles.arrow} ${isOpen ? styles.open : ''}`}
-//           width="12" height="8" viewBox="0 0 12 8" fill="none"
-//         >
-//           <path d="M1 1L6 6L11 1" stroke="white" strokeWidth="2"/>
-//         </svg>
-//       </div>
-
-//       <div className={`${styles.content} ${isOpen ? styles.open : ''}`}>
-//         <div className={styles.categories}>
-//           {filterCategories.map(filter => (
-//             <div
-//               key={filter.id}
-//               className={`${styles.category} ${selectedFilters[filter.id] ? styles.active : ''}`}
-//               onClick={() => handleFilterClick(filter.id)}
-//             >
-//               {filter.label}
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
 import { useState } from 'react';
 import styles from './filters.module.scss';
 
 interface Filters {
   newAccount: boolean;
   promotions: boolean;
-  passesGems: boolean;
+  passes: boolean;
+  gems: boolean;
+
 }
 
 interface FiltersProps {
@@ -77,39 +15,54 @@ interface FiltersProps {
 }
 
 const filterCategories = [
-  { id: 'newAccount' as const, label: 'Новый аккаунт' },
+  { id: 'passes' as const, label: 'Пропуски' },
   { id: 'promotions' as const, label: 'Акции' },
-  { id: 'passesGems' as const, label: 'Пропуски/Гемы' }
+  { id: 'gems' as const, label: 'Гемы' },
+  { id: 'newAccount' as const, label: 'Новый аккаунт' },
 ] as const;
 
 export default function Filters({ onFilterChange }: FiltersProps) {
-  const [selectedFilters, setSelectedFilters] = useState<Filters>({
-    newAccount: false,
-    promotions: false,
-    passesGems: false
-  });
+  const [activeFilter, setActiveFilter] = useState<keyof Filters | null>(null);
 
   const handleFilterClick = (filterId: keyof Filters) => {
-    const newFilters = {
-      ...selectedFilters,
-      [filterId]: !selectedFilters[filterId]
-    };
-    setSelectedFilters(newFilters);
-    onFilterChange(newFilters);
+    // Если кликнули по активному фильтру - сбрасываем его
+    if (activeFilter === filterId) {
+      setActiveFilter(null);
+      // Сбрасываем все фильтры, чтобы показать все товары
+      onFilterChange({
+        newAccount: false,
+        promotions: false,
+        passes: false,
+        gems: false
+      });
+    } else {
+      // Иначе активируем новый фильтр
+      setActiveFilter(filterId);
+      const newFilters = {
+        newAccount: false,
+        promotions: false,
+        passes: false,
+        gems: false,
+        [filterId]: true
+      };
+      onFilterChange(newFilters);
+    }
   };
 
   return (
     <div className={styles.filters}>
-      <div className={styles.categories}>
-        {filterCategories.map(filter => (
-          <div
-            key={filter.id}
-            className={`${styles.category} ${selectedFilters[filter.id] ? styles.active : ''}`}
-            onClick={() => handleFilterClick(filter.id)}
-          >
-            {filter.label}
-          </div>
-        ))}
+      <div className={styles.scroll_container}>
+        <div className={styles.categories}>
+          {filterCategories.map(filter => (
+            <div
+              key={filter.id}
+              className={`${styles.category} ${activeFilter === filter.id ? styles.active : ''}`}
+              onClick={() => handleFilterClick(filter.id)}
+            >
+              {filter.label}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -130,8 +130,35 @@ function TablePage(props: IProps) {
 
     const [dataFilters, setDataFilters] = useState<IDataFilter[]>()
 
+    // const getElemArrFilters = (data: any, item: any) => {
+    //     const arr: any[] = [];
+    //     if (item["id"]) {
+    //         data.map((i: any) => {
+    //             if (item.type === "date") return i
+    //             const elem = i[item.filter];
+    //             const indexArr = arr.findIndex((el) => el["id"] === elem["id"]);
+    //             if (indexArr !== -1) return i
+    //             arr.push(i[item.filter])
+    //             return i
+    //         })
+    //     } else {
+    //         data.map((i: any) => {
+    //             if (item.type === "date") return i
+    //             const elem = i[item.filter].toLocaleString();
+
+    //             if (arr.indexOf(elem) === -1) arr.push(elem)
+    //             return i
+    //         })
+    //     }
+    //     return arr
+
+    // }
     const getElemArrFilters = (data: any, item: any) => {
         const arr: any[] = [];
+        if (item.filter === "statusName") {
+            // Для статусов возвращаем все возможные значения из statusOrder
+            return Object.values(statusOrder);
+        }
         if (item["id"]) {
             data.map((i: any) => {
                 if (item.type === "date") return i
@@ -145,40 +172,76 @@ function TablePage(props: IProps) {
             data.map((i: any) => {
                 if (item.type === "date") return i
                 const elem = i[item.filter].toLocaleString();
-
+    
                 if (arr.indexOf(elem) === -1) arr.push(elem)
                 return i
             })
         }
         return arr
-
     }
+    // useEffect(() => {
 
+    //     setArrRowActive(Array(lengthRow).fill(false))
+    //     setNameColumns(dataTables[nameTable].nameColumns.map((item) => {
+    //       return {
+    //         nameColumn: item.nameColumn,
+    //         nameResponse: item.nameResponse, 
+    //         stateSort: "none"
+    //       }
+    //     }))
+    //     setDataFilters(dataTables[nameTable].filterParams.map((item) => {
+    //         const title = item.title;
+
+
+    //         const keyFilter = item.filter;
+    //         let arr: any[] = [];
+    //         if (products) arr = getElemArrFilters(products, item)
+    //         if (orders) arr = getElemArrFilters(orders, item)
+    //         const type = item.type ? item.type : "";
+
+    //         return Object.assign({ type: type }, { title: title }, { nameFilter: keyFilter }, { [keyFilter]: [...arr] }, { id: item.id })
+
+    //     }))
+    // }, [lengthRow, language])
     useEffect(() => {
-
         setArrRowActive(Array(lengthRow).fill(false))
         setNameColumns(dataTables[nameTable].nameColumns.map((item) => {
-          return {
-            nameColumn: item.nameColumn,
-            nameResponse: item.nameResponse, 
-            stateSort: "none"
-          }
+            return {
+                nameColumn: item.nameColumn,
+                nameResponse: item.nameResponse,
+                stateSort: "none"
+            }
         }))
         setDataFilters(dataTables[nameTable].filterParams.map((item) => {
             const title = item.title;
-
-
             const keyFilter = item.filter;
             let arr: any[] = [];
+            
             if (products) arr = getElemArrFilters(products, item)
             if (orders) arr = getElemArrFilters(orders, item)
+            
             const type = item.type ? item.type : "";
-
-            return Object.assign({ type: type }, { title: title }, { nameFilter: keyFilter }, { [keyFilter]: [...arr] }, { id: item.id })
-
+            
+            // Если это фильтр статуса, устанавливаем значение по умолчанию
+            if (keyFilter === "statusName") {
+                return Object.assign(
+                    { type: type }, 
+                    { title: statusOrder["PAID"] }, // Устанавливаем текущий заголовок как "Оплачен"
+                    { nameFilter: keyFilter }, 
+                    { [keyFilter]: [...arr] }, 
+                    { id: item.id }
+                )
+            }
+    
+            return Object.assign(
+                { type: type }, 
+                { title: title }, 
+                { nameFilter: keyFilter }, 
+                { [keyFilter]: [...arr] }, 
+                { id: item.id }
+            )
         }))
     }, [lengthRow, language])
-
 
     const { isMobile } = useMatchMedia();
     const hasScroll = !isMobile && lengthRow > dataTables[nameTable].countRow;
@@ -322,6 +385,7 @@ function TablePage(props: IProps) {
                         })}
 
                         {orders && orders.length > 0 && orders.map((item, index) => {
+
                             return <div className={"row " + style.row} onClick={() => clickRow(index)} key={item.id}>
                                 <div className={"row__bg " + ((arrRowActive && arrRowActive[index]) ? "active" : "")}></div>
                                 <div className={"col " + style.col}>{item.number}</div>

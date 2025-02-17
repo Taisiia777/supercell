@@ -344,3 +344,19 @@ class RequestCodeView(APIView):
 
         celery_app.send_task("api.davdamer.request_code", args=(kwargs["line_id"],))
         return Response({"status": True})
+
+class ToggleProductVisibilityView(APIView):
+    permission_classes = [IsDavDamer]
+    
+    @extend_schema(
+        request=None,
+        responses=ResponseStatusSerializer
+    )
+    def post(self, request, product_id):
+        try:
+            product = Product.objects.get(pk=product_id)
+            product.is_public = not product.is_public
+            product.save(update_fields=['is_public'])
+            return Response({'status': True})
+        except Product.DoesNotExist:
+            return Response({'status': False}, status=404)

@@ -38,6 +38,7 @@ function ProductForm(props: IProps) {
 
     console.log(data);
 
+    const [loginType, setLoginType] = useState(data?.login_type || 'LINK');
 
     const inputFiles = useRef<HTMLInputElement>(null);
 
@@ -45,20 +46,50 @@ function ProductForm(props: IProps) {
 
     const [uploadFiles, setUploadFiles] = useState<string[]>([]);
     const [errorFile, setErrorFile] = useState("");
+    const [filtersType, setFiltersType] = useState(data?.filters_type || 'NEW_ACCOUNT');
+    const [isPublic, setIsPublic] = useState(data?.is_public ?? false);
 
 
 
-    const { register, handleSubmit, formState: { errors }, getValues } = useForm<any>({
+
+    useEffect(() => {
+        if (data) {
+          setLoginType(data.login_type);
+        }
+      }, [data]);
+      useEffect(() => {
+        if (data?.filters_type) {
+            setFiltersType(data.filters_type);
+        }
+      }, [data]);
+    const { register, handleSubmit, formState: { errors }, getValues, reset } = useForm<any>({
         defaultValues: {
             title: (data && data.title) ? data.title : edit ? "" : "Не заполнено",
             price: (data && data.price) ? data.price.old_price ? data.price.old_price : data.price.incl_tax : edit ? "" : "Не заполнено",
             old_price: (data && data.price.old_price) ? data.price.incl_tax : "",
-            login_type: (data?.login_type === "EMAIL_CODE")
+            login_type: (data?.login_type === "EMAIL_CODE"),
+            filters_type:(data?.filters_type === "NEW_ACCOUNT"),
+            is_public: data?.is_public // Убираем значение по умолчанию здесь
 
         }
     })
 
-
+    // Добавляем эффект для обновления значений формы при изменении data
+    useEffect(() => {
+        if (data) {
+            reset({
+                title: data.title,
+                price: data.price.old_price ? data.price.old_price : data.price.incl_tax,
+                old_price: data.price.old_price ? data.price.incl_tax : "",
+                login_type: data.login_type,
+                filters_type: data.filters_type,
+                is_public: data.is_public // Здесь мы передаем значение напрямую, без значения по умолчанию
+            });
+            setLoginType(data.login_type);
+            setFiltersType(data.filters_type);
+            setIsPublic(data.is_public ?? false);
+        }
+    }, [data, reset]);
 
 
     const { data: categories, error: errorCategory, isLoading: isCategory } = davDamerAPI.useFetchGetCategoryQuery();
@@ -73,19 +104,6 @@ function ProductForm(props: IProps) {
 
     }
 
-
-    // const filterCategory = {
-    //     title: dataArea.category ? dataArea.category : "Выберите игру",
-    //     nameFilter: "category",
-    //     category: categories ? categories.map((item) => item.full_name) : [],
-    // }
-
-
-    // const filterMeasurement = {
-    //     title: data?.price.measurement ? data.price.measurement : "Выберите измерение",
-    //     nameFilter: "measurement",
-    //     measurement: ["1 шт."],
-    // }
     const filterCategory = {
         title: dataArea.category ? dataArea.category : t.selectGame[language],
         nameFilter: "category",
@@ -103,10 +121,6 @@ function ProductForm(props: IProps) {
         category: dataArea.category ? dataArea.category : "",
         measurement: data?.price.measurement ? data.price.measurement : "",
     })
-
-
-
-
 
 
 
@@ -222,72 +236,77 @@ function ProductForm(props: IProps) {
 
     const navigate = useNavigate();
 
+
     const onSubmit: SubmitHandler<any> = async (dataParam) => {
         if (errorFile) return
         if (!valuesFilter.category || !valuesFilter.measurement) return
-
+    
         const formData = new FormData();
-
+    
+        // Добавляем файлы если есть
         if (filesInfo) {
             filesInfo.filter((i) => i).forEach((item) => {
                 formData.append("uploaded_images", item);
             })
         }
-
+    
+        // Добавляем описание если есть
         if (desc) formData.append("description", desc);
-        for (const key in dataParam) {
-            if (key === "login_type") {
-                const valueLogin = dataParam[key] ? "EMAIL_CODE" : "LINK"
-                formData.append(key, valueLogin)
-                continue
-            }
-            if (dataParam[key]) formData.append(key, dataParam[key] as any)
-        }
+    
+        // Добавляем все основные поля
+        formData.append("title", dataParam.title);
+        formData.append("price", dataParam.price);
+        formData.append("login_type", loginType);
+        formData.append("filters_type", filtersType);
+        formData.append("is_public", isPublic.toString());
 
-        if (formData.get("old_price")) {
-
+        // Добавляем old_price если есть
+        if (dataParam.old_price) {
+            formData.append("old_price", dataParam.old_price);
+            
+            // Меняем местами цены если нужно
             const price = formData.get("price");
             const newPrice = formData.get("old_price");
-            formData.set("old_price", price as any)
-            formData.set("price", newPrice as any)
+            formData.set("old_price", price as any);
+            formData.set("price", newPrice as any);
         }
-
+    
+        // Добавляем категории и единицы измерения
         formData.append("categories", [`${valuesFilter.category}`] as any);
-        formData.append("measurement ", valuesFilter.measurement as any)
-
-
-        if (!id) {
-
-            try {
-                if (funcRequest) {
-                    const data = await funcRequest({ body: formData });
-                    if (data.error) return
-                    navigate(`/products`)
-                }
-            }
-            catch {
-                navigate(`/404`)
-
-            }
-        } else {
+        formData.append("measurement", valuesFilter.measurement as any);
+    
+        // Обработка изображений при редактировании
+        if (id) {
             const arrDeleImg = Array.from(arrIdImg);
             try {
                 if (funcRequest && data) {
                     formData.append("deleted_images", JSON.stringify(arrDeleImg));
-
                     const dataRequest = await funcRequest({ id: data.id, body: formData });
                     if (dataRequest.error) return
-                    navigate(`/products`)
+                    navigate(`/products`);
                 }
             } catch {
-                navigate(`/404`)
-
+                navigate(`/404`);
             }
-
+        } else {
+            try {
+                if (funcRequest) {
+                    const data = await funcRequest({ body: formData });
+                    if (data.error) return
+                    navigate(`/products`);
+                }
+            } catch {
+                navigate(`/404`);
+            }
+        }
+    
+        // Логируем содержимое FormData
+        console.log("FormData entries:");
+        for (const pair of formData.entries()) {
+            console.log(pair[0], pair[1]);
         }
     }
-
-
+   
     if (errorCategory) return <ErrorPages></ErrorPages>
 
     if (isCategory) return <h2>Загрузка данных</h2>
@@ -304,11 +323,7 @@ function ProductForm(props: IProps) {
 
                     </div>
                     }
-                    {/* <label className="form__name form__label">
-                        {edit && <span>Название</span>}
-                        <input placeholder="Заполните название" type="text"  {...register("title", { validate: (value) => ((value.length > 2) && (value.length < 30)), disabled: edit ? false : true })} />
-                        {errors.title && <span className="form__error">Длина строки от 3 до 30 символов</span>}
-                    </label> */}
+
                 <label className="form__name form__label">
                     {edit && <span>{t.name[language]}</span>}
                     <input 
@@ -323,14 +338,7 @@ function ProductForm(props: IProps) {
                 </label>
                 </div>
                 <div className={style.form__general}>
-                    {/* <h3 className="form__title"><img src={urlIconGeneral} alt="desc" />Общее</h3>
-                    <div className={"form__label" + " " + (valuesFilter.category ? "value" : "")}>
-                        <span>Наименование игры</span>
-                        {!edit && data && <span className={style.spanName}>{dataArea.category}</span>}
-                        {edit && <Filter data={filterCategory as any} setParamsFilter={setParamsFilter}></Filter>}
 
-                        {sendFormFilters && edit && !valuesFilter.category && <span className="form__error">Выберите игру</span>}
-                    </div> */}
                 <h3 className="form__title">
                     <img src={urlIconGeneral} alt="desc" />
                     {t.general[language]}
@@ -379,14 +387,122 @@ function ProductForm(props: IProps) {
 
                         {sendFormFilters && edit && !valuesFilter.measurement && <span className="form__error">Выберите единицу измерения</span>}
                     </div>
-                    <label className={"form__label label__check"}>
-                        <input type="checkbox" {...register("login_type", { disabled: edit ? false : true })} />
-                        {/* <span>С входом</span> */}
-                        <span>{t.withLogin[language]}</span>
 
-                    </label>
+                        <div className="form__label">
+                        <span>Тип входа</span>
+                        <div className={style.form__check}>
+                            <label className="label__check">
+                            <input 
+                                type="radio" 
+                                {...register("login_type")} 
+                                value="LINK"
+                                checked={loginType === "LINK"}
+                                onChange={(e) => setLoginType(e.target.value)}
+                                disabled={!edit}
+                            />
+                            <span>{t.withoutLogin[language]}</span>
+                            </label>
 
+                            <label className="label__check">
+                            <input 
+                                type="radio"
+                                {...register("login_type")}
+                                value="EMAIL_CODE" 
+                                checked={loginType === "EMAIL_CODE"}
+                                onChange={(e) => setLoginType(e.target.value)}
+                                disabled={!edit}
+                            />
+                            <span>{t.withLogin[language]}</span>
+                            </label>
 
+                            <label className="label__check">
+                            <input 
+                                type="radio"
+                                {...register("login_type")}
+                                value="URL_EMAIL"
+                                checked={loginType === "URL_EMAIL"}
+                                onChange={(e) => setLoginType(e.target.value)}
+                                disabled={!edit} 
+                            />
+                            <span>{t.withlinkLogin[language]}</span>
+                            </label>
+                        </div>
+                        </div>
+                        <div className="form__label">
+                        <span>Фильтры</span>
+                        <div className={style.form__check}>
+                            <label className="label__check">
+                                <input 
+                                    type="radio"
+                                    {...register("filters_type")} 
+                                    value="PASS"
+                                    checked={filtersType === "PASS"}
+                                    onChange={(e) => setFiltersType(e.target.value)}
+                                    disabled={!edit}
+                                />
+                                <span>Пропуски</span>
+                            </label>
+
+                            <label className="label__check">
+                            <input 
+                                type="radio"
+                                {...register("filters_type")} 
+                                value="PROMO"
+                                checked={filtersType === "PROMO"}
+                                onChange={(e) => setFiltersType(e.target.value)}
+                                disabled={!edit}
+                            />
+                            <span>Промо</span>
+                            </label>
+
+                            <label className="label__check">
+                            <input 
+                                type="radio"
+                                {...register("filters_type")} 
+                                value="GEMS"
+                                checked={filtersType === "GEMS"}
+                                onChange={(e) => setFiltersType(e.target.value)}
+                                disabled={!edit}
+                            />
+                            <span>Гемы</span>
+                            </label>
+                            <label className="label__check">
+                            <input 
+                                type="radio"
+                                {...register("filters_type")} 
+                                value="NEW_ACCOUNT"
+                                checked={filtersType === "NEW_ACCOUNT"}
+                                // onChange={(e) => setFiltersType(e.target.value)}
+                                onChange={(e) => {
+                                    console.log("Changed filters_type to:", e.target.value); // Добавляем лог
+                                    setFiltersType(e.target.value);
+                                }}
+                                disabled={!edit}
+                            />
+                            <span>Новый аккаунт</span>
+                            </label>
+                        </div>
+                        </div>
+                        <div className="form__label">
+                        <span>Видимость товара</span>
+                        <div className={style.form__check}>
+                            <label className="label__check">
+                            <input 
+                                type="checkbox"
+                                {...register("is_public")}
+                                checked={isPublic}
+                                // onChange={(e) => setIsPublic(e.target.checked)}
+                                onChange={(e) => {
+                                    const newValue = e.target.checked;
+                                    setIsPublic(newValue);
+                                    console.log("is_public changed to:", newValue); // For debugging
+                                }}
+                                disabled={!edit}
+                            />
+                            <span>Показывать товар в каталоге</span>
+                            </label>
+                        </div>
+                        </div>
 
                 </div>
 

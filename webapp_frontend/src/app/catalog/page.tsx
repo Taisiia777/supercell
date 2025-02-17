@@ -5,7 +5,6 @@ import {getProducts} from "@/actions/getProducts";
 export default async function CatalogPageAll() {
 
     const products = await getProducts()
-
     return (
         <>
             <Header/>

@@ -24,32 +24,36 @@ export default function Product(props: { data: IProduct }) {
     const cartItem = clientItems.find((i) => i.id === props.data.id)
     const count = cartItem ? cartItem.count : 0
 
-    const [isLoading, setLoading] = useState(true);
+    const [isLoading, setLoading] = useState(false);
 
-    useEffect(() => {
-        setLoading(true);
-        const timeoutId = setTimeout(() => {
-            setLoading(false);
-        }, 1000);
+    // useEffect(() => {
+    //     setLoading(true);
+    //     const timeoutId = setTimeout(() => {
+    //         setLoading(false);
+    //     }, 1000);
 
-        return () => clearTimeout(timeoutId);
-    }, []);
+    //     return () => clearTimeout(timeoutId);
+    // }, []);
 
+    const formatDescription = (description: string) => {
+        if (!description) return '';
+        // Заменяем \n на <br/>
+        return description
+            .split('\n')
+            .map((line, i) => {
+                // Если строка пустая, добавляем параграф для сохранения пустой строки
+                if (line.trim() === '') {
+                    return '<p>&nbsp;</p>';
+                }
+                // Оборачиваем каждую строку в параграф
+                return `<p>${line}</p>`;
+            })
+            .join('');
+    };
     
     return (
         <div className={styles.product}>
-            {/* <div className={styles.img}>
-                <Image 
-  src={props.data.images[0].original}
-  alt={props.data.title}
-  fill
-  style={{ objectFit: 'contain' }}
-  quality={100}
-  unoptimized={true}
-  loading="eager"
-  priority
-/>
-            </div> */}
+
                   <ImageCarousel images={props.data.images} title={props.data.title} />
 
             <div className={styles.card}>
@@ -85,8 +89,15 @@ export default function Product(props: { data: IProduct }) {
                 </div>
                 <h3 className={styles.product_name}>{props.data.title}</h3>
                 <h4 className={styles.price}>{props.data.price.incl_tax} ₽</h4>
-                {props.data.description && <div dangerouslySetInnerHTML={{__html: props.data.description}} className={styles.desc}/>}
-
+                {/* {props.data.description && <div dangerouslySetInnerHTML={{__html: props.data.description}} className={styles.desc}/>} */}
+                {props.data.description && (
+                    <div 
+                        dangerouslySetInnerHTML={{
+                            __html: formatDescription(props.data.description)
+                        }} 
+                        className={styles.desc}
+                    />
+                )}
                 <div className={styles.add}>
                     {isLoading ? (
                         <Shimmer width={120} height={49} className={`${shimmer.shimmer_btn} shimmer`} />

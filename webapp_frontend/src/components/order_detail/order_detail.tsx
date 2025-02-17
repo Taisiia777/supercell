@@ -84,16 +84,16 @@ export default function Order({id}: {id: string}) {
                                     <div className={styles.bg}>
                                         {/* <Image src={item.product.images[0].original} alt={item.product.title} height={70} width={60}/> */}
                                         <Image 
-  src={item.product.images[0].original}
-  alt={item.product.titl}
-  height={70}
-  width={60}
-  style={{ objectFit: 'contain', width: 'auto', height: '70px' }}
-  quality={100}
-  unoptimized={true}
-  loading="eager"
-  priority
-/>
+                                            src={item.product.images[0].original}
+                                            alt={item.product.title}
+                                            height={70}
+                                            width={60}
+                                            style={{ objectFit: 'contain', width: 'auto', height: '70px' }}
+                                            quality={100}
+                                            unoptimized={true}
+                                            loading="eager"
+                                            priority
+                                            />
                                     </div>
                                     <div className={styles.type}>
                                         {item.product.login_type === "EMAIL_CODE" ? (
@@ -150,14 +150,15 @@ export default function Order({id}: {id: string}) {
                         <div className={styles.data}>
                             {item.product.login_type === "EMAIL_CODE" ? (
                                 <div style={{display: "flex", flexDirection: "column", gridGap: "10px"}}>
-                                    <Input title="SUPERCELL ID" value={item.login_data.account_id} name="account_id" edit={order.order.status === "NEW"} handleEdit={handlEdit} productId={item.id}/>
-                                    <Input title="Код" value={item.login_data.code} name="code" edit={order.order.status === "NEW"} handleEdit={handlEdit} productId={item.id} validation="code"/>
+                                    <Input title="SUPERCELL ID" value={item.login_data.account_id} name="account_id" editable={order.order.status !== "DELIVERED"} validation="email"     edit={order.order.status !== "DELIVERED"}  handleEdit={handlEdit} productId={item.id}/>
+                                    <Input title="Код" value={item.login_data.code} name="code" edit={order.order.status !== "DELIVERED"} editable={order.order.status !== "DELIVERED"} validation="code" handleEdit={handlEdit} productId={item.id} validation="code"/>
                                 </div>
                             ) : (
                                 <Input title="Ссылка" value={item.login_data.account_id}
-                                       edit={order.order.status === "NEW"}
+                                       edit={order.order.status !== "DELIVERED"}
                                        handleEdit={handlEdit}
                                        name="link"
+                                       editable={order.order.status !== "DELIVERED"}
                                        productId={item.id}
                                        icon={<>
                                     <svg width="24" height="21" viewBox="0 0 24 21" fill="none"
@@ -183,7 +184,7 @@ export default function Order({id}: {id: string}) {
                     <div className={styles.order_status}>
                         <div className={styles.status}>
                             <p className={styles.title}>Статус заказа: {OrderStatus[order.order.status]}</p>
-                            <p className={styles.text}>Дата {formatDate(order.order.date_placed)}, сумма {order.order.total_incl_tax} ₽</p>
+                            <p className={styles.text}>дата {formatDate(order.order.date_placed)}, сумма {order.order.total_incl_tax} ₽</p>
                         </div>
                     </div>
                     {order.order.status === "NEW" && (

@@ -1,3 +1,4 @@
+//@ts-nocheck
 'use client'
 import styles from "@/components/cart/item.module.scss";
 import Link from "next/link";
@@ -30,20 +31,20 @@ export default function ProductItem(props: {item: IProduct, count?: number, isLo
                 <div className={styles.container}>
                     <div className={styles.img}>
                         <div className={styles.bg}>
-                            {/* <Image src={props.item.images[0].original} alt={props.item.title} height={70} width={60}/> */}
                             <Image 
-  src={props.item.images[0].original} 
-  alt={props.item.title} 
-  height={70} 
-  width={60}
-  style={{ objectFit: 'contain', width: 'auto', height: '70px' }}
-  priority
-  quality={100}
-  unoptimized={true}
-  loading="eager"
-/>
+                                src={props.item.images[0].original} 
+                                alt={props.item.title} 
+                                height={70} 
+                                width={60}
+                                style={{ objectFit: 'contain', width: 'auto', height: '70px' }}
+                                quality={100}
+                                unoptimized={true}
+                                loading="eager"
+                                priority
+                                />
 
                         </div>
+
                         <div className={styles.type}>
                             {props.item.login_type === "EMAIL_CODE" ? (
                                 <svg width="13" height="14" viewBox="0 0 13 14" fill="none"

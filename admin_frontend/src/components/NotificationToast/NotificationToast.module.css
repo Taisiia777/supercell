@@ -1,0 +1,81 @@
+/* NotificationToast.module.css */
+
+.notification {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 24rem;
+    width: 100%;
+    padding: 1rem;
+    background-color: green;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  .notification.hide {
+    animation: slideOut 0.3s ease-in forwards;
+  }
+  
+  .icon {
+    flex-shrink: 0;
+    color: #3977F1;
+  }
+  
+  .content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .content__title {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+  
+  .content__message {
+    color: #fff;
+    font-size: 0.875rem;
+  }
+  
+  .closeButton {
+    padding: 0.25rem;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  
+  .closeButton:hover {
+    color: #131313;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }

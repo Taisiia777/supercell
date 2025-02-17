@@ -86,8 +86,12 @@ class ProductListView(CoreProductList):
     serializer_class = serializers.ProductLinkSerializer
     queryset = (
         Product.objects.browsable()
+        .annotate(
+            orders_count=PRODUCT_ORDERS_COUNT,
+        )
         .select_related("seller", "product_class")
         .prefetch_related("images", "stockrecords", "categories")
+        .order_by("-orders_count")
         .distinct()
     )
 
@@ -394,3 +398,4 @@ class RequestCodeAPIView(APIView):
         self.save_code_requests(serializer.validated_data["emails"])
 
         return Response({"status": True})
+

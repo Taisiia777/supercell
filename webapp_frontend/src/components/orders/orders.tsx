@@ -48,7 +48,7 @@ export default function Orders() {
                                 {/*<Image src={img3} alt="" height={20} width={20}/>*/}
                             </div>
                             <div className={styles.data}>
-                                ДАТА: {formatDate(order.date_placed)} СУММА: {order.total_incl_tax} ₽
+                                дата: {formatDate(order.date_placed)} сумма: {order.total_incl_tax} ₽
                             </div>
                         </div>
                         <div className={styles.route}>

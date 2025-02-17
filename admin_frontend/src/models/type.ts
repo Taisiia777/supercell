@@ -42,7 +42,9 @@ export interface IProduct {
         child: {
             name: string
         }
-    }[]
+    }[],
+    filters_type: string,
+
 
 }
 export interface ICategoryAPI {
@@ -129,19 +131,27 @@ export interface IOrderInfo extends IOrder {
         measurement: string,
         login_data: {
             account_id: string,
-            code: string
+            code: string,
+            friend_url?: string;
         },
     }[]
 }
 interface IStatusOrder {
     [key: string]: string
 }
+// export const statusOrder: IStatusOrder = {
+//     NEW: "Ожидает оплаты",
+//     PAID: "Оплачен. Ожидает обработки",
+//     PROCESSING: "Оплачен. В процессе обработки",
+//     DELIVERED: "Завершен",
+//     CANCELLED: "Отменен",
+// }
 export const statusOrder: IStatusOrder = {
-    NEW: "Ожидает оплаты",
-    PAID: "Оплачен. Ожидает обработки",
-    PROCESSING: "Оплачен. В процессе обработки",
-    DELIVERED: "Завершен",
-    CANCELLED: "Отменен",
+    NEW: "Awaiting payment",
+    PAID: "Paid. Awaiting processing",
+    PROCESSING: "Paid. Processing in progress",
+    DELIVERED: "Completed",
+    CANCELLED: "Cancelled",
 }
 
 export const statusOrderColor: IStatusOrder = {
@@ -159,3 +169,5 @@ export interface IGkAPI {
     id: number;
     name: string;
 }
+
+
