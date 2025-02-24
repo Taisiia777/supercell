@@ -36,7 +36,8 @@ div.form__head {
 .form__cart {
     grid-column: 2/3;
     grid-row: 1/4;
-    align-self: stretch
+    align-self: stretch;
+    min-height: 100vh;
 }
 
 
@@ -87,7 +88,7 @@ div.form__head {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    zoom:0.8
+    /* zoom:0.8 */
 }
 
 .infoOrder {

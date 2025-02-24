@@ -7,7 +7,7 @@
 
 .form {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* grid-template-columns: 1fr 1fr; */
     gap: 40px;
     padding: 30px 40px;
     zoom: 0.7;

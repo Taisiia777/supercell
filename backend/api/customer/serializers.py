@@ -113,7 +113,7 @@ class ProductSerializer(CoreProductSerializer):
 class OrderLoginDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderLoginData
-        fields = ["account_id", "code", "friend_url"]
+        fields = ["account_id", "code"]
 
 
 class PutLoginDataSerializer(serializers.ModelSerializer):

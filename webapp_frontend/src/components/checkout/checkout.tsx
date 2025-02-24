@@ -104,7 +104,8 @@ export default function CheckOut(props: {data : IProduct[]}) {
                 try {
                     const res = await checkout(getOrder.order, webApp?.initData);
                     if(res && res.payment_url) {
-                        router.push(res.payment_url);
+                        webApp?.openLink(res.payment_url);
+                        // router.push(res.payment_url);
                         setCanPay(false);
                         removeAll();
                     }

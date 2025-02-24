@@ -50,7 +50,7 @@
             // }
             .imageWrapper {
               position: relative;
-              width: 100%;
+              width: max-content;
               height: 100%;
               padding: 8px;
               
@@ -222,6 +222,7 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
             margin-bottom: 8px;
+            height: 41.6px;
           }
 
           .add-to-cart {

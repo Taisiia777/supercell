@@ -25,8 +25,8 @@
 }
 
 .col__images img {
-    width: 56px;
-    height: 56px;
+    width: 150px;
+    height: 150px;
     object-fit: cover;
     object-position: center center;
     position: relative;
@@ -78,7 +78,7 @@
     gap: 8px;
     align-items: start;
     justify-content: start;
-    min-width: 200px;
+    min-width: 400px;
 }
 
 .title {
@@ -103,7 +103,7 @@
 .col__desc,
 .col__seller {
     display: -webkit-box;
-    -webkit-line-clamp: 1;
+    /* -webkit-line-clamp: 1; */
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

@@ -61,7 +61,8 @@ services:
     platform: linux/amd64
     image: davdam/backend
     restart: unless-stopped
-    command: gunicorn config.wsgi:application -w ${DJANGO_WORKERS_COUNT:-1}
+    # command: gunicorn config.wsgi:application -w ${DJANGO_WORKERS_COUNT:-1} 
+    command: gunicorn config.wsgi:application -w ${DJANGO_WORKERS_COUNT:-1} --timeout 12000 --graceful-timeout 12000 --keep-alive 12000
     environment:
       <<: *common-env
       DJANGO_CSRF_TRUSTED_ORIGINS: $DJANGO_CSRF_TRUSTED_ORIGINS
@@ -70,6 +71,7 @@ services:
       - "${DJANGO_STATIC_VOLUME:-./backend/static}:/app/static"
     depends_on:
       - postgres
+
 
   nginx:
     image: nginx:1.22-alpine-slim
