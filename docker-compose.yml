@@ -44,10 +44,33 @@ services:
     image: redis:6-alpine
     restart: unless-stopped
 
+  # celery_worker:
+  #   image: davdam/backend
+  #   platform: linux/amd64
+  #   command: celery -A celery_app:app worker --concurrency=${CELERY_WORKERS_COUNT:-1} -l INFO
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #   environment:
+  #     <<: *common-env
+  #     IS_HEADLESS: 1
   celery_worker:
     image: davdam/backend
     platform: linux/amd64
-    command: celery -A celery_app:app worker --concurrency=${CELERY_WORKERS_COUNT:-1} -l INFO
+    command: celery -A celery_app:app worker -Q default,celery --concurrency=${CELERY_WORKERS_COUNT:-2} -l INFO
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      <<: *common-env
+      IS_HEADLESS: 1
+
+  celery_mailing_worker:
+    image: davdam/backend
+    platform: linux/amd64
+    command: celery -A celery_app:app worker -Q mailing --concurrency=${CELERY_MAILING_WORKERS_COUNT:-1} -l INFO
     restart: unless-stopped
     depends_on:
       - postgres

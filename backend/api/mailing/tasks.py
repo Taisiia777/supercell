@@ -10,7 +10,8 @@ from .send import send_message_to_user
 from core.models import ScheduledMailing, User, Role
 from aiogram import Bot, types
 from django.conf import settings
-from api.mailing.send import send_message_to_user, process_mailing
+# from api.mailing.send import send_message_to_user, process_mailing
+from api.mailing.send import send_message_to_user, process_scheduled_mailings as process_mailing
 from asgiref.sync import sync_to_async
 
 logger = logging.getLogger(__name__)

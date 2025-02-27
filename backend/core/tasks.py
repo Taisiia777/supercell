@@ -15,7 +15,9 @@ from core.models import EmailCodeRequest
 from supercell_auth.mobile_app import request_code_from_mobile
 from core.models import ScheduledMailing
 from django.utils import timezone
-from api.mailing.send import send_message_to_user, process_mailing
+# from api.mailing.send import send_message_to_user, process_mailing
+from api.mailing.send import send_message_to_user, process_scheduled_mailings as process_mailing
+
 from .models import User, Role
 from aiogram import Bot, types
 from django.conf import settings
