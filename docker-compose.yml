@@ -19,12 +19,23 @@ x-common-envs: &common-env
 services:
   webapp_frontend:
     build:
-      context: ./webapp_frontend
+      context: ./webapp_frontend_test
       args:
         - API_URL=https://api.mamostore.ru/api/
     restart: unless-stopped
     environment:
       API_URL: https://api.mamostore.ru/api/
+
+  webapp_frontend_test:
+    build:
+      context: ./webapp_frontend_test_1
+      args:
+        - API_URL=https://api.mamostore.ru/api/
+        - BASE_PATH=/test
+    restart: unless-stopped
+    environment:
+      API_URL: https://api.mamostore.ru/api/
+      BASE_PATH: /test
 
   admin_frontend:
     build: ./admin_frontend
@@ -44,21 +55,10 @@ services:
     image: redis:6-alpine
     restart: unless-stopped
 
-  # celery_worker:
-  #   image: davdam/backend
-  #   platform: linux/amd64
-  #   command: celery -A celery_app:app worker --concurrency=${CELERY_WORKERS_COUNT:-1} -l INFO
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - postgres
-  #     - redis
-  #   environment:
-  #     <<: *common-env
-  #     IS_HEADLESS: 1
   celery_worker:
     image: davdam/backend
     platform: linux/amd64
-    command: celery -A celery_app:app worker -Q default,celery --concurrency=${CELERY_WORKERS_COUNT:-2} -l INFO
+    command: celery -A celery_app:app worker -Q default,celery --concurrency=${CELERY_WORKERS_COUNT:-4} -l INFO
     restart: unless-stopped
     depends_on:
       - postgres
@@ -70,7 +70,7 @@ services:
   celery_mailing_worker:
     image: davdam/backend
     platform: linux/amd64
-    command: celery -A celery_app:app worker -Q mailing --concurrency=${CELERY_MAILING_WORKERS_COUNT:-1} -l INFO
+    command: celery -A celery_app:app worker -Q mailing --concurrency=${CELERY_MAILING_WORKERS_COUNT:-3} -l INFO
     restart: unless-stopped
     depends_on:
       - postgres
@@ -120,6 +120,7 @@ services:
       <<: *common-env
       BOT_LOGLEVEL_INFO: $BOT_LOGLEVEL_INFO
       API_HOST: http://backend:8000
+
 
   order_bot:
       build: ./order_bot

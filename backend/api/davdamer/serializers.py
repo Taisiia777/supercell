@@ -261,7 +261,9 @@ class OrderDetailSerializer(OrderSerializer, CustomerOrderDetailSerializer):
 class OrderUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ["status"]
+        # fields = ["status"]
+        fields = ["status", "custom_field"]
+
 
 
 class CustomProductAttributeValueSerializer(ProductAttributeValueSerializer):
@@ -555,3 +557,4 @@ class DavDamerCategorySerializer(CategorySerializer):
                 obj.get_children().filter(), many=True
             ).data
         return []
+

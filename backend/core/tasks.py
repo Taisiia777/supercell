@@ -10,6 +10,8 @@ from core.services.customer import (
     CustomerAccountCodeNotifier,
     CustomerFailedPaymentNotifier,
     CustomerSuccessOrderNotifier,
+    CustomerInvalidEmailNotifier  
+
 )
 from core.models import EmailCodeRequest
 from supercell_auth.mobile_app import request_code_from_mobile
@@ -28,13 +30,41 @@ OrderLine = get_model("order", "Line")
 Order = get_model("order", "Order")
 
 
-@shared_task(name="api.davdamer.order_status_updated")
+@shared_task(name="api.davdamer.order_status_updated", queue="celery")
 def order_status_updated(order_pk: int):
     CustomerOrderNotifier(order_pk).notify()
 
 
+# @shared_task(name="api.davdamer.request_code", queue="celery")
+# def davdamer_requested_code(line_id: int):
+#     try:
+#         line = OrderLine.objects.get(pk=line_id)
+#         game = line.product.game
+#     except OrderLine.DoesNotExist:
+#         logger.info(f"OrderLine with id {line_id} does not exist")
+#         return
+
+#     login_data = line.login_data.first()
+#     if not login_data:
+#         logger.info(f"No logindata for OrderLine with id {line_id}")
+#         return
+
+#     if "@" not in login_data.account_id:
+#         logger.info(
+#             f"Account id {login_data.account_id} is not an email (line_id: {line_id})"
+#         )
+#         return
+
+#     requested_successful = request_code_from_mobile(login_data.account_id, game)
+#     EmailCodeRequest.objects.create(
+#         email=login_data.account_id, game=game, is_successful=requested_successful
+#     )
+#     if requested_successful:
+#         CustomerAccountCodeNotifier(
+#             line.order.user, login_data.account_id, line_id
+#         ).notify()
 @shared_task(name="api.davdamer.request_code")
-def davdamer_requested_code(line_id: int):
+def davdamer_requested_code(line_id: int, send_code: bool = True):
     try:
         line = OrderLine.objects.get(pk=line_id)
         game = line.product.game
@@ -53,18 +83,28 @@ def davdamer_requested_code(line_id: int):
         )
         return
 
-    requested_successful = request_code_from_mobile(login_data.account_id, game)
-    EmailCodeRequest.objects.create(
-        email=login_data.account_id, game=game, is_successful=requested_successful
-    )
-    if requested_successful:
+    # Только если send_code=True, отправляем запрос на получение кода
+    requested_successful = False
+    if send_code:
+        requested_successful = request_code_from_mobile(login_data.account_id, game)
+        EmailCodeRequest.objects.create(
+            email=login_data.account_id, game=game, is_successful=requested_successful
+        )
+    
+    # Выбираем, какое уведомление отправить пользователю
+    if send_code:
+        # Отправляем уведомление о неверном коде, запрашиваем новый код
         CustomerAccountCodeNotifier(
+            line.order.user, login_data.account_id, line_id
+        ).notify()
+    else:
+        # Отправляем уведомление о неверной почте, без запроса кода
+        CustomerInvalidEmailNotifier(
             line.order.user, login_data.account_id, line_id
         ).notify()
 
 
-
-@shared_task(name="api.shop.request_code")
+@shared_task(name="api.shop.request_code", queue="celery")
 def request_supercell_code(code_request_pk: int):
     try:
         code_request = EmailCodeRequest.objects.get(pk=code_request_pk)
@@ -78,7 +118,7 @@ def request_supercell_code(code_request_pk: int):
         print(f"Error in request_code task: {e}")  # Временно добавьте print
         return False
 
-@shared_task(name="api.shop.failed_payment")
+@shared_task(name="api.shop.failed_payment", queue="celery")
 def failed_payment_task(order_number: str):
     CustomerFailedPaymentNotifier(order_number).notify()
 
@@ -86,7 +126,7 @@ def failed_payment_task(order_number: str):
 # @shared_task(name="api.shop.success_payment")
 # def success_payment_task(order_number: str):
 #     CustomerSuccessOrderNotifier(order_number).notify()
-@shared_task(name="api.shop.success_payment")
+@shared_task(name="api.shop.success_payment", queue="celery")
 def success_payment_task(order_number: str):
     # Оставляем существующее уведомление пользователя
     CustomerSuccessOrderNotifier(order_number).notify()
@@ -134,7 +174,7 @@ def success_payment_task(order_number: str):
         if hasattr(err, 'response') and err.response is not None:
             logger.error(f"Error response body: {err.response.text}")
 
-@shared_task(name="api.mailing.process_scheduled")
+@shared_task(name="api.mailing.process_scheduled", queue="celery")
 def process_scheduled_mailings(message, image):
     logger.info("Обработка запланированных рассылок")
     

@@ -1,0 +1,193 @@
+/* src/pages/Referral/ReferralPage.css */
+.referral-container {
+  padding: 0;
+  background-color: var(--bg);
+  max-width: 85vw;
+}
+
+.referral-tabs {
+  display: flex;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: var(--bg-block);
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.referral-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color);
+  font-size: 16px;
+  font-weight: 400;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.referral-tab:hover {
+  color: var(--color-title);
+  background-color: rgba(57, 119, 241, 0.05);
+}
+
+.referral-tab.active {
+  color: var(--icon-active);
+  font-weight: 500;
+}
+
+.referral-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--icon-active);
+}
+
+.referral-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.statistics-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233977F1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 20V10'/%3E%3Cpath d='M12 20V4'/%3E%3Cpath d='M6 20v-6'/%3E%3C/svg%3E");
+}
+
+.users-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233977F1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
+}
+
+.referral-content {
+  background-color: var(--bg-block);
+  border-radius: 0 0 8px 8px;
+  padding: 24px;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Общие стили для секций */
+.referral-section {
+  margin-bottom: 32px;
+}
+
+.referral-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.referral-section-title {
+  color: var(--color-title);
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.referral-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.referral-card:hover {
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.referral-button {
+  padding: 8px 16px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 1px 1px 2px 0px rgba(186, 186, 186, 0.40);
+  border-radius: 8px;
+  background: var(--icon-active);
+  border: 1px solid var(--icon-active);
+  cursor: pointer;
+  transition: .3s;
+}
+
+.referral-button:hover {
+  background-color: #2262de;
+}
+
+.secondary-button {
+  background-color: #f1f5f9;
+  color: var(--color-title);
+  border: 1px solid #e2e8f0;
+}
+
+.secondary-button:hover {
+  background-color: #e2e8f0;
+}
+
+.referral-input {
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: rgba(212, 224, 250, 0.20);
+  color: #000;
+  font-family: "Rubik";
+  border: none;
+  font-size: 16px;
+  width: 100%;
+}
+
+.referral-input:focus {
+  outline: none;
+  border: 1px solid var(--icon-active);
+}
+
+.referral-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.referral-table th,
+.referral-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.referral-table th {
+  color: var(--color);
+  font-weight: 500;
+  background-color: #f9fafb;
+}
+
+.referral-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.referral-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.copy-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--icon-active);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.copy-button:hover {
+  text-decoration: underline;
+}

@@ -52,6 +52,9 @@ function LayoutMenu() {
                         <span>{translations.excel[language]}</span>
 
                         </NavLink>
+                        <NavLink to="/referral" className="nav__link nav__referral">
+                        <img height={21} width={21} src="images/referral.png"/>
+                        Реферальная система</NavLink>
                 </nav>
 
                 <main className="main">

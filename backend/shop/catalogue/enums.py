@@ -8,7 +8,7 @@ class LoginType(models.TextChoices):
     EMAIL_CODE = "EMAIL_CODE", "требуется вход"
     LINK = "LINK", "без входа"
     URL_EMAIL = "URL_EMAIL", "вход + ссылка в друзья"
-    
+    URL_LINK = "URL_LINK", "без входа + ссылка в друзья"
 
 class FiltersType(models.TextChoices):
     NEW_ACCOUNT = "NEW_ACCOUNT", "Новый аккаунт"

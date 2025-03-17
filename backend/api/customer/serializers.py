@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 from api.shop.serializers import IntPriceField, CategoryField
 from core.models import OrderLoginData
+from core.models import OrderReview
 
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
@@ -110,11 +111,14 @@ class ProductSerializer(CoreProductSerializer):
         fields = ["id", "title", "images", "categories", "login_type", "game", "filters_type", "friend_url"]
 
 
+# class OrderLoginDataSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = OrderLoginData
+#         fields = ["account_id", "code"]
 class OrderLoginDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderLoginData
-        fields = ["account_id", "code"]
-
+        fields = ["account_id", "code", "email_changed", "code_changed"]
 
 class PutLoginDataSerializer(serializers.ModelSerializer):
     line_id = serializers.PrimaryKeyRelatedField(
@@ -180,3 +184,52 @@ class OrderPaymentStatusSerializer(serializers.Serializer):
 class UpdateLoginDataSerializer(serializers.Serializer):
     line_id = serializers.IntegerField()
     code = serializers.CharField()
+
+class ProcessReferralSerializer(serializers.Serializer):
+    telegram_id = serializers.IntegerField()
+    username = serializers.CharField(required=False, allow_blank=True)
+    full_name = serializers.CharField(required=False, allow_blank=True)
+    referral_code = serializers.CharField()
+
+class RegisterUserSerializer(serializers.Serializer):
+    telegram_id = serializers.IntegerField()
+    username = serializers.CharField(required=False, allow_blank=True)
+    full_name = serializers.CharField(required=False, allow_blank=True)
+
+class ReferralLinkSerializer(serializers.Serializer):
+    referral_link = serializers.CharField()
+
+# Добавьте этот класс в файл
+class OrderReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderReview
+        fields = ["rating", "comment"]
+        
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if not attrs.get("rating"):
+            raise serializers.ValidationError({"rating": "Оценка обязательна"})
+        return attrs
+
+
+class CreateOrderReviewSerializer(OrderReviewSerializer):
+    order_number = serializers.CharField(required=True)
+
+    class Meta(OrderReviewSerializer.Meta):
+        # Добавляем поле order_number в список полей
+        fields = ["rating", "comment", "order_number"]
+        
+    def validate_order_number(self, value):
+        try:
+            order = Order.objects.get(number=value, user=self.context["request"].user)
+            return order
+        except Order.DoesNotExist:
+            raise serializers.ValidationError("Заказ не найден")
+
+    def create(self, validated_data):
+        order = validated_data.pop("order_number")
+        return OrderReview.objects.create(order=order, **validated_data)
+
+class ResponseStatusSerializer(serializers.Serializer):
+    status = serializers.BooleanField(default=True)
+    message = serializers.CharField(required=False, allow_null=True)

@@ -15,6 +15,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import 'overlayscrollbars/overlayscrollbars.css';
 import './App.css'
 import { LanguageProvider } from "./providers/LanguageProvider";
+import ReferralPage from "./pages/Referral/ReferralPage";
 
 
 const router = createBrowserRouter(
@@ -30,6 +31,7 @@ const router = createBrowserRouter(
         <Route index element={<HomePage />} />
         <Route path="mailing" element={<MassMailingPage />} />
         <Route path="excel" element={<ExcelPage />} />
+        <Route path="referral" element={<ReferralPage />}></Route>
 
         <Route path="products" element={<ProductsPage />} />
         <Route path="products/:id" element={<ProductsShowEdit edit={false} nameFunc="show" />} />

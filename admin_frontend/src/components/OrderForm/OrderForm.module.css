@@ -1,3 +1,4 @@
+
 .form {
     align-items: start;
     gap: 20px;
@@ -25,27 +26,31 @@ div.form__head {
     align-self: stretch;
 }
 
-.form__comment {
+.form__notes {
     grid-column: 1/2;
     grid-row: 4/5;
+    background: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 1px 1px 2px 0px rgba(186, 186, 186, 0.40);
     align-self: stretch;
+    margin-bottom: 20px;
 }
 
-
+.form__comment {
+    grid-column: 1/2;
+    grid-row: 5/6;
+    align-self: stretch;
+}
 
 .form__cart {
     grid-column: 2/3;
-    grid-row: 1/4;
+    grid-row: 1/6;
     align-self: stretch;
-    min-height: 100vh;
 }
-
-
-
 
 .form__head label {
     margin-top: 0;
-
 }
 
 .status {
@@ -88,7 +93,6 @@ div.form__head {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    /* zoom:0.8 */
 }
 
 .infoOrder {
@@ -98,7 +102,6 @@ div.form__head {
     align-items: center;
     margin-top: 20px;
 }
-
 
 .infoCount {
     color: var(--color-title);
@@ -131,7 +134,6 @@ div.form__head {
     flex-direction: column;
     width: 100%;
     grid-column: 1/4;
-
 }
 
 .formCode {
@@ -140,12 +142,10 @@ div.form__head {
     align-items: center;
     gap: 30px;
     margin-right: 10px;
-
 }
 
 .formCode .btn {
     flex: 0 0 auto;
-
 }
 
 .code {
@@ -172,7 +172,6 @@ body input.input:read-only {
     width: 15px;
     height: auto;
     z-index: 0;
-
 }
 
 body input.input:active {
@@ -181,4 +180,62 @@ body input.input:active {
     opacity: .7;
     color: white;
     user-select: none;
+}
+
+.notesTextarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    border: 1px solid #E0E0E0;
+    border-radius: 4px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.notesTextarea:disabled {
+    background-color: transparent;
+    cursor: not-allowed;
+    border-color: transparent;
+}
+
+.notesTextarea:focus {
+    outline: none;
+    border-color: var(--icon-active);
+    box-shadow: 0 0 0 2px rgba(57, 119, 241, 0.25);
+}
+
+/* Styles for changed data indicators */
+.warningIcon {
+    position: absolute;
+    right: 30px;
+    color: #ff4d4f;
+    font-weight: bold;
+    font-size: 16px;
+    margin-left: 5px;
+}
+
+.changed {
+    border: 1px solid #ff4d4f !important;
+    border-radius: 4px;
+    box-shadow: 0 0 3px rgba(255, 77, 79, 0.3);
+}
+
+/* Style for order with changed data */
+.orderWithChangedData {
+    position: relative;
+    border: 1px solid #ff4d4f;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+.orderWithChangedData::before {
+    content: "❗";
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: #ff4d4f;
+    font-size: 16px;
+    font-weight: bold;
 }

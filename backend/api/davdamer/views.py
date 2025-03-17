@@ -3,7 +3,7 @@ from django.db.models import Max
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from oscar.core.loading import get_model
 from rest_framework import generics, viewsets, mixins
 from rest_framework.generics import get_object_or_404
@@ -329,11 +329,36 @@ class ProductAttributeListView(generics.ListAPIView):
         return ProductAttribute.objects.filter(product_class=product_class).distinct()
 
 
+# class RequestCodeView(APIView):
+#     # permission_classes = [IsDavDamer]
+#     permission_classes = []
+
+#     @extend_schema(request=None, responses=ResponseStatusSerializer)
+#     def post(self, request, *args, **kwargs):
+#         if not OrderLine.objects.filter(
+#             pk=kwargs["line_id"],
+#             order__id=kwargs["id"],
+#             product__login_type=LoginType.EMAIL_CODE,
+#         ).exists():
+#             return Response({"status": False})
+
+#         celery_app.send_task("api.davdamer.request_code", args=(kwargs["line_id"],))
+#         return Response({"status": True})
 class RequestCodeView(APIView):
-    # permission_classes = [IsDavDamer]
     permission_classes = []
 
-    @extend_schema(request=None, responses=ResponseStatusSerializer)
+    @extend_schema(
+        request=None, 
+        responses=ResponseStatusSerializer,
+        parameters=[
+            OpenApiParameter(
+                name="send_code", 
+                type=bool, 
+                description="Отправлять ли код на почту (по умолчанию - да)",
+                required=False
+            )
+        ]
+    )
     def post(self, request, *args, **kwargs):
         if not OrderLine.objects.filter(
             pk=kwargs["line_id"],
@@ -342,7 +367,15 @@ class RequestCodeView(APIView):
         ).exists():
             return Response({"status": False})
 
-        celery_app.send_task("api.davdamer.request_code", args=(kwargs["line_id"],))
+        # Получаем параметр из запроса
+        send_code = request.query_params.get("send_code", "true").lower() == "true"
+        
+        # Передаем параметр в задачу
+        celery_app.send_task(
+            "api.davdamer.request_code", 
+            args=[kwargs["line_id"]], 
+            kwargs={"send_code": send_code}
+        )
         return Response({"status": True})
 
 class ToggleProductVisibilityView(APIView):
@@ -360,3 +393,4 @@ class ToggleProductVisibilityView(APIView):
             return Response({'status': True})
         except Product.DoesNotExist:
             return Response({'status': False}, status=404)
+

@@ -68,9 +68,11 @@ export interface IProductClassesAPI {
 
 export type TStatusOrder = "NEW" | "PAID" | "PROCESSING" | "SENT" | "DELIVERED" | "REFUND" | "CANCELLED" | "READY"
 export interface IOrder {
+    lines: any;
     id: number,
     payment_id: string,
     payment_link: string,
+    has_changed_login_data?: boolean;
     shipping_address: {
         first_name: string,
         last_name: string,
@@ -119,6 +121,7 @@ export interface IOrder {
     basket: number,
     billing_address: null | string
     statusName: string,
+    is_new?: boolean;
 
 }
 
@@ -132,20 +135,18 @@ export interface IOrderInfo extends IOrder {
         login_data: {
             account_id: string,
             code: string,
-            friend_url?: string;
+            friend_url?: string,
+            email_changed?: boolean,
+            code_changed?: boolean
         },
-    }[]
+    }[],
+    custom_field?: string 
+
 }
 interface IStatusOrder {
     [key: string]: string
 }
-// export const statusOrder: IStatusOrder = {
-//     NEW: "Ожидает оплаты",
-//     PAID: "Оплачен. Ожидает обработки",
-//     PROCESSING: "Оплачен. В процессе обработки",
-//     DELIVERED: "Завершен",
-//     CANCELLED: "Отменен",
-// }
+
 export const statusOrder: IStatusOrder = {
     NEW: "Awaiting payment",
     PAID: "Paid. Awaiting processing",

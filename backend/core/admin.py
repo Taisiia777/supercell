@@ -1,18 +1,4 @@
-# # Register your models here.
-# from django.contrib import admin
-# from django.contrib.auth.admin import UserAdmin
-# from .models import User, Role
-# # Кастомный админ для модели Role
-# class CustomUserAdmin(UserAdmin):
-#     list_display = UserAdmin.list_display + ('get_roles',)
-#     filter_horizontal = ('roles',)
-    
-#     def get_roles(self, obj):
-#         return ", ".join([role.name for role in obj.roles.all()])
-#     get_roles.short_description = 'Роли'
 
-# admin.site.unregister(User)
-# admin.site.register(User, CustomUserAdmin)
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import User, Role
@@ -45,6 +31,9 @@ class ScheduledMailingAdmin(admin.ModelAdmin):
     search_fields = ('message',)
     ordering = ('-scheduled_time',)
 
+
+    
 admin.site.register(ScheduledMailing, ScheduledMailingAdmin)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Role, RoleAdmin)
+

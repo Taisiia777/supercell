@@ -48,6 +48,8 @@ def created_api_callback_handler(sender, order, user, **kwargs):
                     account_id=product_account_id[i]["account_id"],
                     code=product_account_id[i]["code"],
                     created_dt=now,
+                    email_changed=False,
+                    code_changed=False
                     )
                 )
 

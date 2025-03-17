@@ -8,5 +8,7 @@ urlpatterns = [
         seller_bot_views.SellerOrdersView.as_view(),
     ),
     path("customer_bot/login_data/", customer_views.UpdateLoginDataView.as_view()),
-
+    path("customer_bot/process_referral/", customer_views.ProcessReferralView.as_view()),
+    path("customer_bot/register_user/", customer_views.RegisterUserView.as_view()),
+    path("customer_bot/get_referral_link/", customer_views.GetReferralLinkView.as_view()),
 ]

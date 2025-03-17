@@ -17,7 +17,7 @@ interface IOrderAnswer {
 }
 
 interface IParamsMutation {
-    [key: string]: number | string | File;
+    [key: string]: number | string | File | boolean;
 }
 interface IParamDeleteImg {
     productID: number,
@@ -167,15 +167,30 @@ export const davDamerAPI = createApi({
             },
             invalidatesTags: ['Products']
         }),
+        // fetchSendCode: build.mutation<IParamsMutation, IParamsMutation>({
+        //     query: (body) => {
+        //         return ({
+        //             url: `/davdamer/order/${body.id}/request_code/${body.line_id}/`,
+        //             method: 'POST',
+        //         })
+        //     },
+        //     invalidatesTags: ['Orders']
+        // }),
         fetchSendCode: build.mutation<IParamsMutation, IParamsMutation>({
             query: (body) => {
+                let url = `/davdamer/order/${body.id}/request_code/${body.line_id}/`;
+                
+                // Если body.send_code существует и равно false, добавляем параметр запроса
+                if (body.send_code === false) {
+                    url += '?send_code=false';
+                }
+                
                 return ({
-                    url: `/davdamer/order/${body.id}/request_code/${body.line_id}/`,
+                    url: url,
                     method: 'POST',
                 })
             },
             invalidatesTags: ['Orders']
         }),
-
-    })
+    }),
 })

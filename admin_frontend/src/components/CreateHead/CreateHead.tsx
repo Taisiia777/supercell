@@ -26,16 +26,7 @@ function CreateHead(props: IProps) {
 
     return (
         <>
-            {/* <div className="page">
-                <div className="page__head">
-                    <h2 className="page__title">{title}</h2>
-                    <div className="page__btns head__btns">
-                        <Link to={`/${namePage}`} className="btn__cancel btn__head">Отмена</Link>
-                        {nameFunc === "show" && <Link to={`/${namePage}/edit/${id}`} className="btn__active btn__head">Редактировать</Link>}
-                        {nameFunc === "save" && <button className="btn__active btn__head" onClick={saveClick}>Сохранить</button>}
-                    </div>
-                </div>
-            </div> */}
+
             <div className="page">
                 <div className="page__head">
                     <h2 className="page__title">

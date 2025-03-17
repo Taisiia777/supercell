@@ -1,66 +1,73 @@
+
+
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import moment from "moment";
-import { useEffect, useRef, useState } from "react"
-import { useForm, SubmitHandler } from "react-hook-form"
+import { useEffect, useRef, useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import moment from "moment";
 
-import style from "./OrderForm.module.css"
+import style from "./OrderForm.module.css";
 
-import urlIconClient from "../../assets/images/clientIcon.svg"
-import urlIconCart from "../../assets/images/cartIcon.svg"
-import urlIconPay from "../../assets/images/payIcon.svg"
+import urlIconClient from "../../assets/images/clientIcon.svg";
+import urlIconCart from "../../assets/images/cartIcon.svg";
+import urlIconPay from "../../assets/images/payIcon.svg";
 import { IOrderInfo } from "../../models/type";
 
 import TitleProduct from "../TitleProduct/TitleProduct";
 import Filter from "../Filter/Filter";
 
 import { statusOrder } from "../../models/type";
+import { saveChangedOrderId } from "../../utils/localStorage";
 
 import { davDamerAPI } from "../../store/api/DavdamerAPI";
 import Modal from "../Modal/Modal";
-import urlCopy from "../../assets/images/copy.svg"
-import { useLanguage } from "../../context/LanguageContext";
-
+import urlCopy from "../../assets/images/copy.svg";
 
 interface IProps {
-    edit: boolean,
-    data: IOrderInfo
-    id?: string | null,
-    refBtn: any,
-    funcRequest?: any,
-    sendFormFilters: boolean
+    edit: boolean;
+    data: IOrderInfo;
+    id?: string | null;
+    refBtn: any;
+    funcRequest?: any;
+    sendFormFilters: boolean;
 }
 
-
-
 function OrderForm(props: IProps) {
-    const { translations, language } = useLanguage();
-    const t = translations.orderReader;
     const { edit, data, id, refBtn, funcRequest } = props;
-    console.log(data);
-
-    // const { register, handleSubmit, formState: { errors } } = useForm<any>({
-    //     defaultValues: {
-    //         line1: data.shipping_address.line1 ? data.shipping_address.line1 : "Не заполнено",
-
-    //     }
-    // })
-    const { handleSubmit } = useForm<any>()
+    
+    // Use react-hook-form with custom field
+    const { register, handleSubmit } = useForm<any>({
+        defaultValues: {
+            custom_field: data.custom_field || ''
+        }
+    });
+    
     const navigate = useNavigate();
-    const onSubmit: SubmitHandler<any> = async () => {
+    
+    // Enhanced submit handler to include custom fields
+    const onSubmit: SubmitHandler<any> = async (formValues) => {
         const formData = new FormData();
         formData.append("status", valueFilter);
+        
+        // Add custom fields to the request
+        if (formValues.custom_field !== undefined) {
+            formData.append("custom_field", formValues.custom_field);
+        }
+        
         try {
             if (funcRequest) {
-                const data = await funcRequest({ id: id, body: formData })
-                if (data) navigate(`/orders`)
+                const response = await funcRequest({ id: id, body: formData });
+                if (response) {
+                    // Mark this order as having changes in localStorage
+                    if (id) saveChangedOrderId(parseInt(id));
+                    navigate(`/orders`);
+                }
             }
         } catch (err) {
-            navigate(`/404`)
-
+            navigate(`/404`);
         }
-
-    }
+    };
 
     function declOfNum(number: number) {
         const titles = ["товар", "товара", "товаров"]
@@ -68,84 +75,107 @@ function OrderForm(props: IProps) {
         return titles[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]];
     }
 
-
+    // Refs for layout management
     const refHead = useRef<HTMLDivElement>(null);
     const refClient = useRef<HTMLDivElement>(null);
     const refDelivery = useRef<HTMLDivElement>(null);
     const refPay = useRef<HTMLDivElement>(null);
     const refOrder = useRef<HTMLDivElement>(null);
+    const refNotes = useRef<HTMLDivElement>(null);
     const [isScroll, setIsScroll] = useState(false);
+    
+    // Calculate layout heights
     useEffect(() => {
         let height = 0;
         if (refHead.current) {
-            height += refHead.current.clientHeight
+            height += refHead.current.clientHeight;
         }
-        if (refClient.current) height += refClient.current.clientHeight
-        if (refDelivery.current) height += refDelivery.current.clientHeight
-        if (refPay.current) height += refPay.current.clientHeight
+        if (refClient.current) height += refClient.current.clientHeight;
+        if (refDelivery.current) height += refDelivery.current.clientHeight;
+        if (refPay.current) height += refPay.current.clientHeight;
+        if (refNotes.current) height += refNotes.current.clientHeight;
+        
         if (refOrder.current && (refOrder.current.clientHeight > height)) {
-
-            refOrder.current.style.height = height + "px"; setIsScroll(true)
+            refOrder.current.style.height = height + "px"; 
+            setIsScroll(true);
         }
+    }, []);
 
-
-    }, [])
-
-
+    // Status filter state management
     const [valueFilter, setValueFilter] = useState(data.status);
     const setParamsFilter = (_: string, value: string) => {
-        setValueFilter(value ? value : data.status)
-
-
-    }
+        setValueFilter(value ? value : data.status);
+    };
+    
     const [statusFilter, setStatusFilter] = useState<any[]>([]);
     const filterStatus = {
         title: data.statusName ? data.statusName : "",
         nameFilter: "status",
         status: statusFilter,
         id: true
-    }
+    };
+    
     useEffect(() => {
         const arr = [];
         for (const key in statusOrder) {
             const newObj = {
                 name: statusOrder[key],
                 id: key
-            }
+            };
             arr.push(newObj);
-
         }
-        setStatusFilter(arr)
-    }, [])
+        setStatusFilter(arr);
+    }, []);
 
-
-
+    // Modal for code sending confirmation
     const [isModalCode, sendIsModal] = useState(false);
     const [code, { isLoading: isLoadingCode }] = davDamerAPI.useFetchSendCodeMutation();
-    const clickSendCode = async (lineID: number) => {
+    
+    // Enhanced function to send new codes with loginType check
+    const clickSendCode = async (lineID: number, loginType: string) => {
         try {
             if (id) {
-                const data = await code({ id: id, line_id: lineID })
-                if (data) sendIsModal(true)
-
+                // Determine if code needs to be sent based on login type
+                const needSendCode = loginType === "EMAIL_CODE" || loginType === "URL_EMAIL";
+                
+                const data = await code({ 
+                    id: id, 
+                    line_id: lineID,
+                    send_code: needSendCode // true for EMAIL_CODE and URL_EMAIL, false for LINK and URL_LINK
+                });
+                
+                if (data) {
+                    sendIsModal(true);
+                    // Mark order as changed
+                    if (id) saveChangedOrderId(parseInt(id));
+                }
             }
-
-
         } catch (err) {
-            navigate(`/404`)
-
+            navigate(`/404`);
         }
-
-
-    }
+    };
 
     const clickCopyCode = (code: string) => {
         navigator.clipboard.writeText(code);
-    }
+    };
 
-    if (isLoadingCode) return <p>Загрузка данных</p>
+    if (isLoadingCode) return <p>Загрузка данных</p>;
 
-
+    // Helper function to determine login type text
+    const getLoginTypeText = (type: string) => {
+        switch(type) {
+            case "EMAIL_CODE":
+                return "С входом";
+            case "LINK":
+                return "Без входа";
+            case "URL_EMAIL":
+                return "С входом + ссылка";
+            case "URL_LINK":
+                return "Без входа + ссылка";
+            default:
+                return "Неизвестный тип";
+        }
+    };
 
     return (
         <>
@@ -154,159 +184,243 @@ function OrderForm(props: IProps) {
                 <div className={"form__head" + " " + style.form__head} ref={refHead}>
                     <div className={"form__name " + style.form__name}>
                         <div className={style.form__orderTitle}>
-                            <p>
-                                {/* Номер заказа:  */}
-                                {t.orderNumber[language]}
-                                </p>
+                            <p>Номер заказа: </p>
                             <p>{data.number}</p>
-
                         </div>
-                        {data && data.date_placed && <span>{t.orderDate[language]}: {moment(data.date_placed).format("DD.MM.YYYY")}</span>}
-                        {data && data.updated_dt && <span> {t.updateDate[language]}: {moment(data.updated_dt).format("DD.MM.YYYY")}</span>}
+                        {data && data.date_placed && <span>Дата заказа: {moment(data.date_placed).format("DD.MM.YYYY")}</span>}
+                        {data && data.updated_dt && <span>Дата изменения: {moment(data.updated_dt).format("DD.MM.YYYY")}</span>}
                     </div>
                     {!edit && <div className={style.status}>
                         {data.statusName}
                     </div>}
                     {edit && <Filter data={filterStatus as any} setParamsFilter={setParamsFilter}></Filter>}
                 </div>
+                
                 <div className={style.form__client} ref={refClient}>
-                    <h3 className="form__title"><img src={urlIconClient} alt="desc" />
-                    {t.paymentInfo[language]}
-
-                    {/* О платеже */}
-                    </h3>
+                    <h3 className="form__title"><img src={urlIconClient} alt="desc" />О платеже</h3>
                     <label className="form__label">
-                        <span>
-                            {/* Код платежа */}
-                            {t.paymentCode[language]}
-                            </span>
+                        <span>Код платежа</span>
                         <input defaultValue={data.payment_id} type="text" disabled />
                     </label>
-
-
                 </div>
+                
                 <div className={style.form__pay} ref={refPay}>
-                    <h3 className="form__title"><img src={urlIconPay} alt="pay" />
-                    {/* Оплата */}
-                    {t.payment[language]}
-                    </h3>
+                    <h3 className="form__title"><img src={urlIconPay} alt="pay" />Оплата</h3>
                     <label className="form__label">
                         <span>{data.total_incl_tax} ₽</span>
                         <input defaultValue={`${data.lines.length} ${declOfNum(data.lines.length)}`} type="text" disabled />
                     </label>
                     <label className="form__label">
-                        <span>
-                            {/* Способ оплаты */}
-                            {t.paymentMethod[language]}
-                            </span>
+                        <span>Способ оплаты</span>
                         <input defaultValue={"Кредитная карта"} type="text" disabled />
                     </label>
                 </div>
+
+                {/* New notes section */}
+                <div className={style.form__notes} ref={refNotes}>
+                    <h3 className="form__title">Заметки к заказу</h3>
+                    <label className="form__label">
+                        <span>Заметки</span>
+                        <textarea 
+                            className={style.notesTextarea}
+                            disabled={!edit}
+                            {...register("custom_field")}
+                            placeholder={edit ? "Введите заметки к заказу..." : "Нет заметок"}
+                        />
+                    </label>
+                </div>
+
                 <div className={style.form__cart + " "}>
-                    <h3 className="form__title"><img src={urlIconCart} alt="cart" />
-                    {/* Детали заказа */}
-                    {t.orderDetails[language]}
-
-                    </h3>
+                    <h3 className="form__title"><img src={urlIconCart} alt="cart" />Детали заказа</h3>
                     <div className={style.order + " " + (isScroll ? "scroll__elem" : "")} ref={refOrder}>
+                        {data.lines.map((item, index) => {
+                            const loginType = item.product.login_type;
+                            
+                            return (
+                                <div key={index} className={style.infoOrder}>
+                                    <TitleProduct 
+                                        active={true} 
+                                        categories={item.product.categories} 
+                                        images={item.product.images} 
+                                        title={item.product.title} 
+                                    />
+                                    <p className={style.infoPace}>{getLoginTypeText(item.product.login_type)}</p>
 
-                        {data.lines.map((item, index) => <div key={index} className={style.infoOrder}>
-
-                            <TitleProduct active={true} categories={item.product.categories} images={item.product.images} title={item.product.title} ></TitleProduct>
-                            {/* <p className={style.infoPace}> {item.product.login_type === "EMAIL_CODE" ? t.withLogin[language] : t.withoutLogin[language]}</p> */}
-
-                            <p className={style.infoPace}>
-                                {item.product.login_type === "EMAIL_CODE" 
-                                    ? t.withLogin[language] 
-                                    : item.product.login_type === "URL_EMAIL"
-                                        ? "Вход + ссылка в друзья"
-                                        : t.withoutLogin[language]
-                                }
-                            </p>
-
-                            <div className={style.infoCount}>
-                                <span>x {item.quantity} </span>
-                                <span>{item.unit_price_incl_tax} ₽ / {item.measurement ? item.measurement : "шт."}</span>
-                            </div>
-                            <div className={style.formInfoProduct}>
-                                <label className="form__label">
-                                    <span>
-                                        {/* {item.product.login_type === "EMAIL_CODE" ? "Аккаунт" : "Пригласительная ссылка"} */}
-                                        {item.product.login_type === "EMAIL_CODE" ? 
-                                            t.account[language] : 
-                                            t.inviteLink[language]
-                                        }
-                                        </span>
-                                    <div className={style.code}>
-                                        <input className={style.input} defaultValue={item.login_data.account_id} type="text" readOnly onClick={() => clickCopyCode(item.login_data.account_id)} />
-                                        <img src={urlCopy} alt="copy" />
+                                    <div className={style.infoCount}>
+                                        <span>x {item.quantity} </span>
+                                        <span>{item.unit_price_incl_tax} ₽ / {item.measurement ? item.measurement : "шт."}</span>
                                     </div>
-                                </label>
-                                {item.product.login_type === "EMAIL_CODE" && <label className="form__label">
-                                    <span>
-                                        {/* Код */}
-                                        {t.code[language]}
-
-                                        </span>
-                                    <div className={style.formCode}>
-                                        <div className={style.code}>
-                                            <input className={style.input} defaultValue={item.login_data.code} type="text" readOnly onClick={() => clickCopyCode(item.login_data.code)} />
-                                            <img src={urlCopy} alt="copy" />
-                                        </div>
-
-                                        <div className={"btn btn__table " + style.btn} onClick={() => clickSendCode(item.id)}>
-                                            {/* Отправить новый код */}
-                                            {t.newCode[language]}
-
-                                            </div>
-                                    </div>
-                                </label>}
-                                {item.product.login_type === "URL_EMAIL" && (
-                                        <>
+                                    <div className={style.formInfoProduct}>
+                                        {/* Display appropriate fields based on login type */}
+                                        {loginType === "EMAIL_CODE" && (
                                             <label className="form__label">
-                                                <span>{t.code[language]}</span>
-                                                <div className={style.formCode}>
-                                                    <div className={style.code}>
-                                                        <input className={style.input} defaultValue={item.login_data.code} type="text" readOnly onClick={() => clickCopyCode(item.login_data.code)} />
-                                                        <img src={urlCopy} alt="copy" />
-                                                    </div>
-
-                                                    <div className={"btn btn__table " + style.btn} onClick={() => clickSendCode(item.id)}>
-                                                        {t.newCode[language]}
-                                                    </div>
+                                                <span>Аккаунт</span>
+                                                <div className={style.code}>
+                                                    <input 
+                                                        className={`${style.input} ${item.login_data.email_changed ? style.changed : ''}`} 
+                                                        defaultValue={item.login_data.account_id} 
+                                                        type="text" 
+                                                        readOnly 
+                                                        onClick={() => clickCopyCode(item.login_data.account_id)} 
+                                                    />
+                                                    <img src={urlCopy} alt="copy" />
+                                                    {item.login_data.email_changed && (
+                                                        <span className={style.warningIcon} title="Email был изменен">❗</span>
+                                                    )}
                                                 </div>
                                             </label>
-                                            {item.login_data.friend_url && (
+                                        )}
+
+                                        {loginType === "LINK" && (
+                                            <label className="form__label">
+                                                <span>Пригласительная ссылка</span>
+                                                <div className={style.code}>
+                                                    <input 
+                                                        className={`${style.input} ${item.login_data.email_changed ? style.changed : ''}`} 
+                                                        defaultValue={item.login_data.account_id} 
+                                                        type="text" 
+                                                        readOnly 
+                                                        onClick={() => clickCopyCode(item.login_data.account_id)} 
+                                                    />
+                                                    <img src={urlCopy} alt="copy" />
+                                                    {item.login_data.email_changed && (
+                                                        <span className={style.warningIcon} title="Ссылка была изменена">❗</span>
+                                                    )}
+                                                </div>
+                                            </label>
+                                        )}
+                                   
+                                        {loginType === "URL_EMAIL" && (
+                                            <>
+                                                <label className="form__label">
+                                                    <span>Почта</span>
+                                                    <div className={style.code}>
+                                                        <input 
+                                                            className={style.input} 
+                                                            defaultValue={
+                                                                item.login_data?.account_id?.includes('|') 
+                                                                    ? item.login_data.account_id.split('|')[0] 
+                                                                    : item.login_data?.account_id || ''
+                                                            } 
+                                                            type="text" 
+                                                            readOnly 
+                                                            onClick={() => {
+                                                                const email = item.login_data?.account_id?.includes('|') 
+                                                                    ? item.login_data.account_id.split('|')[0] 
+                                                                    : item.login_data?.account_id || '';
+                                                                clickCopyCode(email);
+                                                            }} 
+                                                        />
+                                                        <img src={urlCopy} alt="copy" />
+                                                    </div>
+                                                </label>
+                                                
                                                 <label className="form__label">
                                                     <span>Ссылка в друзья</span>
                                                     <div className={style.code}>
                                                         <input 
                                                             className={style.input} 
-                                                            defaultValue={item.login_data.friend_url} 
+                                                            defaultValue={
+                                                                item.login_data?.account_id?.includes('|') 
+                                                                    ? item.login_data.account_id.split('|')[1] 
+                                                                    : item.login_data?.code || ''
+                                                            } 
                                                             type="text" 
                                                             readOnly 
-                                                            onClick={() => item.login_data.friend_url && clickCopyCode(item.login_data.friend_url)} 
+                                                            onClick={() => {
+                                                                const link = item.login_data?.account_id?.includes('|') 
+                                                                    ? item.login_data.account_id.split('|')[1] 
+                                                                    : item.login_data?.code || '';
+                                                                clickCopyCode(link);
+                                                            }} 
                                                         />
                                                         <img src={urlCopy} alt="copy" />
                                                     </div>
                                                 </label>
-                                            )}
-                                        </>
-                                    )}
-                            </div>
+                                            </>
+                                        )}
 
-                        </div>
-                        )}
+                                        {loginType === "URL_LINK" && (
+                                            <>
+                                                <label className="form__label">
+                                                    <span>Почта</span>
+                                                    <div className={style.code}>
+                                                        <input 
+                                                            className={style.input} 
+                                                            defaultValue={
+                                                                item.login_data?.account_id?.includes('|') 
+                                                                    ? item.login_data.account_id.split('|')[0] 
+                                                                    : item.login_data?.account_id || ''
+                                                            } 
+                                                            type="text" 
+                                                            readOnly 
+                                                            onClick={() => {
+                                                                const email = item.login_data?.account_id?.includes('|') 
+                                                                    ? item.login_data.account_id.split('|')[0] 
+                                                                    : item.login_data?.account_id || '';
+                                                                clickCopyCode(email);
+                                                            }} 
+                                                        />
+                                                        <img src={urlCopy} alt="copy" />
+                                                    </div>
+                                                </label>
+                                                <label className="form__label">
+                                                    <span>Ссылка в друзья</span>
+                                                    <div className={style.code}>
+                                                        <input 
+                                                            className={style.input} 
+                                                            defaultValue={
+                                                                item.login_data?.account_id?.includes('|') 
+                                                                    ? item.login_data.account_id.split('|')[1] 
+                                                                    : item.login_data?.account_id || ''
+                                                            } 
+                                                            type="text" 
+                                                            readOnly 
+                                                            onClick={() => {
+                                                                const link = item.login_data?.account_id?.includes('|') 
+                                                                    ? item.login_data.account_id.split('|')[1] 
+                                                                    : item.login_data?.account_id || '';
+                                                                clickCopyCode(link);
+                                                            }} 
+                                                        />
+                                                        <img src={urlCopy} alt="copy" />
+                                                    </div>
+                                                </label>
+                                            </>                                            
+                                        )}
 
+                                        {/* Code field for all login types */}
+                                        <label className="form__label">
+                                            <span>Код</span>
+                                            <div className={style.formCode}>
+                                                <div className={style.code}>
+                                                    <input 
+                                                        className={`${style.input} ${item.login_data.code_changed ? style.changed : ''}`} 
+                                                        defaultValue={item.login_data.code} 
+                                                        type="text" 
+                                                        readOnly 
+                                                        onClick={() => clickCopyCode(item.login_data.code)} 
+                                                    />
+                                                    <img src={urlCopy} alt="copy" />
+                                                    {item.login_data.code_changed && (
+                                                        <span className={style.warningIcon} title="Код был изменен">❗</span>
+                                                    )}
+                                                </div>
+                                                <div className={"btn btn__table " + style.btn} onClick={() => clickSendCode(item.id, item.product.login_type)}>
+                                                    Отправить новый код
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
-
                 </div>
                 <input type="submit" value="Отправить" className="form__submit" ref={refBtn} />
-
-            </form >
+            </form>
         </>
     )
-    
 }
 
-export default OrderForm
+export default OrderForm;

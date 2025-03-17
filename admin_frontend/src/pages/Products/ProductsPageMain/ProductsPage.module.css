@@ -1,6 +1,7 @@
 .row {
     grid-gap: 1%;
-    grid-template-columns: 36% 17% 13% 8% 9% 7%;
+    grid-template-columns: 45% 20% 10% 10% 10% ;
+
 }
 
 .title,
@@ -16,7 +17,7 @@
     color: var(--color-title);
     font-size: 12px;
     font-weight: 400;
-    -webkit-line-clamp: 3;
+    /* -webkit-line-clamp: 3; */
     opacity: .6;
 }
 
@@ -40,4 +41,5 @@
     flex-direction: column;
     gap: 5px;
     align-items: center;
+    z-index: 100;
 }

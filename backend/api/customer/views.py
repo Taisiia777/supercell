@@ -24,6 +24,10 @@ from . import serializers
 from ..shop.serializers import ResponseStatusSerializer
 from celery_app import app as celery_app
 from api.permissions import OrderManagerPermission, ProductManagerPermission, AdminPermission
+from .serializers import ProcessReferralSerializer, RegisterUserSerializer, ReferralLinkSerializer
+from .utils import get_or_create_referral_code, get_referral_link
+from django.shortcuts import get_object_or_404
+from core.models import OrderReview
 
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
@@ -175,20 +179,51 @@ class OrderLoginDataView(generics.GenericAPIView):
         context["order"] = self.get_object()
         return context
 
+    # @staticmethod
+    # def perform_create(serializer):
+    #     now = timezone.now()
+    #     login_data = [
+    #         OrderLoginData(
+    #             order_line_id=data["order_line"],
+    #             account_id=data["account_id"],
+    #             code=data["code"],
+    #             created_dt=now,
+    #         )
+    #         for data in serializer.validated_data
+    #     ]
+    #     OrderLoginData.objects.bulk_create(login_data)
+    # В api.customer.views.OrderLoginDataView.perform_create
     @staticmethod
     def perform_create(serializer):
         now = timezone.now()
-        login_data = [
-            OrderLoginData(
-                order_line_id=data["order_line"],
-                account_id=data["account_id"],
-                code=data["code"],
-                created_dt=now,
+        login_data_list = []
+        
+        for data in serializer.validated_data:
+            # Получаем последнюю запись для этой линии заказа
+            last_login_data = OrderLoginData.objects.filter(
+                order_line_id=data["order_line"]
+            ).order_by('-created_dt').first()
+            
+            # Проверяем, изменились ли почта или код
+            email_changed = False
+            code_changed = False
+            
+            if last_login_data:
+                email_changed = last_login_data.account_id != data["account_id"]
+                code_changed = last_login_data.code != data["code"]
+            
+            login_data_list.append(
+                OrderLoginData(
+                    order_line_id=data["order_line"],
+                    account_id=data["account_id"],
+                    code=data["code"],
+                    created_dt=now,
+                    email_changed=email_changed,
+                    code_changed=code_changed
+                )
             )
-            for data in serializer.validated_data
-        ]
-        OrderLoginData.objects.bulk_create(login_data)
-
+        
+        OrderLoginData.objects.bulk_create(login_data_list)
     @extend_schema(
         request=serializers.PutLoginDataSerializer(many=True),
         responses={
@@ -333,3 +368,198 @@ class OrderWebhookView(APIView):
             logger.info(f"Order {order.number} was deleted due to payment timeout")
         except Order.DoesNotExist:
             logger.warning(f"Order with payment_id={payment_id} not found")
+
+
+class ProcessReferralView(APIView):
+    """Обрабатывает присоединение пользователя через реферальную ссылку"""
+    def post(self, request):
+        serializer = ProcessReferralSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({"status": False, "errors": serializer.errors})
+        
+        data = serializer.validated_data
+        telegram_id = data['telegram_id']
+        username = data.get('username', '')
+        full_name = data.get('full_name', '')
+        referral_code = data['referral_code']
+        
+        try:
+            # Найти или создать пользователя
+            user, created = User.objects.get_or_create(
+                telegram_chat_id=telegram_id,
+                defaults={
+                    'username': f"tg_{telegram_id}" if not username else username,
+                    'first_name': full_name.split(' ')[0] if full_name else '',
+                    'last_name': ' '.join(full_name.split(' ')[1:]) if full_name and len(full_name.split(' ')) > 1 else '',
+                }
+            )
+            
+            # Если пользователь уже привязан к реферальному коду
+            if user.referred_by is not None:
+                return Response({"status": False, "error": "Пользователь уже имеет реферера"})
+            
+            # Найти пользователя с таким реферальным кодом
+            try:
+                referrer = User.objects.get(referral_code=referral_code)
+                
+                # Нельзя быть своим собственным рефералом
+                if referrer.id == user.id:
+                    return Response({"status": False, "error": "Нельзя использовать свой собственный код"})
+                    
+                # Создание связи
+                user.referred_by = referrer
+                user.save(update_fields=['referred_by'])
+                
+                # Создание реферального кода для нового пользователя, если его нет
+                if not user.referral_code:
+                    user.referral_code = user.generate_unique_code()
+                    user.save(update_fields=['referral_code'])
+                
+                return Response({"status": True})
+                
+            except User.DoesNotExist:
+                return Response({"status": False, "error": "Неверный реферальный код"})
+                
+        except Exception as e:
+            logger.exception(f"Ошибка обработки реферала: {str(e)}")
+            return Response({"status": False, "error": "Ошибка сервера"})
+
+class RegisterUserView(APIView):
+    """Регистрирует нового пользователя без реферальной связи"""
+    def post(self, request):
+        serializer = RegisterUserSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({"status": False, "errors": serializer.errors})
+        
+        data = serializer.validated_data
+        telegram_id = data['telegram_id']
+        username = data.get('username', '')
+        full_name = data.get('full_name', '')
+        
+        try:
+            # Найти или создать пользователя
+            user, created = User.objects.get_or_create(
+                telegram_chat_id=telegram_id,
+                defaults={
+                    'username': f"tg_{telegram_id}" if not username else username,
+                    'first_name': full_name.split(' ')[0] if full_name else '',
+                    'last_name': ' '.join(full_name.split(' ')[1:]) if full_name and len(full_name.split(' ')) > 1 else '',
+                }
+            )
+            
+            # Создание реферального кода для пользователя, если его нет
+            if not user.referral_code:
+                user.referral_code = user.generate_unique_code()
+                user.save(update_fields=['referral_code'])
+            
+            return Response({"status": True})
+                
+        except Exception as e:
+            logger.exception(f"Ошибка регистрации пользователя: {str(e)}")
+            return Response({"status": False, "error": "Ошибка сервера"})
+
+class GetReferralLinkView(APIView):
+    """Возвращает реферальную ссылку пользователя"""
+    def get(self, request):
+        telegram_id = request.query_params.get('telegram_id')
+        if not telegram_id:
+            return Response({"status": False, "error": "Параметр telegram_id обязателен"})
+            
+        try:
+            telegram_id = int(telegram_id)
+            user = get_object_or_404(User, telegram_chat_id=telegram_id)
+            
+            # Создать реферальную ссылку
+            referral_link = user.get_referral_link()
+            
+            return Response({"referral_link": referral_link})
+                
+        except Exception as e:
+            logger.exception(f"Ошибка получения реферальной ссылки: {str(e)}")
+            return Response({"status": False, "error": "Ошибка сервера"})
+
+
+# class OrderReviewView(generics.CreateAPIView):
+#     """
+#     Создание отзыва к заказу
+#     """
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = serializers.CreateOrderReviewSerializer
+    
+#     def get_serializer_context(self):
+#         context = super().get_serializer_context()
+#         return context
+class OrderReviewView(generics.ListCreateAPIView):
+    """
+    Создание и получение отзывов к заказам
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return serializers.CreateOrderReviewSerializer
+        return serializers.OrderReviewListSerializer  # Нужно создать этот сериализатор
+    
+    def get_queryset(self):
+        return OrderReview.objects.filter(
+            order__user=self.request.user
+        ).select_related('order').order_by('-created_dt')
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        reviews_data = []
+        
+        for review in queryset:
+            line = review.order.lines.first()
+            product = line.product if line else None
+            
+            review_data = {
+                'id': review.id,
+                'order': review.order.id,
+                'order_number': review.order.number,
+                'rating': review.rating,
+                'comment': review.comment,
+                'created_dt': review.created_dt.isoformat(),
+                'user_name': request.user.first_name or request.user.username or 'Покупатель',
+            }
+            
+            if product:
+                review_data.update({
+                    'product_name': product.title,
+                    'product_price': str(line.unit_price_incl_tax) + ' ₽',
+                    'product_image': product.images.first().original.url if product.images.exists() else None
+                })
+            
+            reviews_data.append(review_data)
+        
+        return Response({'reviews': reviews_data})
+
+class OrderReviewForPaymentView(APIView):
+    """
+    Создание отзыва на странице оплаты заказа
+    """
+    permission_classes = [IsAuthenticated]
+    
+    @extend_schema(
+        request=serializers.OrderReviewSerializer,
+        responses={
+            200: serializers.ResponseStatusSerializer,
+            400: None,
+        },
+    )
+    def post(self, request, order_number, *args, **kwargs):
+        try:
+            order = Order.objects.get(number=order_number, user=request.user)
+        except Order.DoesNotExist:
+            return Response({"status": False, "message": "Заказ не найден"}, status=status.HTTP_404_NOT_FOUND)
+            
+        serializer = serializers.OrderReviewSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        OrderReview.objects.create(
+            order=order,
+            rating=serializer.validated_data["rating"],
+            comment=serializer.validated_data.get("comment", "")
+        )
+        
+        return Response({"status": True})

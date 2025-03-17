@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             model_name="orderlogindata",
             name="account_id",
             field=models.CharField(
-                max_length=150, null=True, verbose_name="ID аккаунта"
+                max_length=255, null=True, verbose_name="ID аккаунта"
             ),
         ),
         migrations.AddField(

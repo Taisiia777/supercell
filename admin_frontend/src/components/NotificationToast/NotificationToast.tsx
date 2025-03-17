@@ -1,62 +1,69 @@
 import React, { useEffect, useState } from 'react';
-import styles from './NotificationToast.module.css';
+import './NotificationToast.css';
 
-interface NotificationProps {
+interface NotificationToastProps {
   message: string;
   onClose: () => void;
+  duration?: number; // Duration in milliseconds, defaults to 5000ms (5 seconds)
+  type?: 'info' | 'success' | 'warning' | 'error';
 }
 
-const NotificationToast: React.FC<NotificationProps> = ({ message, onClose }) => {
-  const [isVisible, setIsVisible] = useState(true);
-  const [isClosing, setIsClosing] = useState(false);
+const NotificationToast: React.FC<NotificationToastProps> = ({
+  message,
+  onClose,
+  duration = 5000,
+  type = 'info'
+}) => {
+  const [visible, setVisible] = useState(true);
+  const [progress, setProgress] = useState(100);
+  const [intervalId, setIntervalId] = useState<number | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      handleClose();
-    }, 5000);
+    // Start progress timer
+    const interval = setInterval(() => {
+      setProgress((oldProgress) => {
+        const newProgress = oldProgress - (100 / (duration / 100));
+        return newProgress <= 0 ? 0 : newProgress;
+      });
+    }, 100);
 
-    return () => clearTimeout(timer);
-  }, []);
+    setIntervalId(interval);
+
+    // Set timeout to close notification
+    const timeout = setTimeout(() => {
+      setVisible(false);
+      setTimeout(() => {
+        onClose();
+      }, 300); // Wait for fade out animation to complete
+    }, duration);
+
+    // Cleanup
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+      clearTimeout(timeout);
+    };
+  }, [duration, onClose]);
 
   const handleClose = () => {
-    setIsClosing(true);
+    setVisible(false);
+    if (intervalId) clearInterval(intervalId);
     setTimeout(() => {
-      setIsVisible(false);
       onClose();
-    }, 300);
+    }, 300); // Wait for fade out animation to complete
   };
 
-  if (!isVisible) return null;
-
   return (
-    <div className={`${styles.notification} ${isClosing ? styles.hide : ''}`}>
-      <svg 
-        className={styles.icon} 
-        width="20" 
-        height="20" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path 
-          d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16ZM16 17H8V11C8 8.52 9.51 6.5 12 6.5C14.49 6.5 16 8.52 16 11V17Z" 
-          fill="currentColor"
-        />
-      </svg>
-      
-      <div className={styles.content}>
-        <h4 className={styles.content__title}>Новый заказ</h4>
-        <p className={styles.content__message}>{message}</p>
+    <div className={`notification-toast notification-${type} ${visible ? 'show' : 'hide'}`}>
+      <div className="notification-content">
+        <div className="notification-message">{message}</div>
+        <button className="notification-close" onClick={handleClose}>×</button>
       </div>
-      
-      <button 
-        className={styles.closeButton}
-        onClick={handleClose}
-        type="button"
-        aria-label="Закрыть уведомление"
-      >
-        ×
-      </button>
+      <div className="notification-progress">
+        <div 
+          className="notification-progress-bar" 
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
     </div>
   );
 };

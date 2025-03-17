@@ -23,5 +23,5 @@ urlpatterns = [
     path("order/<int:id>/request_code/<int:line_id>/", views.RequestCodeView.as_view()),
     *router.urls,
     path('product/<int:product_id>/toggle_visibility/', views.ToggleProductVisibilityView.as_view()),
-
+    
 ]

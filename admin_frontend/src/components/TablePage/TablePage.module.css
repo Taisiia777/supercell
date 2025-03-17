@@ -19,3 +19,8 @@
     align-items: center;
     gap: 8px;
 }
+/* Только добавляем красную обводку, сохраняя все остальные стили */
+.changedDataRow {
+    outline: 2px solid #ff4d4f !important;
+    /* outline не влияет на размер и позиционирование элемента */
+}

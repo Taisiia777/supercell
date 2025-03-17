@@ -1,0 +1,448 @@
+/* src/pages/Referral/components/ReferralUsers.css */
+.referral-users {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.users-filters {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.search-container {
+  width: 300px;
+}
+
+.search-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 12px center;
+  background-size: 16px;
+  padding-left: 40px;
+}
+
+.status-filter {
+  display: flex;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.filter-button {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--color);
+  transition: all 0.2s ease;
+}
+
+.filter-button.active {
+  background-color: white;
+  color: var(--color-title);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.users-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.summary-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 20px;
+}
+
+.summary-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  background-size: 24px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.total-icon {
+  background-color: #dbeafe;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
+}
+
+.active-icon {
+  background-color: #dcfce7;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 11.08V12a10 10 0 1 1-5.93-9.14'/%3E%3Cpolyline points='22 4 12 14.01 9 11.01'/%3E%3C/svg%3E");
+}
+
+.earnings-icon {
+  background-color: #dbeafe;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='1' x2='12' y2='23'/%3E%3Cpath d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'/%3E%3C/svg%3E");
+}
+
+.avg-order-icon {
+  background-color: #fff7ed;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z'/%3E%3Cline x1='3' y1='6' x2='21' y2='6'/%3E%3Cpath d='M16 10a4 4 0 0 1-8 0'/%3E%3C/svg%3E");
+}
+
+.summary-content {
+  flex: 1;
+}
+
+.summary-title {
+  font-size: 14px;
+  color: var(--color);
+  margin: 0 0 8px;
+}
+
+.summary-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-title);
+  margin: 0;
+}
+
+.users-table-container {
+  overflow-x: auto;
+  padding: 16px;
+}
+
+.users-table {
+  min-width: 100%;
+}
+
+.user-details-button {
+  background: none;
+  border: none;
+  color: var(--icon-active);
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+.inactive-user {
+  opacity: 0.7;
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 24px;
+  color: var(--color);
+}
+
+/* User modal styles */
+.user-details-modal {
+  width: 700px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: var(--icon-active);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 600;
+  margin-right: 24px;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-title);
+  margin: 0 0 4px;
+}
+
+.user-email {
+  font-size: 16px;
+  color: var(--color);
+  margin: 0 0 8px;
+}
+
+.user-date {
+  font-size: 14px;
+  color: var(--color);
+  margin: 0 0 8px;
+}
+
+.user-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.user-stat-card {
+  text-align: center;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-title);
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: var(--color);
+}
+
+.section-subtitle {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-title);
+  margin: 0 0 16px;
+}
+
+.orders-table {
+  margin-bottom: 24px;
+}
+
+.user-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.secondary-button {
+  background-color: #f1f5f9;
+  color: var(--color-title);
+  border: 1px solid #e2e8f0;
+}
+
+.secondary-button:hover {
+  background-color: #e2e8f0;
+}
+
+/* Status styles */
+.status-active {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.status-inactive {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.status-completed {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+  .users-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .users-filters {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .search-container {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .user-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .user-actions {
+    flex-direction: column;
+  }
+}
+
+/* Добавьте эти стили в конец файла ReferralUsers.css */
+
+/* Модальные окна */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-title);
+}
+
+.close-modal-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--color);
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.close-modal-button:hover {
+  color: var(--color-title);
+}
+
+.modal-content {
+  padding: 24px;
+}
+
+/* Модальное окно для подробной информации о пользователе */
+.user-details-modal {
+  width: 700px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Модальное окно для выплат */
+.payment-modal {
+  width: 500px;
+  max-width: 90vw;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.payment-user-info {
+  margin-bottom: 24px;
+}
+
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.payment-form-label {
+  display: block;
+  font-size: 14px;
+  color: var(--color-title);
+  margin-bottom: 8px;
+}
+
+.payment-summary {
+  background-color: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.payment-summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.payment-summary-row.total {
+  font-weight: 600;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 8px;
+}
+
+.payment-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+}
+
+/* Стили для кнопок действий в таблице */
+.user-action-button {
+  background: none;
+  border: none;
+  color: var(--icon-active);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
+.user-action-button:hover {
+  color: #2262de;
+}
+
+.payment-button {
+  margin-left: 8px;
+}
+
+/* Стили для кнопок в пользовательских действиях */
+.user-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Исправления для некоторых других стилей */
+.payment-submit-button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.link-url {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.truncate-url {
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

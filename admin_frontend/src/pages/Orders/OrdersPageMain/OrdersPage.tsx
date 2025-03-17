@@ -1,5 +1,4 @@
-
-import { useState, useMemo, useEffect, useRef  } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import style from "./OrdersPage.module.css";
 import TablePage from "../../../components/TablePage/TablePage";
 import { davDamerAPI } from "../../../store/api/DavdamerAPI";
@@ -7,6 +6,7 @@ import { IParamsAPI } from "../../../store/api/DavdamerAPI";
 import { statusOrder, IOrder } from "../../../models/type";
 import { useLanguage } from "../../../context/LanguageContext";
 import NotificationToast from '../../../components/NotificationToast/NotificationToast';
+
 import notificationSound from './sound.mp3';
 
 interface SearchParams {
@@ -53,20 +53,34 @@ export const OrderSearch = ({ onSearch }: {
 };
 
 function OrdersPage() {
+    // State for API parameters
     const [paramsAPI, setParamsAPI] = useState<IParamsAPI>({
-        status: 'PAID'
+        status: 'PAID' // Default to show only PAID orders
     });
+    
+    // State for search
     const [searchParams, setSearchParams] = useState<SearchParams>({
         type: 'number',
         query: ''
     });
-    const [orders, setOrders] = useState<IOrder[]>([]);
-    const [notification, setNotification] = useState<{message: string} | null>(null);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const previousOrdersCount = useRef<number>(0);
     
+    // State for order data
+    const [orders, setOrders] = useState<IOrder[]>([]);
+    
+    // State for notifications
+    const [notification, setNotification] = useState<{message: string, type?: 'info' | 'success' | 'warning' | 'error'} | null>(null);
+    
+    // Reference for tracking previous order count and audio
+    const previousOrdersCount = useRef<number>(0);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    
+    // Track if we're performing initial load
+    const initialLoadDone = useRef<boolean>(false);
+    
+    // Use the API hook
     const { data, error, isLoading, refetch } = davDamerAPI.useFetchAllOrdersQuery(paramsAPI);
 
+    // Initialize audio on component mount
     useEffect(() => {
         audioRef.current = new Audio(notificationSound);
         return () => {
@@ -76,33 +90,119 @@ function OrdersPage() {
         };
     }, []);
 
+
+    const processOrders = useCallback((ordersData: IOrder[]) => {
+        if (!ordersData) return [];
+        
+        // Помечаем заказы как измененные только на основе email_changed и code_changed
+        return ordersData.map(order => ({
+          ...order,
+          has_changed_login_data: order.lines?.some((line: { login_data: { email_changed: any; code_changed: any; }; }) => 
+            line.login_data?.email_changed || line.login_data?.code_changed
+          ) || false
+        }));
+      }, []);
+    // Set up polling interval for fetching new data
     useEffect(() => {
         const interval = setInterval(() => {
             refetch();
-        }, 5000);
+        }, 3000); // Poll every 10 seconds
+        
         return () => clearInterval(interval);
     }, [refetch]);
 
     useEffect(() => {
+        const handleStorageChange = () => {
+            // Перезагрузить данные при изменении localStorage
+            refetch();
+        };
+        
+        window.addEventListener('storage-changed', handleStorageChange);
+        return () => {
+            window.removeEventListener('storage-changed', handleStorageChange);
+        };
+    }, [refetch]);
+
+    // Process orders when data changes
+    useEffect(() => {
         if (data) {
-            if (previousOrdersCount.current && data.length > previousOrdersCount.current) {
+            // Only check for new orders after initial load is complete
+            // if (initialLoadDone.current && previousOrdersCount.current && data.length > previousOrdersCount.current) {
+            if (data.length > previousOrdersCount.current) {
                 const newOrders = data.length - previousOrdersCount.current;
                 
+                // Play notification sound
                 if (audioRef.current) {
                     audioRef.current.play().catch(e => 
-                        console.log('Ошибка воспроизведения звука:', e)
+                        console.log('Audio playback error:', e)
                     );
                 }
                 
+                // Show notification
                 setNotification({
-                    message: `Получено новых заказов: ${newOrders}`
+                    message: `Получено новых заказов: ${newOrders}`,
+                    type: 'success'
                 });
             }
+            
+            // Mark initial load as done
+            if (!initialLoadDone.current) {
+                initialLoadDone.current = true;
+            }
+            
+            // Update previous count
             previousOrdersCount.current = data.length;
-            setOrders(data);
+            
+            // Process orders and set to state
+            const processedOrders = processOrders(data);
+            setOrders(processedOrders);
         }
-    }, [data]);
+    }, [data, processOrders]);
 
+    // В OrdersPage.tsx, после получения списка заказов
+useEffect(() => {
+    if (data) {
+      // Предварительно обработать заказы
+      const processedOrders = data.map(order => ({
+        ...order,
+        has_changed_login_data: false // По умолчанию не изменен
+      }));
+      
+      setOrders(processedOrders);
+      
+      // Для каждого заказа PAID делаем отдельный запрос для получения деталей
+      if (data.length > 0) {
+        data.forEach(async (order) => {
+          if (order.status === 'PAID') {
+            try {
+              // Получаем детали заказа
+              const detailsResponse = await fetch(`https://api.mamostore.ru/api/davdamer/order/${order.id}/`);
+              const orderDetails = await detailsResponse.json();
+              
+              // Проверяем, есть ли измененные данные
+              const hasChanges = orderDetails.lines?.some((line: { login_data: { email_changed: any; code_changed: any; }; }) => 
+                line.login_data?.email_changed || line.login_data?.code_changed
+              );
+              
+              if (hasChanges) {
+                // Обновляем состояние заказов
+                setOrders(prev => prev.map(o => 
+                  o.id === order.id ? { ...o, has_changed_login_data: true } : o
+                ));
+              }
+            } catch (error) {
+              console.error(`Ошибка при получении деталей заказа ${order.id}:`, error);
+            }
+          }
+        });
+      }
+    }
+  }, [data]);
+
+
+
+  
+    // Filter orders based on search parameters
     const filteredOrders = useMemo(() => {
         if (!orders || !searchParams.query) return orders;
     
@@ -114,7 +214,8 @@ function OrdersPage() {
             }
             
             if (searchParams.type === 'telegram_id') {
-                const userIdStr = order.user.username.toString();
+                // Handle Telegram ID search - extract ID from username if it has "TG:" prefix
+                const userIdStr = order.user.username ? order.user.username.toString() : '';
                 const cleanUserId = userIdStr.replace('TG:', '');
                 return cleanUserId.includes(query);
             }
@@ -123,15 +224,17 @@ function OrdersPage() {
         });
     }, [orders, searchParams]);
 
+    // Handle filter parameter changes
     const setParamsFilter = (key: string, value: string | number) => {
         setParamsAPI((prevParams) => {
             const obj = { ...prevParams };
 
             if (key === "statusName") {
                 if (value === "") {
-                    // Если фильтр сброшен, устанавливаем статус PAID
+                    // If filter is reset, set status to PAID (default)
                     obj["status"] = "PAID";
                 } else {
+                    // Find the status code from the status name
                     const objStatus = Object.entries(statusOrder);
                     let status = "";
                     objStatus.forEach((item) => {
@@ -149,6 +252,8 @@ function OrdersPage() {
         });
     };
 
+
+
     if (isLoading) return (<p>Загрузка данных</p>);
     if (error) return (<p>Ошибка</p>);
 
@@ -157,6 +262,7 @@ function OrdersPage() {
             {notification && (
                 <NotificationToast 
                     message={notification.message}
+                    type={notification.type || 'info'}
                     onClose={() => setNotification(null)}
                 />
             )}
@@ -173,8 +279,5 @@ function OrdersPage() {
         </>
     );
 }
-
-
-
 
 export default OrdersPage;

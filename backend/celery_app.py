@@ -44,7 +44,7 @@ app.conf.broker_url = os.environ["CELERY_BROKER_URL"]
 app.conf.broker_connection_retry_on_startup = True
 
 app.conf.task_track_started = True
-app.conf.task_time_limit = 3000
+app.conf.task_time_limit = 30000
 app.conf.include = [
     "core.tasks",
     "api.mailing.send",  # Добавляем задачи рассылки
