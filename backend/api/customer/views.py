@@ -520,7 +520,8 @@ class OrderReviewView(generics.ListCreateAPIView):
                 'rating': review.rating,
                 'comment': review.comment,
                 'created_dt': review.created_dt.isoformat(),
-                'user_name': request.user.first_name or request.user.username or 'Покупатель',
+                # 'user_name': request.user.first_name or request.user.username or 'Покупатель',
+                'user_name': review.order.user.first_name or review.order.user.username or 'Покупатель',
             }
             
             if product:

@@ -6,6 +6,12 @@ import { IParamsAPI } from "../../../store/api/DavdamerAPI";
 import { statusOrder, IOrder } from "../../../models/type";
 import { useLanguage } from "../../../context/LanguageContext";
 import NotificationToast from '../../../components/NotificationToast/NotificationToast';
+import { 
+    findNewOrders, 
+    saveProcessedOrderIds,
+    hasStatusChangedToPaid, 
+    saveOrderStatus, 
+  } from '../../../utils/localStorage';
 
 import notificationSound from './sound.mp3';
 
@@ -71,7 +77,7 @@ function OrdersPage() {
     const [notification, setNotification] = useState<{message: string, type?: 'info' | 'success' | 'warning' | 'error'} | null>(null);
     
     // Reference for tracking previous order count and audio
-    const previousOrdersCount = useRef<number>(0);
+    // const previousOrdersCount = useRef<number>(0);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     
     // Track if we're performing initial load
@@ -123,35 +129,57 @@ function OrdersPage() {
         };
     }, [refetch]);
 
-    // Process orders when data changes
+
+
     useEffect(() => {
         if (data) {
-            // Only check for new orders after initial load is complete
-            // if (initialLoadDone.current && previousOrdersCount.current && data.length > previousOrdersCount.current) {
-            if (data.length > previousOrdersCount.current) {
-                const newOrders = data.length - previousOrdersCount.current;
+            // Находим только действительно новые заказы (которых нет в localStorage)
+            const newOrders = findNewOrders(data);
+            
+            // Находим заказы, статус которых изменился на PAID
+            const statusChangedToPaidOrders = data.filter(order => 
+                hasStatusChangedToPaid(order.id, order.status)
+            );
+            
+            let shouldPlaySound = false;
+            
+            // Показываем уведомление о новых заказах
+            if (newOrders.length > 0) {
+                shouldPlaySound = true;
                 
-                // Play notification sound
-                if (audioRef.current) {
-                    audioRef.current.play().catch(e => 
-                        console.log('Audio playback error:', e)
-                    );
-                }
-                
-                // Show notification
                 setNotification({
-                    message: `Получено новых заказов: ${newOrders}`,
+                    message: `Получено новых заказов: ${newOrders.length}`,
                     type: 'success'
                 });
+                
+                // Сохраняем ID новых заказов
+                saveProcessedOrderIds(newOrders.map(order => order.id));
             }
+            
+            // Показываем уведомление об изменениях статуса
+            if (statusChangedToPaidOrders.length > 0 && !newOrders.some(o => statusChangedToPaidOrders.includes(o))) {
+                shouldPlaySound = true;
+                
+                setNotification({
+                    message: `${statusChangedToPaidOrders.length} заказ(ов) изменили статус на "Оплачен"`,
+                    type: 'warning'
+                });
+            }
+            
+            // Воспроизводим звук при необходимости
+            if (shouldPlaySound && audioRef.current) {
+                audioRef.current.play().catch(e => 
+                    console.log('Audio playback error:', e)
+                );
+            }
+            
+            // Сохраняем статусы всех заказов для будущего отслеживания
+            data.forEach(order => saveOrderStatus(order.id, order.status));
             
             // Mark initial load as done
             if (!initialLoadDone.current) {
                 initialLoadDone.current = true;
             }
-            
-            // Update previous count
-            previousOrdersCount.current = data.length;
             
             // Process orders and set to state
             const processedOrders = processOrders(data);
@@ -159,45 +187,59 @@ function OrdersPage() {
         }
     }, [data, processOrders]);
 
-    // В OrdersPage.tsx, после получения списка заказов
+// Добавьте новый useEffect для периодического обновления деталей заказов PAID
 useEffect(() => {
-    if (data) {
-      // Предварительно обработать заказы
-      const processedOrders = data.map(order => ({
-        ...order,
-        has_changed_login_data: false // По умолчанию не изменен
-      }));
-      
-      setOrders(processedOrders);
-      
-      // Для каждого заказа PAID делаем отдельный запрос для получения деталей
-      if (data.length > 0) {
-        data.forEach(async (order) => {
-          if (order.status === 'PAID') {
-            try {
-              // Получаем детали заказа
-              const detailsResponse = await fetch(`https://api.mamostore.ru/api/davdamer/order/${order.id}/`);
-              const orderDetails = await detailsResponse.json();
-              
-              // Проверяем, есть ли измененные данные
-              const hasChanges = orderDetails.lines?.some((line: { login_data: { email_changed: any; code_changed: any; }; }) => 
-                line.login_data?.email_changed || line.login_data?.code_changed
+    // Функция для запроса деталей заказов со статусом PAID
+    const fetchPaidOrdersDetails = async () => {
+      if (orders && orders.length > 0) {
+        const paidOrders = orders.filter(order => order.status === 'PAID');
+        
+        for (const order of paidOrders) {
+          try {
+            const detailsResponse = await fetch(`https://api.mamostore.ru/api/davdamer/order/${order.id}/`);
+            const orderDetails = await detailsResponse.json();
+            
+            // Проверяем, есть ли измененные данные
+            const hasChanges = orderDetails.lines?.some((line: { login_data: { email_changed: any; code_changed: any; }; }) => 
+              line.login_data?.email_changed || line.login_data?.code_changed
+            );
+            
+            if (hasChanges) {
+              // Проверяем, было ли это изменение уже обработано
+              const isNewChange = !orders.find(o => 
+                o.id === order.id && o.has_changed_login_data
               );
               
-              if (hasChanges) {
-                // Обновляем состояние заказов
-                setOrders(prev => prev.map(o => 
-                  o.id === order.id ? { ...o, has_changed_login_data: true } : o
-                ));
+              if (isNewChange) {
+                setNotification({
+                  message: `Данные заказа #${order.number} были изменены`,
+                  type: 'info'
+                });
+                
+                if (audioRef.current) {
+                  audioRef.current.play().catch(e => console.log('Audio playback error:', e));
+                }
               }
-            } catch (error) {
-              console.error(`Ошибка при получении деталей заказа ${order.id}:`, error);
+              
+              // Обновляем состояние заказов
+              setOrders(prev => prev.map(o => 
+                o.id === order.id ? { ...o, has_changed_login_data: true } : o
+              ));
             }
+          } catch (error) {
+            console.error(`Ошибка при получении деталей заказа ${order.id}:`, error);
           }
-        });
+        }
       }
-    }
-  }, [data]);
+    };
+  
+    // Вызываем сразу и устанавливаем интервал
+    fetchPaidOrdersDetails();
+    
+    const detailsInterval = setInterval(fetchPaidOrdersDetails, 5000); // Каждые 5 секунд
+    
+    return () => clearInterval(detailsInterval);
+  }, [orders]); // Зависимость от orders, чтобы реагировать на их изменения
 
 
 

@@ -8,7 +8,6 @@ from .callbacks import router as callbacks_router
 from .commands import router as commands_router
 from .messages import router as messages_router
 from ..filters import PrivateChatFilter
-# from .referral import router as referral_router
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +15,7 @@ router = Router()
 
 router.message.filter(PrivateChatFilter())
 router.callback_query.filter(PrivateChatFilter())
-router.include_routers( commands_router, callbacks_router, messages_router)
+router.include_routers(commands_router, callbacks_router, messages_router)
 
 
 @router.message(Command("get_id"))

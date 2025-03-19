@@ -119,3 +119,134 @@ export const clearLastViewedItem = (type: 'product' | 'order'): void => {
   }
 };
 
+// Утилита для работы с локальным хранилищем
+// Создайте файл utils/localStorage.ts
+
+// Ключ для хранения ID заказов
+const PROCESSED_ORDERS_KEY = 'processed_orders_ids';
+
+// Получить все известные ID заказов
+export const getProcessedOrderIds = (): number[] => {
+  const storedIds = localStorage.getItem(PROCESSED_ORDERS_KEY);
+  return storedIds ? JSON.parse(storedIds) : [];
+};
+
+// Сохранить ID заказа в localStorage
+export const saveProcessedOrderId = (orderId: number): void => {
+  const existingIds = getProcessedOrderIds();
+  if (!existingIds.includes(orderId)) {
+    existingIds.push(orderId);
+    localStorage.setItem(PROCESSED_ORDERS_KEY, JSON.stringify(existingIds));
+    
+    // Создаем событие для обновления в других вкладках
+    const event = new Event('storage-changed');
+    window.dispatchEvent(event);
+  }
+};
+
+// Сохранить массив ID заказов
+export const saveProcessedOrderIds = (orderIds: number[]): void => {
+  const existingIds = getProcessedOrderIds();
+  let changed = false;
+  
+  orderIds.forEach(id => {
+    if (!existingIds.includes(id)) {
+      existingIds.push(id);
+      changed = true;
+    }
+  });
+  
+  if (changed) {
+    localStorage.setItem(PROCESSED_ORDERS_KEY, JSON.stringify(existingIds));
+    
+    // Создаем событие для обновления в других вкладках
+    const event = new Event('storage-changed');
+    window.dispatchEvent(event);
+  }
+};
+
+// Проверить, является ли заказ новым
+export const isNewOrder = (orderId: number): boolean => {
+  return !getProcessedOrderIds().includes(orderId);
+};
+
+// Найти новые заказы из списка
+export const findNewOrders = (orders: any[]): any[] => {
+  const processedIds = getProcessedOrderIds();
+  return orders.filter(order => !processedIds.includes(order.id));
+};
+
+const ORDER_STATUS_KEY = 'order_statuses';
+
+// Сохранить статус заказа
+export const saveOrderStatus = (orderId: number, status: string): void => {
+  try {
+    const statusesStr = localStorage.getItem(ORDER_STATUS_KEY);
+    const statuses = statusesStr ? JSON.parse(statusesStr) : {};
+    
+    // Сохраняем только если статус изменился
+    if (statuses[orderId] !== status) {
+      statuses[orderId] = status;
+      localStorage.setItem(ORDER_STATUS_KEY, JSON.stringify(statuses));
+    }
+  } catch (error) {
+    console.error('Error saving order status:', error);
+  }
+};
+
+// Получить предыдущий статус заказа
+export const getOrderStatus = (orderId: number): string | null => {
+  try {
+    const statusesStr = localStorage.getItem(ORDER_STATUS_KEY);
+    if (!statusesStr) return null;
+    
+    const statuses = JSON.parse(statusesStr);
+    return statuses[orderId] || null;
+  } catch (error) {
+    console.error('Error getting order status:', error);
+    return null;
+  }
+};
+
+// Проверить, изменился ли статус на PAID
+export const hasStatusChangedToPaid = (orderId: number, currentStatus: string): boolean => {
+  const previousStatus = getOrderStatus(orderId);
+  return previousStatus !== null && 
+         previousStatus !== 'PAID' && 
+         currentStatus === 'PAID';
+};
+
+const LOGIN_DATA_KEY = 'login_data_state';
+
+// Сохранить состояние login_data
+export const saveLoginDataState = (orderId: number, lineId: number, state: boolean): void => {
+  try {
+    const dataStr = localStorage.getItem(LOGIN_DATA_KEY);
+    const data = dataStr ? JSON.parse(dataStr) : {};
+    
+    if (!data[orderId]) {
+      data[orderId] = {};
+    }
+    
+    data[orderId][lineId] = state;
+    localStorage.setItem(LOGIN_DATA_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.error('Error saving login data state:', error);
+  }
+};
+
+// Проверить, изменилось ли состояние login_data
+export const hasLoginDataChanged = (orderId: number, lineId: number, currentState: boolean): boolean => {
+  try {
+    const dataStr = localStorage.getItem(LOGIN_DATA_KEY);
+    if (!dataStr) return true; // Если нет данных, считаем что изменилось
+    
+    const data = JSON.parse(dataStr);
+    return !data[orderId] || 
+           data[orderId][lineId] === undefined || 
+           data[orderId][lineId] !== currentState;
+  } catch (error) {
+    console.error('Error checking login data state:', error);
+    return false;
+  }
+};

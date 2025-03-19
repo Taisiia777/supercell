@@ -302,7 +302,7 @@ YOOKASSA_SHOP_ID = os.environ["YOOKASSA_SHOP_ID"]
 YOOKASSA_API_KEY = os.environ["YOOKASSA_API_KEY"]
 FRONTEND_URL = os.environ.get("CUSTOMER_WEBAPP_URL", "https://example.com/")
 FRONTEND_PAYMENT_REDIRECT_URL = "/order/{id}/success"
-BOT_USERNAME = os.environ.get("BOT_USERNAME", "mamostoretest_bot")
-TELEGRAM_BOT_USERNAME = "mamostoretest_bot"  # Замените на имя вашего бота
+BOT_USERNAME = os.environ.get("BOT_USERNAME", "Mamoshop_bot")
+TELEGRAM_BOT_USERNAME = "Mamoshop_bot"  # Замените на имя вашего бота
 
 from oscar.defaults import *  # noqa

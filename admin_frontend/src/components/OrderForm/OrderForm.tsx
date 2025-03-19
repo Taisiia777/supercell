@@ -1,6 +1,3 @@
-
-
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -23,6 +20,7 @@ import { saveChangedOrderId } from "../../utils/localStorage";
 import { davDamerAPI } from "../../store/api/DavdamerAPI";
 import Modal from "../Modal/Modal";
 import urlCopy from "../../assets/images/copy.svg";
+import { useLanguage } from '../../context/LanguageContext';
 
 interface IProps {
     edit: boolean;
@@ -35,7 +33,8 @@ interface IProps {
 
 function OrderForm(props: IProps) {
     const { edit, data, id, refBtn, funcRequest } = props;
-    
+    const { language, translations } = useLanguage();
+    const t = translations.orderReader;
     // Use react-hook-form with custom field
     const { register, handleSubmit } = useForm<any>({
         defaultValues: {
@@ -69,10 +68,23 @@ function OrderForm(props: IProps) {
         }
     };
 
+    // function declOfNum(number: number) {
+    //     const titles = ["товар", "товара", "товаров"]
+    //     const cases = [2, 0, 1, 1, 1, 2];
+    //     return titles[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]];
+    // }
     function declOfNum(number: number) {
-        const titles = ["товар", "товара", "товаров"]
+        if (language === "zh") {
+            return t.itemCountDeclensions.many[language]; // В китайском нет склонений
+        }
+        
+        // Для русского языка:
         const cases = [2, 0, 1, 1, 1, 2];
-        return titles[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]];
+        const form = (number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5];
+        
+        if (form === 0) return t.itemCountDeclensions.one[language]; // 1 товар
+        if (form === 1) return t.itemCountDeclensions.few[language]; // 2-4 товара
+        return t.itemCountDeclensions.many[language]; // 5+ товаров
     }
 
     // Refs for layout management
@@ -159,36 +171,52 @@ function OrderForm(props: IProps) {
         navigator.clipboard.writeText(code);
     };
 
-    if (isLoadingCode) return <p>Загрузка данных</p>;
+    // if (isLoadingCode) return <p>Загрузка данных</p>;
+    if (isLoadingCode) return <p>{t.loading[language]}</p>;
 
     // Helper function to determine login type text
+    // const getLoginTypeText = (type: string) => {
+    //     switch(type) {
+    //         case "EMAIL_CODE":
+    //             return "С входом";
+    //         case "LINK":
+    //             return "Без входа";
+    //         case "URL_EMAIL":
+    //             return "С входом + ссылка";
+    //         case "URL_LINK":
+    //             return "Без входа + ссылка";
+    //         default:
+    //             return "Неизвестный тип";
+    //     }
+    // };
     const getLoginTypeText = (type: string) => {
         switch(type) {
             case "EMAIL_CODE":
-                return "С входом";
+                return t.withLogin[language];
             case "LINK":
-                return "Без входа";
+                return t.withoutLogin[language];
             case "URL_EMAIL":
-                return "С входом + ссылка";
+                return t.withLoginAndLink[language];
             case "URL_LINK":
-                return "Без входа + ссылка";
+                return t.withoutLoginAndLink[language];
             default:
-                return "Неизвестный тип";
+                return t.unknownType[language];
         }
     };
 
     return (
         <>
-            {isModalCode && <Modal text="Код отправлен" closeModal={() => sendIsModal(false)} />}
+            {/* {isModalCode && <Modal text="Код отправлен" closeModal={() => sendIsModal(false)} />} */}
+            {isModalCode && <Modal text={t.codeSent[language]} closeModal={() => sendIsModal(false)} />}
             <form className={'form ' + (edit ? "" : "show") + " " + style.form} encType="multipart/form-data" onSubmit={handleSubmit(onSubmit)}>
                 <div className={"form__head" + " " + style.form__head} ref={refHead}>
                     <div className={"form__name " + style.form__name}>
                         <div className={style.form__orderTitle}>
-                            <p>Номер заказа: </p>
+                            <p>{t.orderNumber[language]}: </p>
                             <p>{data.number}</p>
                         </div>
-                        {data && data.date_placed && <span>Дата заказа: {moment(data.date_placed).format("DD.MM.YYYY")}</span>}
-                        {data && data.updated_dt && <span>Дата изменения: {moment(data.updated_dt).format("DD.MM.YYYY")}</span>}
+                        <span>{t.orderDate[language]}: {moment(data.date_placed).format("DD.MM.YYYY")}</span>
+                        {data && data.updated_dt && <span>{t.updateDate[language]}: {moment(data.updated_dt).format("DD.MM.YYYY")}</span>}
                     </div>
                     {!edit && <div className={style.status}>
                         {data.statusName}
@@ -197,41 +225,55 @@ function OrderForm(props: IProps) {
                 </div>
                 
                 <div className={style.form__client} ref={refClient}>
-                    <h3 className="form__title"><img src={urlIconClient} alt="desc" />О платеже</h3>
+                    {/* <h3 className="form__title"><img src={urlIconClient} alt="desc" />О платеже</h3> */}
+                    <h3 className="form__title"><img src={urlIconClient} alt="desc" />{t.paymentSection[language]}</h3>
                     <label className="form__label">
-                        <span>Код платежа</span>
+                        <span>{t.paymentCode[language]}</span>
+                        {/* <span>Код платежа</span> */}
                         <input defaultValue={data.payment_id} type="text" disabled />
                     </label>
                 </div>
                 
                 <div className={style.form__pay} ref={refPay}>
-                    <h3 className="form__title"><img src={urlIconPay} alt="pay" />Оплата</h3>
+                    {/* <h3 className="form__title"><img src={urlIconPay} alt="pay" />Оплата</h3> */}
+                    <h3 className="form__title"><img src={urlIconPay} alt="pay" />{t.payment[language]}</h3>
                     <label className="form__label">
                         <span>{data.total_incl_tax} ₽</span>
                         <input defaultValue={`${data.lines.length} ${declOfNum(data.lines.length)}`} type="text" disabled />
                     </label>
                     <label className="form__label">
-                        <span>Способ оплаты</span>
-                        <input defaultValue={"Кредитная карта"} type="text" disabled />
+                        {/* <span>Способ оплаты</span> */}
+                        <span>{t.paymentMethod[language]}</span>
+                        {/* <input defaultValue={"Кредитная карта"} type="text" disabled /> */}
+                        <input defaultValue={t.creditCard[language]} type="text" disabled />
                     </label>
                 </div>
 
                 {/* New notes section */}
                 <div className={style.form__notes} ref={refNotes}>
-                    <h3 className="form__title">Заметки к заказу</h3>
+                    {/* <h3 className="form__title">Заметки к заказу</h3> */}
+                    <h3 className="form__title">{t.notesSection[language]}</h3>
                     <label className="form__label">
-                        <span>Заметки</span>
-                        <textarea 
+                        {/* <span>Заметки</span> */}
+                        <span>{t.notes[language]}</span>
+                        {/* <textarea 
                             className={style.notesTextarea}
                             disabled={!edit}
                             {...register("custom_field")}
                             placeholder={edit ? "Введите заметки к заказу..." : "Нет заметок"}
+                        /> */}
+                        <textarea 
+                            className={style.notesTextarea}
+                            disabled={!edit}
+                            {...register("custom_field")}
+                            placeholder={edit ? t.notesPlaceholder[language] : t.noNotes[language]}
                         />
                     </label>
                 </div>
 
                 <div className={style.form__cart + " "}>
-                    <h3 className="form__title"><img src={urlIconCart} alt="cart" />Детали заказа</h3>
+                    {/* <h3 className="form__title"><img src={urlIconCart} alt="cart" />Детали заказа</h3> */}
+                    <h3 className="form__title"><img src={urlIconCart} alt="cart" />{t.orderDetails[language]}</h3>
                     <div className={style.order + " " + (isScroll ? "scroll__elem" : "")} ref={refOrder}>
                         {data.lines.map((item, index) => {
                             const loginType = item.product.login_type;
@@ -254,7 +296,9 @@ function OrderForm(props: IProps) {
                                         {/* Display appropriate fields based on login type */}
                                         {loginType === "EMAIL_CODE" && (
                                             <label className="form__label">
-                                                <span>Аккаунт</span>
+                                                {/* <span>Аккаунт</span> */}
+                                                <span>{t.account[language]}</span>
+
                                                 <div className={style.code}>
                                                     <input 
                                                         className={`${style.input} ${item.login_data.email_changed ? style.changed : ''}`} 
@@ -265,7 +309,8 @@ function OrderForm(props: IProps) {
                                                     />
                                                     <img src={urlCopy} alt="copy" />
                                                     {item.login_data.email_changed && (
-                                                        <span className={style.warningIcon} title="Email был изменен">❗</span>
+                                                        // <span className={style.warningIcon} title="Email был изменен">❗</span>
+                                                        <span className={style.warningIcon} title={t.changes.emailChanged[language]}>❗</span>
                                                     )}
                                                 </div>
                                             </label>
@@ -273,7 +318,9 @@ function OrderForm(props: IProps) {
 
                                         {loginType === "LINK" && (
                                             <label className="form__label">
-                                                <span>Пригласительная ссылка</span>
+                                                {/* <span>Пригласительная ссылка</span> */}
+                                                <span>{t.inviteLink[language]}</span>
+
                                                 <div className={style.code}>
                                                     <input 
                                                         className={`${style.input} ${item.login_data.email_changed ? style.changed : ''}`} 
@@ -284,7 +331,9 @@ function OrderForm(props: IProps) {
                                                     />
                                                     <img src={urlCopy} alt="copy" />
                                                     {item.login_data.email_changed && (
-                                                        <span className={style.warningIcon} title="Ссылка была изменена">❗</span>
+                                                        // <span className={style.warningIcon} title="Ссылка была изменена">❗</span>
+                                                        <span className={style.warningIcon} title={t.changes.linkChanged[language]}>❗</span>
+
                                                     )}
                                                 </div>
                                             </label>
@@ -293,7 +342,9 @@ function OrderForm(props: IProps) {
                                         {loginType === "URL_EMAIL" && (
                                             <>
                                                 <label className="form__label">
-                                                    <span>Почта</span>
+                                                    {/* <span>Почта</span> */}
+                                                    <span>{t.email[language]}</span>
+
                                                     <div className={style.code}>
                                                         <input 
                                                             className={style.input} 
@@ -316,7 +367,9 @@ function OrderForm(props: IProps) {
                                                 </label>
                                                 
                                                 <label className="form__label">
-                                                    <span>Ссылка в друзья</span>
+                                                    {/* <span>Ссылка в друзья</span> */}
+                                                    <span>{t.friendLink[language]}</span>
+
                                                     <div className={style.code}>
                                                         <input 
                                                             className={style.input} 
@@ -343,7 +396,9 @@ function OrderForm(props: IProps) {
                                         {loginType === "URL_LINK" && (
                                             <>
                                                 <label className="form__label">
-                                                    <span>Почта</span>
+                                                    {/* <span>Почта</span> */}
+                                                    <span>{t.email[language]}</span>
+
                                                     <div className={style.code}>
                                                         <input 
                                                             className={style.input} 
@@ -365,7 +420,9 @@ function OrderForm(props: IProps) {
                                                     </div>
                                                 </label>
                                                 <label className="form__label">
-                                                    <span>Ссылка в друзья</span>
+                                                    {/* <span>Ссылка в друзья</span> */}
+                                                    <span>{t.inviteLink[language]}</span>
+
                                                     <div className={style.code}>
                                                         <input 
                                                             className={style.input} 
@@ -391,7 +448,9 @@ function OrderForm(props: IProps) {
 
                                         {/* Code field for all login types */}
                                         <label className="form__label">
-                                            <span>Код</span>
+                                            {/* <span>Код</span> */}
+                                            <span>{t.code[language]}</span>
+
                                             <div className={style.formCode}>
                                                 <div className={style.code}>
                                                     <input 
@@ -403,11 +462,16 @@ function OrderForm(props: IProps) {
                                                     />
                                                     <img src={urlCopy} alt="copy" />
                                                     {item.login_data.code_changed && (
-                                                        <span className={style.warningIcon} title="Код был изменен">❗</span>
+                                                        // <span className={style.warningIcon} title="Код был изменен">❗</span>
+                                                        <span className={style.warningIcon} title={t.changes.codeChanged[language]}>❗</span>
+
                                                     )}
                                                 </div>
-                                                <div className={"btn btn__table " + style.btn} onClick={() => clickSendCode(item.id, item.product.login_type)}>
+                                                {/* <div className={"btn btn__table " + style.btn} onClick={() => clickSendCode(item.id, item.product.login_type)}>
                                                     Отправить новый код
+                                                </div> */}
+                                                <div className={"btn btn__table " + style.btn} onClick={() => clickSendCode(item.id, item.product.login_type)}>
+                                                    {t.sendNewCode[language]}
                                                 </div>
                                             </div>
                                         </label>
@@ -417,7 +481,9 @@ function OrderForm(props: IProps) {
                         })}
                     </div>
                 </div>
-                <input type="submit" value="Отправить" className="form__submit" ref={refBtn} />
+                {/* <input type="submit" value="Отправить" className="form__submit" ref={refBtn} /> */}
+                <input type="submit" value={t.submit[language]} className="form__submit" ref={refBtn} />
+
             </form>
         </>
     )

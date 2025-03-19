@@ -51,6 +51,7 @@ type ExcelTranslations = {
   };
 };
 
+
 type TableTranslations = {
   products: {
     title: Translation;
@@ -70,6 +71,60 @@ type TableTranslations = {
       delete: Translation;
       deleteConfirm: Translation;
     };
+    // Новые поля для продуктов
+    orderStatuses: {
+      NEW: Translation;
+      PAID: Translation;
+      PROCESSING: Translation;
+      SENT: Translation;
+      DELIVERED: Translation;
+      REFUND: Translation;
+      CANCELLED: Translation;
+      READY: Translation;
+    };
+    productStates: {
+      visibility: {
+        active: Translation;
+        hidden: Translation;
+      };
+      loginTypes: {
+        EMAIL_CODE: Translation;
+        LINK: Translation;
+      };
+    };
+    changes: {
+      loginDataChanged: Translation;
+      newOrder: Translation;
+      emailChanged: Translation;
+      codeChanged: Translation;
+    };
+    tableInterface: {
+      actions: {
+        view: Translation;
+        edit: Translation;
+        delete: Translation;
+        confirm: Translation;
+        cancel: Translation;
+      };
+      messages: {
+        noData: Translation;
+        loading: Translation;
+        error: Translation;
+        deleteConfirmation: Translation;
+      };
+      filters: {
+        resetFilter: Translation;
+        search: Translation;
+        apply: Translation;
+      };
+      pagination: {
+        prev: Translation;
+        next: Translation;
+        showing: Translation;
+        of: Translation;
+        entries: Translation;
+      };
+    };
   };
   orders: {
     title: Translation;
@@ -85,8 +140,7 @@ type TableTranslations = {
       orderDate: Translation;
     };
     notSpecified: Translation;
-    search: SearchTranslations; // Добавляем это поле
-
+    search: SearchTranslations;
   };
   common: {
     empty: Translation;
@@ -135,25 +189,43 @@ type OrderReaderTranslations = {
   orderNumber: Translation;
   orderDate: Translation;
   updateDate: Translation;
-  paymentInfo: Translation;
+  paymentSection: Translation; // Заголовок секции о платеже
   paymentCode: Translation;
-  payment: Translation;
-  total: Translation;
-  itemCount: Translation;
+  payment: Translation; // Заголовок секции оплаты
   paymentMethod: Translation;
   creditCard: Translation;
-  orderDetails: Translation;
+  notesSection: Translation; // Заголовок секции заметок
+  notes: Translation; // Метка поля заметок
+  notesPlaceholder: Translation;
+  noNotes: Translation;
+  orderDetails: Translation; // Заголовок секции деталей заказа
+  email: Translation;
+  friendLink: Translation;
   withLogin: Translation;
   withoutLogin: Translation;
-  piece: Translation;
+  withLoginAndLink: Translation;
+  withoutLoginAndLink: Translation;
+  unknownType: Translation;
+  piece: Translation; // Единица измерения "шт."
   account: Translation;
   inviteLink: Translation;
-  copy: Translation;
   code: Translation;
-  newCode: Translation;
+  sendNewCode: Translation; // Текст кнопки отправки нового кода
+  codeSent: Translation; // Сообщение об успешной отправке кода
+  loading: Translation;
+  submit: Translation; // Текст кнопки отправки формы
+  itemCountDeclensions: {
+    one: Translation;
+    few: Translation;
+    many: Translation;
+  };
+  changes: {
+    emailChanged: Translation;
+    linkChanged: Translation;
+    codeChanged: Translation;
+  };
 };
 
-// Определяем структуру всех переводов
 interface Translations {
   cancel: Translation;
   edit: Translation;
@@ -375,7 +447,164 @@ export const translations: Translations = {
           ru: 'Удалить товар?',
           zh: '确定删除产品？'
         }
-      }
+      },
+orderStatuses: {
+  NEW: {
+    ru: "Ожидает оплаты",
+    zh: "等待付款"
+  },
+  PAID: {
+    ru: "Оплачен. Ожидает обработки",
+    zh: "已付款，等待处理"
+  },
+  PROCESSING: {
+    ru: "Оплачен. В процессе обработки",
+    zh: "已付款，处理中"
+  },
+  SENT: {
+    ru: "Отправлен",
+    zh: "已发货"
+  },
+  DELIVERED: {
+    ru: "Завершен",
+    zh: "已完成"
+  },
+  REFUND: {
+    ru: "Возврат",
+    zh: "已退款"
+  },
+  CANCELLED: {
+    ru: "Отменен",
+    zh: "已取消"
+  },
+  READY: {
+    ru: "Готов",
+    zh: "已准备"
+  }
+},
+
+// Переводы для состояний товаров
+productStates: {
+  visibility: {
+    active: {
+      ru: "Активен",
+      zh: "可见"
+    },
+    hidden: {
+      ru: "Скрыт",
+      zh: "隐藏"
+    }
+  },
+  loginTypes: {
+    EMAIL_CODE: {
+      ru: "С входом",
+      zh: "需要登录"
+    },
+    LINK: {
+      ru: "Без входа",
+      zh: "无需登录"
+    }
+  }
+},
+
+// Индикаторы изменений
+changes: {
+  loginDataChanged: {
+    ru: "Данные для входа изменены",
+    zh: "登录数据已更改"
+  },
+  newOrder: {
+    ru: "Новый заказ",
+    zh: "新订单"
+  },
+  emailChanged: {
+    ru: "Email изменен",
+    zh: "邮箱已更改"
+  },
+  codeChanged: {
+    ru: "Код изменен",
+    zh: "验证码已更改"
+  }
+},
+
+tableInterface: {
+  actions: {
+    view: {
+      ru: "Просмотр",
+      zh: "查看"
+    },
+    edit: {
+      ru: "Редактировать",
+      zh: "编辑"
+    },
+    delete: {
+      ru: "Удалить",
+      zh: "删除"
+    },
+    confirm: {
+      ru: "Подтвердить",
+      zh: "确认"
+    },
+    cancel: {
+      ru: "Отмена",
+      zh: "取消"
+    }
+  },
+  messages: {
+    noData: {
+      ru: "Нет данных для отображения",
+      zh: "没有可显示的数据"
+    },
+    loading: {
+      ru: "Загрузка данных...",
+      zh: "正在加载数据..."
+    },
+    error: {
+      ru: "Ошибка при загрузке данных",
+      zh: "加载数据时出错"
+    },
+    deleteConfirmation: {
+      ru: "Вы уверены, что хотите удалить этот товар?",
+      zh: "您确定要删除此产品吗？"
+    }
+  },
+  filters: {
+    resetFilter: {
+      ru: "Сбросить",
+      zh: "重置"
+    },
+    search: {
+      ru: "Поиск",
+      zh: "搜索"
+    },
+    apply: {
+      ru: "Применить",
+      zh: "应用"
+    }
+  },
+  pagination: {
+    prev: {
+      ru: "Предыдущая",
+      zh: "上一页"
+    },
+    next: {
+      ru: "Следующая",
+      zh: "下一页"
+    },
+    showing: {
+      ru: "Показано",
+      zh: "显示"
+    },
+    of: {
+      ru: "из",
+      zh: "共"
+    },
+    entries: {
+      ru: "записей",
+      zh: "条记录"
+    }
+  }
+},
     },
     orders: {
       title: {
@@ -575,7 +804,7 @@ export const translations: Translations = {
       ru: 'Дата изменения',
       zh: '更新日期'
     },
-    paymentInfo: {
+    paymentSection: {
       ru: 'О платеже',
       zh: '支付信息'
     },
@@ -587,14 +816,6 @@ export const translations: Translations = {
       ru: 'Оплата',
       zh: '支付'
     },
-    total: {
-      ru: 'Итого',
-      zh: '总计'
-    },
-    itemCount: {
-      ru: 'Количество товаров',
-      zh: '商品数量'
-    },
     paymentMethod: {
       ru: 'Способ оплаты',
       zh: '支付方式'
@@ -603,9 +824,33 @@ export const translations: Translations = {
       ru: 'Кредитная карта',
       zh: '信用卡'
     },
+    notesSection: {
+      ru: 'Заметки к заказу',
+      zh: '订单备注'
+    },
+    notes: {
+      ru: 'Заметки',
+      zh: '备注'
+    },
+    notesPlaceholder: {
+      ru: 'Введите заметки к заказу...',
+      zh: '请输入订单备注...'
+    },
+    noNotes: {
+      ru: 'Нет заметок',
+      zh: '无备注'
+    },
     orderDetails: {
       ru: 'Детали заказа',
       zh: '订单详情'
+    },
+    email: {
+      ru: 'Почта',
+      zh: '邮箱'
+    },
+    friendLink: {
+      ru: 'Ссылка в друзья',
+      zh: '好友邀请链接'
     },
     withLogin: {
       ru: 'С входом',
@@ -614,6 +859,18 @@ export const translations: Translations = {
     withoutLogin: {
       ru: 'Без входа',
       zh: '无需登录'
+    },
+    withLoginAndLink: {
+      ru: 'С входом + ссылка',
+      zh: '需要登录 + 链接'
+    },
+    withoutLoginAndLink: {
+      ru: 'Без входа + ссылка',
+      zh: '无需登录 + 链接'
+    },
+    unknownType: {
+      ru: 'Неизвестный тип',
+      zh: '未知类型'
     },
     piece: {
       ru: 'шт.',
@@ -627,19 +884,56 @@ export const translations: Translations = {
       ru: 'Пригласительная ссылка',
       zh: '邀请链接'
     },
-    copy: {
-      ru: 'Копировать',
-      zh: '复制'
-    },
     code: {
       ru: 'Код',
       zh: '验证码'
     },
-    newCode: {
+    sendNewCode: {
       ru: 'Отправить новый код',
       zh: '发送新验证码'
+    },
+    codeSent: {
+      ru: 'Код отправлен',
+      zh: '验证码已发送'
+    },
+    loading: {
+      ru: 'Загрузка данных',
+      zh: '加载数据中'
+    },
+    submit: {
+      ru: 'Отправить',
+      zh: '提交'
+    },
+    itemCountDeclensions: {
+      one: {
+        ru: 'товар',
+        zh: '件商品'
+      },
+      few: {
+        ru: 'товара',
+        zh: '件商品'
+      },
+      many: {
+        ru: 'товаров',
+        zh: '件商品'
+      }
+    },
+    changes: {
+      emailChanged: {
+        ru: 'Email был изменен',
+        zh: '邮箱已更改'
+      },
+      linkChanged: {
+        ru: 'Ссылка была изменена',
+        zh: '链接已更改'
+      },
+      codeChanged: {
+        ru: 'Код был изменен',
+        zh: '验证码已更改'
+      }
     }
   },
+ 
   search: {
     placeholder: {
       ru: 'Поиск...',
