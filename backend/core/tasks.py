@@ -118,9 +118,9 @@ def request_supercell_code(code_request_pk: int):
         print(f"Error in request_code task: {e}")  # Временно добавьте print
         return False
 
-@shared_task(name="api.shop.failed_payment", queue="celery")
-def failed_payment_task(order_number: str):
-    CustomerFailedPaymentNotifier(order_number).notify()
+# @shared_task(name="api.shop.failed_payment", queue="celery")
+# def failed_payment_task(order_number: str):
+#     CustomerFailedPaymentNotifier(order_number).notify()
 
 
 # @shared_task(name="api.shop.success_payment")

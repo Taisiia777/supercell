@@ -91,6 +91,13 @@ class User(AbstractUser):
             code = ''.join(random.choice(chars) for _ in range(length))
             if not User.objects.filter(referral_code=code).exists():
                 return code
+    
+    def save(self, *args, **kwargs):
+        # При первом сохранении генерируем реферальный код
+        if not self.referral_code:
+            self.referral_code = self.generate_unique_code()
+        
+        super().save(*args, **kwargs)
 
 class DavDamer(models.Model):
     name = models.CharField(max_length=128, db_index=True)
@@ -156,3 +163,35 @@ class OrderReview(models.Model):
         verbose_name = "Отзыв к заказу"
         verbose_name_plural = "Отзывы к заказам"
         ordering = ["-created_dt"]
+
+
+class ReferralPayment(models.Model):
+    referrer = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='referral_payments'
+    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    comment = models.TextField(blank=True, null=True)
+    created_dt = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_dt']
+
+class UserSocialMedia(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='social_media')
+    tiktok = models.CharField(max_length=255, blank=True, null=True, verbose_name="TikTok")
+    instagram = models.CharField(max_length=255, blank=True, null=True, verbose_name="Instagram")
+    youtube = models.CharField(max_length=255, blank=True, null=True, verbose_name="YouTube")
+    vk = models.CharField(max_length=255, blank=True, null=True, verbose_name="ВКонтакте")
+    telegram = models.CharField(max_length=255, blank=True, null=True, verbose_name="Telegram")
+    
+    created_dt = models.DateTimeField(auto_now_add=True)
+    updated_dt = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Социальные сети пользователя'
+        verbose_name_plural = 'Социальные сети пользователей'
+        
+    def __str__(self):
+        return f"Соцсети пользователя {self.user.username}"

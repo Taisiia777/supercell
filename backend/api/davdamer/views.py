@@ -363,7 +363,6 @@ class RequestCodeView(APIView):
         if not OrderLine.objects.filter(
             pk=kwargs["line_id"],
             order__id=kwargs["id"],
-            product__login_type=LoginType.EMAIL_CODE,
         ).exists():
             return Response({"status": False})
 

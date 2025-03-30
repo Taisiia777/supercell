@@ -75,80 +75,91 @@ def process_immediate_mailing_task(self, message, image_content=None, mailing_id
     finally:
         loop.close()
 
+
 async def process_mailing_async(users, message, image_content, mailing_id=None):
-    """Асинхронная обработка рассылки с повышенной производительностью"""
+    """Асинхронная обработка рассылки с метриками"""
     bot = Bot(token=settings.BOT_TOKEN, parse_mode="HTML")
     
     try:
         total_users = len(users)
         processed_users = 0
+        successful_users = 0
+        failed_users = 0
         
-        # Для параллельной отправки
-        batch_size = 100  # Размер пакета для параллельной отправки
-        
-        # Подготавливаем клавиатуру заранее
-        keyboard = types.InlineKeyboardMarkup(
-            inline_keyboard=[[
-                types.InlineKeyboardButton(
-                    text="В магазин",
-                    web_app=types.WebAppInfo(url="https://shop.mamostore.ru")
-                )
-            ]]
-        )
-        
-        # Подготавливаем изображение заранее, если оно есть
-        image_input = None
-        if image_content:
-            image_input = types.BufferedInputFile(
-                file=image_content,
-                filename='mailing_image.jpg'
-            )
-        
-        # Логируем только начало и окончание процесса
-        logger.info(f"Начало рассылки: {total_users} пользователей")
+        # Для метрик
         start_time = time.time()
+        last_metrics_time = start_time
+        last_processed = 0
         
-        # Обрабатываем пользователей партиями
-        for i in range(0, total_users, batch_size):
-            batch = users[i:i+batch_size]
-            tasks = []
+        # Создаем таймер для отправки метрик каждые 10 секунд
+        def print_metrics():
+            nonlocal last_metrics_time, last_processed
+            current_time = time.time()
+            elapsed = current_time - last_metrics_time
+            messages_per_second = (processed_users - last_processed) / elapsed if elapsed > 0 else 0
             
-            # Создаем задачи для параллельной отправки
-            for user in batch:
-                if not user.telegram_chat_id:
-                    continue
-                
-                # Создаем задачу отправки без ожидания ответа
-                if image_input:
-                    task = bot.send_photo(
-                        chat_id=user.telegram_chat_id,
-                        photo=image_input,
-                        caption=message,
-                        reply_markup=keyboard,
-                        disable_notification=True,  # Тихое уведомление
-                        wait_until_complete=False   # Не ждать ответа от API
-                    )
-                else:
-                    task = bot.send_message(
-                        chat_id=user.telegram_chat_id,
-                        text=message,
-                        reply_markup=keyboard,
-                        disable_notification=True,  # Тихое уведомление
-                        wait_until_complete=False   # Не ждать ответа от API
-                    )
-                
-                tasks.append(task)
-                processed_users += 1
-                
-                # Минимальная задержка для предотвращения блокировки
-                if processed_users % 30 == 0:
-                    await asyncio.sleep(0.1)
+            # Учитываем общий прогресс с учетом пропущенных пользователей
+            global_processed = START_INDEX + processed_users
+            global_total = total_users
+            global_percent = (global_processed / global_total) * 100 if global_total > 0 else 0
             
-            # Запускаем все задачи пакета параллельно и не ждем их завершения
-            asyncio.create_task(asyncio.gather(*tasks, return_exceptions=True))
+            remaining = total_users - processed_users
+            percent_complete = (processed_users / total_users) * 100 if total_users > 0 else 0
             
-            # Небольшая пауза между пакетами
-            await asyncio.sleep(0.5)
+            logger.info(
+                f"МЕТРИКИ РАССЫЛКИ: "
+                f"Отправлено: {global_processed}/{global_total} ({global_percent:.1f}%) | "
+                f"В текущей сессии: {processed_users}/{total_users} ({percent_complete:.1f}%) | "
+                f"Успешно: {successful_users} | "
+                f"Ошибок: {failed_users} | "
+                f"Осталось: {remaining} | "
+                f"Скорость: {messages_per_second:.1f} сообщ/сек"
+            )
+            
+            last_metrics_time = current_time
+            last_processed = processed_users
+        
+        # Пропускаем первые START_INDEX пользователей
+        if START_INDEX > 0:
+            if START_INDEX >= total_users:
+                logger.warning(f"Указанный индекс {START_INDEX} превышает количество пользователей {total_users}")
+                return {"status": "completed", "message": "Все пользователи уже обработаны"}
+            
+            logger.info(f"Пропускаем первых {START_INDEX} пользователей")
+            users = users[START_INDEX:]
+            total_users = len(users)
+            logger.info(f"Будет обработано {total_users} пользователей")
+        
+        # Обрабатываем всех пользователей поочередно с соблюдением лимита
+        for user in users:
+            if not user.telegram_chat_id:
+                continue
+                
+            # Ожидаем, чтобы соблюсти лимит сообщений в секунду
+            await asyncio.sleep(1 / RATE_LIMIT)
+            
+            # Отправляем сообщение
+            success = await send_message_to_user(
+                bot=bot,
+                chat_id=user.telegram_chat_id,
+                message=message,
+                image=image_content
+            )
+            
+            # Обновляем счетчики
+            processed_users += 1
+            if success:
+                successful_users += 1
+            else:
+                failed_users += 1
+            
+            # Выводим метрики каждые 10 секунд
+            current_time = time.time()
+            if current_time - last_metrics_time >= 10:
+                print_metrics()
+        
+        # Выводим финальные метрики
+        print_metrics()
         
         # Если это запланированная рассылка, обновляем её статус
         if mailing_id:
@@ -161,137 +172,31 @@ async def process_mailing_async(users, message, image_content, mailing_id=None):
                 logger.error(f"Ошибка обновления статуса рассылки {mailing_id}: {e}")
         
         total_time = time.time() - start_time
-        logger.info(f"Рассылка завершена: отправлено {processed_users} сообщений за {total_time:.1f} сек")
+        avg_speed = processed_users / total_time if total_time > 0 else 0
+        
+        logger.info(
+            f"РАССЫЛКА ЗАВЕРШЕНА: Всего отправлено {processed_users} сообщений "
+            f"({successful_users} успешно, {failed_users} ошибок) "
+            f"за {total_time:.1f} сек. Средняя скорость: {avg_speed:.1f} сообщ/сек"
+        )
         
         return {
             "total": total_users,
+            "global_total": total_users + START_INDEX,
             "processed": processed_users,
+            "global_processed": START_INDEX + processed_users,
+            "successful": successful_users,
+            "failed": failed_users,
             "time": total_time
         }
+        
     finally:
-        # Просто закрываем сессию без дополнительных проверок
-        await bot.session.close()
-# async def process_mailing_async(users, message, image_content, mailing_id=None):
-#     """Асинхронная обработка рассылки с метриками"""
-#     bot = Bot(token=settings.BOT_TOKEN, parse_mode="HTML")
-    
-#     try:
-#         total_users = len(users)
-#         processed_users = 0
-#         successful_users = 0
-#         failed_users = 0
-        
-#         # Для метрик
-#         start_time = time.time()
-#         last_metrics_time = start_time
-#         last_processed = 0
-        
-#         # Создаем таймер для отправки метрик каждые 10 секунд
-#         def print_metrics():
-#             nonlocal last_metrics_time, last_processed
-#             current_time = time.time()
-#             elapsed = current_time - last_metrics_time
-#             messages_per_second = (processed_users - last_processed) / elapsed if elapsed > 0 else 0
-            
-#             # Учитываем общий прогресс с учетом пропущенных пользователей
-#             global_processed = START_INDEX + processed_users
-#             global_total = total_users
-#             global_percent = (global_processed / global_total) * 100 if global_total > 0 else 0
-            
-#             remaining = total_users - processed_users
-#             percent_complete = (processed_users / total_users) * 100 if total_users > 0 else 0
-            
-#             logger.info(
-#                 f"МЕТРИКИ РАССЫЛКИ: "
-#                 f"Отправлено: {global_processed}/{global_total} ({global_percent:.1f}%) | "
-#                 f"В текущей сессии: {processed_users}/{total_users} ({percent_complete:.1f}%) | "
-#                 f"Успешно: {successful_users} | "
-#                 f"Ошибок: {failed_users} | "
-#                 f"Осталось: {remaining} | "
-#                 f"Скорость: {messages_per_second:.1f} сообщ/сек"
-#             )
-            
-#             last_metrics_time = current_time
-#             last_processed = processed_users
-        
-#         # Пропускаем первые START_INDEX пользователей
-#         if START_INDEX > 0:
-#             if START_INDEX >= total_users:
-#                 logger.warning(f"Указанный индекс {START_INDEX} превышает количество пользователей {total_users}")
-#                 return {"status": "completed", "message": "Все пользователи уже обработаны"}
-            
-#             logger.info(f"Пропускаем первых {START_INDEX} пользователей")
-#             users = users[START_INDEX:]
-#             total_users = len(users)
-#             logger.info(f"Будет обработано {total_users} пользователей")
-        
-#         # Обрабатываем всех пользователей поочередно с соблюдением лимита
-#         for user in users:
-#             if not user.telegram_chat_id:
-#                 continue
-                
-#             # Ожидаем, чтобы соблюсти лимит сообщений в секунду
-#             await asyncio.sleep(1 / RATE_LIMIT)
-            
-#             # Отправляем сообщение
-#             success = await send_message_to_user(
-#                 bot=bot,
-#                 chat_id=user.telegram_chat_id,
-#                 message=message,
-#                 image=image_content
-#             )
-            
-#             # Обновляем счетчики
-#             processed_users += 1
-#             if success:
-#                 successful_users += 1
-#             else:
-#                 failed_users += 1
-            
-#             # Выводим метрики каждые 10 секунд
-#             current_time = time.time()
-#             if current_time - last_metrics_time >= 10:
-#                 print_metrics()
-        
-#         # Выводим финальные метрики
-#         print_metrics()
-        
-#         # Если это запланированная рассылка, обновляем её статус
-#         if mailing_id:
-#             try:
-#                 mailing = ScheduledMailing.objects.get(id=mailing_id)
-#                 mailing.is_sent = True
-#                 mailing.in_progress = False
-#                 mailing.save()
-#             except Exception as e:
-#                 logger.error(f"Ошибка обновления статуса рассылки {mailing_id}: {e}")
-        
-#         total_time = time.time() - start_time
-#         avg_speed = processed_users / total_time if total_time > 0 else 0
-        
-#         logger.info(
-#             f"РАССЫЛКА ЗАВЕРШЕНА: Всего отправлено {processed_users} сообщений "
-#             f"({successful_users} успешно, {failed_users} ошибок) "
-#             f"за {total_time:.1f} сек. Средняя скорость: {avg_speed:.1f} сообщ/сек"
-#         )
-        
-#         return {
-#             "total": total_users,
-#             "global_total": total_users + START_INDEX,
-#             "processed": processed_users,
-#             "global_processed": START_INDEX + processed_users,
-#             "successful": successful_users,
-#             "failed": failed_users,
-#             "time": total_time
-#         }
-        
-#     finally:
-#         # Корректно закрываем сессию бота
-#         try:
-#             session = await bot.get_session()
-#             await session.close()
-#         except Exception as e:
-#             logger.error(f"Ошибка закрытия сессии бота: {e}")
+        # Корректно закрываем сессию бота
+        try:
+            session = await bot.get_session()
+            await session.close()
+        except Exception as e:
+            logger.error(f"Ошибка закрытия сессии бота: {e}")
 
 @shared_task(name="api.mailing.process_scheduled", queue="mailing")
 def process_scheduled_mailings():

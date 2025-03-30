@@ -2,24 +2,23 @@
 import React, { useState } from 'react';
 import Pages from '../../components/PagesHead/PagesHead';
 import './ReferralPage.css';
-import ReferralStats from './components/ReferralStats';
 import ReferralUsers from './components/ReferralUsers';
 
 const ReferralPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('statistics');
+  const [activeTab, setActiveTab] = useState('users');
 
   return (
     <>
       <Pages title="Реферальная система" />
       <div className="referral-container">
         <div className="referral-tabs">
-          <button 
+          {/* <button 
             className={`referral-tab ${activeTab === 'statistics' ? 'active' : ''}`}
             onClick={() => setActiveTab('statistics')}
           >
             <i className="referral-icon statistics-icon"></i>
             Статистика
-          </button>
+          </button> */}
           <button 
             className={`referral-tab ${activeTab === 'users' ? 'active' : ''}`}
             onClick={() => setActiveTab('users')}
@@ -30,7 +29,6 @@ const ReferralPage: React.FC = () => {
         </div>
 
         <div className="referral-content">
-          {activeTab === 'statistics' && <ReferralStats />}
           {activeTab === 'users' && <ReferralUsers />}
         </div>
       </div>

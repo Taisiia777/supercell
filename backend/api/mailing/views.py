@@ -60,7 +60,7 @@ class MassMailingView(APIView):
                     eta=scheduled_time,
                     queue="mailing"
                 )
-
+    
                 return Response({
                     'status': 'success',
                     'message': f'Рассылка запланирована на {scheduled_time}',

@@ -15,5 +15,13 @@ urlpatterns = [
         name="api_confirm_payment",
     ),
     path("order/<str:order_number>/login_data/", views.OrderLoginDataView.as_view()),
+    path("referral/process/", views.ProcessReferralView.as_view(), name="process_referral"),
+    path("referral/register/", views.RegisterUserView.as_view(), name="register_user"),
+    path("referral/link/", views.GetReferralLinkView.as_view(), name="get_referral_link"),
+    path("referral/stats/", views.ReferralStatsView.as_view(), name="referral_stats"),
+    path("referral/users/", views.ReferralUsersView.as_view(), name="referral_users"),
+    path("referral/payment/", views.ReferralPaymentView.as_view(), name="referral_payment"),
+    path("referral/users/<int:user_id>/details/", views.ReferralUserDetailsView.as_view(), name="referral_user_details"),
+    path("social-media/", views.UserSocialMediaView.as_view(), name="user_social_media"),
 
 ]
