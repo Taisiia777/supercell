@@ -19,7 +19,7 @@ x-common-envs: &common-env
 services:
   webapp_frontend:
     build:
-      context: ./webapp_frontend_test_3
+      context: ./webapp_frontend_test_4
       args:
         - API_URL=https://api.mamostore.ru/api/
     restart: unless-stopped
