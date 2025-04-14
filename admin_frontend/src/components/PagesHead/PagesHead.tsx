@@ -6,12 +6,12 @@ interface IProps {
 function Pages(props: IProps) {
 
     const { title } = props;
-
+    console.log(title)
     return (
         <>
             <div className="page">
                 <div className="page__head">
-                    <h2 className="page__title">{title}</h2>
+                    {/* <h2 className="page__title">{title}</h2> */}
                     {/* <div className="page__name">
                         <div className="page__info">
                             <span>Констанипольский</span>

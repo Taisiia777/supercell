@@ -20,6 +20,7 @@ import { OrderSearch } from "../../pages/Orders/OrdersPageMain/OrdersPage";
 import { davDamerAPI } from "../../store/api/DavdamerAPI";
 import { useLanguage } from '../../context/LanguageContext';
 import { saveLastViewedItem, getLastViewedItem, clearLastViewedItem } from '../../utils/localStorage';
+import React from 'react';
 
 type TSortingState = "asc" | "desc" | "none"
 interface IColumns {
@@ -579,4 +580,5 @@ function TablePage(props: IProps) {
     );
 }
 
-export default TablePage;
+// export default TablePage;
+export default React.memo(TablePage);

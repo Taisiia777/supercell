@@ -1,6 +1,6 @@
 .page__head {
     background-color: var(--bg-block);
-    padding: 40px;
+    padding: 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -13,6 +13,7 @@
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+    
 }
 
 .page__name {

@@ -23,5 +23,5 @@ urlpatterns = [
     path("referral/payment/", views.ReferralPaymentView.as_view(), name="referral_payment"),
     path("referral/users/<int:user_id>/details/", views.ReferralUserDetailsView.as_view(), name="referral_user_details"),
     path("social-media/", views.UserSocialMediaView.as_view(), name="user_social_media"),
-
+    path("referral/users/<int:user_id>/update/", views.ReferralUserUpdateView.as_view(), name="referral_user_update"),
 ]

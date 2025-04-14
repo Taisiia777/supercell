@@ -118,14 +118,55 @@ def request_supercell_code(code_request_pk: int):
         print(f"Error in request_code task: {e}")  # Временно добавьте print
         return False
 
-# @shared_task(name="api.shop.failed_payment", queue="celery")
-# def failed_payment_task(order_number: str):
-#     CustomerFailedPaymentNotifier(order_number).notify()
 
-
-# @shared_task(name="api.shop.success_payment")
+# @shared_task(name="api.shop.success_payment", queue="celery")
 # def success_payment_task(order_number: str):
+#     # Оставляем существующее уведомление пользователя
 #     CustomerSuccessOrderNotifier(order_number).notify()
+    
+#     try:
+#         # Загружаем заказ со всеми необходимыми данными
+#         order = Order.objects.prefetch_related(
+#             'lines', 
+#             'lines__login_data', 
+#             'lines__product'
+#         ).get(number=order_number)
+        
+#         # Формируем данные для уведомления
+#         lines = []
+#         for line in order.lines.all():
+#             login_data = line.login_data.first()
+#             if login_data:
+#                 lines.append({
+#                     "product_title": line.product.title,
+#                     "quantity": line.quantity,
+#                     "mailbox": login_data.account_id,
+#                     "code": login_data.code if login_data.code else ""
+#                 })
+        
+#         if lines:  # Отправляем только если есть данные
+#             notify_data = {
+#                 "number": order.number,
+#                 "lines": lines,
+#                 "total_incl_tax": int(order.total_incl_tax),
+#                 "client_id": str(order.user.telegram_chat_id) if order.user and order.user.telegram_chat_id else ""
+#             }
+            
+#             # Отправляем запрос в MamoStore
+#             response = requests.post(
+#                 "https://api.mamostore.ru/bot/order/notify", 
+#                 json=notify_data,
+#                 headers={"Content-Type": "application/json"},
+#                 timeout=10
+#             )
+#             response.raise_for_status()
+#             logger.info(f"Successfully notified MamoStore about order {order.number}")
+            
+#     except Exception as err:
+#         logger.exception("Failed to notify MamoStore about order %s: %s", order_number, err)
+#         if hasattr(err, 'response') and err.response is not None:
+#             logger.error(f"Error response body: {err.response.text}")
+
 @shared_task(name="api.shop.success_payment", queue="celery")
 def success_payment_task(order_number: str):
     # Оставляем существующее уведомление пользователя
@@ -139,19 +180,37 @@ def success_payment_task(order_number: str):
             'lines__product'
         ).get(number=order_number)
         
+        # Вывод полной структуры заказа для отладки
+        logger.info(f"============ НАЧАЛО ОТЛАДКИ ЗАКАЗА {order_number} ============")
+        logger.info(f"ID заказа: {order.id}")
+        logger.info(f"Номер заказа: {order.number}")
+        logger.info(f"Сумма заказа: {order.total_incl_tax}")
+        logger.info(f"Статус заказа: {order.status}")
+        
         # Формируем данные для уведомления
         lines = []
         for line in order.lines.all():
+            logger.info(f"Обработка строки заказа ID: {line.id}")
+            logger.info(f"Продукт: {line.product.title} (ID: {line.product.id})")
+            
+            # Получаем login_type из продукта
+            login_type = getattr(line.product, 'login_type', None)
+            logger.info(f"Тип логина продукта: {login_type}")
+            
             login_data = line.login_data.first()
             if login_data:
+                logger.info(f"Данные авторизации: {login_data.account_id}, код: {login_data.code}")
+                
+                # Добавляем в линии с учетом типа login_type
                 lines.append({
                     "product_title": line.product.title,
                     "quantity": line.quantity,
                     "mailbox": login_data.account_id,
-                    "code": login_data.code if login_data.code else ""
+                    "code": login_data.code if login_data.code else "",
+                    "type": login_type  # Важно! Передаем именно login_type продукта
                 })
         
-        if lines:  # Отправляем только если есть данные
+        if lines:
             notify_data = {
                 "number": order.number,
                 "lines": lines,
@@ -159,7 +218,14 @@ def success_payment_task(order_number: str):
                 "client_id": str(order.user.telegram_chat_id) if order.user and order.user.telegram_chat_id else ""
             }
             
+            # Выводим готовые данные для отправки
+            import json
+            logger.info("Данные для отправки в API:")
+            logger.info(json.dumps(notify_data, indent=2, ensure_ascii=False))
+            logger.info(f"============ КОНЕЦ ОТЛАДКИ ЗАКАЗА {order_number} ============")
+            
             # Отправляем запрос в MamoStore
+            logger.info(f"Отправляем уведомление в MamoStore о заказе {order.number}")
             response = requests.post(
                 "https://api.mamostore.ru/bot/order/notify", 
                 json=notify_data,
@@ -167,12 +233,13 @@ def success_payment_task(order_number: str):
                 timeout=10
             )
             response.raise_for_status()
-            logger.info(f"Successfully notified MamoStore about order {order.number}")
+            logger.info(f"Успешно отправлено уведомление в MamoStore о заказе {order.number}. Статус: {response.status_code}")
+            logger.info(f"Ответ API: {response.text}")
             
     except Exception as err:
-        logger.exception("Failed to notify MamoStore about order %s: %s", order_number, err)
+        logger.exception("Ошибка при отправке уведомления в MamoStore о заказе %s: %s", order_number, err)
         if hasattr(err, 'response') and err.response is not None:
-            logger.error(f"Error response body: {err.response.text}")
+            logger.error(f"Ответ с ошибкой: {err.response.text}")
 
 @shared_task(name="api.mailing.process_scheduled", queue="celery")
 def process_scheduled_mailings(message, image):

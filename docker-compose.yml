@@ -28,7 +28,7 @@ services:
 
   webapp_frontend_test:
     build:
-      context: ./webapp_frontend_test_4
+      context: ./webapp_frontend_test_5
       args:
         - API_URL=https://api.mamostore.ru/api/
         - BASE_PATH=/test

@@ -87,6 +87,8 @@ interface OrderHistory {
     date: string;
     amount: number;
     comment: string;
+    phone: string,
+    bank: string
   }
   
 // Нужно обновить в API файле:
@@ -110,6 +112,7 @@ export const davDamerAPI = createApi({
     reducerPath: 'davDamerAPI',
     baseQuery: fetchBaseQuery({ baseUrl: 'https://api.mamostore.ru/api' }),
     tagTypes: ['Products', 'Orders', 'Referrals'],
+    keepUnusedDataFor: 3600,
     endpoints: (build) => ({
         fetchAllProducts: build.query<IProduct[], IParamsAPI>({
             query:
@@ -257,33 +260,41 @@ export const davDamerAPI = createApi({
             }),
             providesTags: ['Referrals']
         }),
+fetchReferralUsers: build.query<IReferralUsersResponse, void>({
+    query: () => ({
+      url: '/customer/referral/users/'
+    }),
+    transformResponse: (response: any) => {
+      // Исправить преобразование числовых значений
+      const transformedUsers = response.users.map((user: any) => ({
+        id: user.id,
+        name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username,
+        email: user.username || 'Нет email',
+        registration_date: user.registration_date || 'Неизвестно',
+        total_spent: typeof user.total_spent === 'number' ? user.total_spent : parseFloat(user.total_spent || '0'),
+        orders_count: typeof user.orders_count === 'number' ? user.orders_count : parseInt(user.orders_count || '0', 10),
+        status: user.status || 'inactive',
+        referrer_earnings: typeof user.referrer_earnings === 'number' ? user.referrer_earnings : parseFloat(user.referrer_earnings || '0'),
+        paid_amount: typeof user.paid_amount === 'number' ? user.paid_amount : parseFloat(user.paid_amount || '0'),
+        ref_link: user.ref_link || `https://mamostore.ru/ref/${user.id}`
+      }));
+      
+      // Также преобразуем суммарные числа
+      return {
+        users: transformedUsers,
+        summary: {
+          total_users: response.summary.total_users || 0,
+          active_users: response.summary.active_users || 0,
+          total_earnings: typeof response.summary.total_earnings === 'number' ? 
+            response.summary.total_earnings : parseFloat(response.summary.total_earnings || '0'),
+          total_pending: typeof response.summary.total_pending === 'number' ? 
+            response.summary.total_pending : parseFloat(response.summary.total_pending || '0')
+        }
+      };
+    },
+    providesTags: ['Referrals']
+  }),
 
-        fetchReferralUsers: build.query<IReferralUsersResponse, void>({
-            query: () => ({
-              url: '/customer/referral/users/'
-            }),
-            transformResponse: (response: any) => {
-              // Трансформируем полученные данные в формат, который ожидает компонент
-              const transformedUsers = response.users.map((user: any) => ({
-                id: user.id,
-                name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
-                email: user.username || 'Нет email',
-                registration_date: user.registration_date || 'Неизвестно',
-                total_spent: user.total_spent || 0,
-                orders_count: user.orders_count || 0,
-                status: user.status || 'inactive',
-                referrer_earnings: user.referrer_earnings || 0,
-                paid_amount: user.paid_amount || 0,
-                ref_link: user.ref_link || `https://mamostore.ru/ref/${user.id}`
-              }));
-              
-              return {
-                users: transformedUsers,
-                summary: response.summary
-              };
-            },
-            providesTags: ['Referrals']
-          }),
         makeReferralPayment: build.mutation<{ status: boolean }, IReferralPayment>({
             query: (payment) => ({
                 url: '/customer/referral/payment/',
@@ -344,6 +355,38 @@ export const davDamerAPI = createApi({
             query: (userId) => ({
               url: `/customer/referral/users/${userId}/details`
             }),
+            transformResponse: (response: any) => {
+              // Преобразуем основную информацию пользователя
+              const transformedUser = {
+                ...response,
+                total_spent: typeof response.total_spent === 'number' ? response.total_spent : parseFloat(response.total_spent || '0'),
+                orders_count: typeof response.orders_count === 'number' ? response.orders_count : parseInt(response.orders_count || '0', 10),
+                referrer_earnings: typeof response.referrer_earnings === 'number' ? response.referrer_earnings : parseFloat(response.referrer_earnings || '0'),
+                paid_amount: typeof response.paid_amount === 'number' ? response.paid_amount : parseFloat(response.paid_amount || '0'),
+                
+                // Преобразуем социальные сети из пустого объекта в null, если нет данных
+                social_media: Object.keys(response.social_media || {}).length > 0 ? response.social_media : null,
+                
+                // Преобразуем банковские данные из пустого объекта в null, если нет данных
+                bank_details: Object.keys(response.bank_details || {}).length > 0 ? response.bank_details : null,
+                
+                // Преобразуем данные рефералов
+                referrals: (response.referrals || []).map((referral: any) => ({
+                  id: referral.id,
+                  name: referral.name || '',
+                  email: referral.email || referral.name || '',
+                  registration_date: referral.registration_date || 'Неизвестно',
+                  total_spent: typeof referral.total_spent === 'number' ? referral.total_spent : parseFloat(referral.total_spent || '0'),
+                  orders_count: referral.orders_count || 0,
+                  status: referral.status || 'inactive',
+                  referrer_earnings: referral.referrer_earnings || 0,
+                  paid_amount: referral.paid_amount || 0,
+                  ref_link: referral.ref_link || `https://t.me/Mamoshop_bot?start=${referral.id}`
+                }))
+              };
+              
+              return transformedUser;
+            },
             providesTags: ['Referrals']
           }),
         

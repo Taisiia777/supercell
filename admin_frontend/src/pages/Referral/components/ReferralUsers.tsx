@@ -58,6 +58,7 @@ interface OrderHistory {
   commission: number;
   status: string;
 }
+
 const ReferralUsers: React.FC = () => {
   // Используем хуки RTK Query для получения данных
   const { data, isLoading } = davDamerAPI.useFetchReferralUsersQuery();
@@ -70,6 +71,7 @@ const ReferralUsers: React.FC = () => {
   davDamerAPI.useFetchReferralUserDetailsQuery(selectedUserId || 0, { 
     skip: !selectedUserId 
   });
+  
   
   // Данные от API
   const users: ReferralUser[] = data?.users || [];
@@ -91,6 +93,8 @@ const ReferralUsers: React.FC = () => {
   const [copiedLinkId, setCopiedLinkId] = useState<number | null>(null);
   const [paymentBank, setPaymentBank] = useState('');
   const [paymentPhone, setPaymentPhone] = useState('');
+
+
   const filteredUsers = (users || []).filter(user => {
     // Сначала проверяем, что сам элемент user существует
     if (!user) return false;
@@ -169,19 +173,49 @@ const handlePaymentInitiate = (user: ReferralUser) => {
     return <div className="loading">Загрузка пользователей...</div>;
   }
 
+  // const handleReferralClick = (referralUser: ReferralUser) => {
+  //   // Закрываем текущее модальное окно
+  //   setShowUserModal(false);
+    
+  //   // Небольшая задержка перед открытием нового модального окна
+  //   setTimeout(() => {
+  //     // Открываем данные по выбранному рефералу
+  //     setSelectedUser(referralUser);
+  //     setSelectedUserId(referralUser.id);
+  //     setShowUserModal(true);
+  //   }, 100);
+  // };
   const handleReferralClick = (referralUser: ReferralUser) => {
-    // Закрываем текущее модальное окно
+    // Проверяем, есть ли все необходимые поля
+    const completeUser: ReferralUser = {
+      ...referralUser,
+      // Устанавливаем значения по умолчанию для отсутствующих полей
+      orders_count: referralUser.orders_count || 0,
+      referrer_earnings: referralUser.referrer_earnings || 0,
+      paid_amount: referralUser.paid_amount || 0,
+      ref_link: referralUser.ref_link || `https://t.me/Mamoshop_bot?start=${referralUser.id}`
+    };
+    
     setShowUserModal(false);
     
-    // Небольшая задержка перед открытием нового модального окна
     setTimeout(() => {
-      // Открываем данные по выбранному рефералу
-      setSelectedUser(referralUser);
-      setSelectedUserId(referralUser.id);
+      setSelectedUser(completeUser);
+      setSelectedUserId(completeUser.id);
       setShowUserModal(true);
     }, 100);
   };
-
+  const displayUser = selectedUser && userDetails ? {
+    ...selectedUser,
+    ...(userDetails || {}),
+    name: userDetails?.name || selectedUser.name,
+    email: userDetails?.email || selectedUser.email,
+    registration_date: userDetails?.registration_date || selectedUser.registration_date,
+    total_spent: userDetails?.total_spent ?? selectedUser.total_spent,
+    referrer_earnings: userDetails?.referrer_earnings ?? selectedUser.referrer_earnings,
+    paid_amount: userDetails?.paid_amount ?? selectedUser.paid_amount,
+    ref_link: userDetails?.ref_link || selectedUser.ref_link,
+    status: userDetails?.status || selectedUser.status
+  } : selectedUser;
   return (
     <div className="referral-users">
       <div className="referral-section-header">
@@ -236,11 +270,11 @@ const handlePaymentInitiate = (user: ReferralUser) => {
               <th>Имя</th>
               <th>Username</th>
               <th>Реф. ссылка</th>
-              <th>Регистрация</th>
+              {/* <th>Регистрация</th>
               <th>Заработок</th>
               <th>Выплачено</th>
               <th>К выплате</th>
-              <th>Статус</th>
+              <th>Статус</th> */}
               <th>Действия</th>
             </tr>
           </thead>
@@ -260,7 +294,7 @@ const handlePaymentInitiate = (user: ReferralUser) => {
                     </button>
                   </div>
                 </td>
-                <td>{user.registration_date}</td>
+                {/* <td>{user.registration_date}</td>
                 <td>{Number(user.referrer_earnings).toLocaleString()} ₽</td>
                 <td>{Number(user.paid_amount).toLocaleString()} ₽</td>
                 <td>{Number(user.referrer_earnings - user.paid_amount).toLocaleString()} ₽</td>
@@ -268,7 +302,7 @@ const handlePaymentInitiate = (user: ReferralUser) => {
                   <span className={`referral-status ${user.status === 'active' ? 'status-active' : 'status-inactive'}`}>
                     {user.status === 'active' ? 'Активен' : 'Неактивен'}
                   </span>
-                </td>
+                </td> */}
                 <td>
                   <div className="user-actions">
                     <button 
@@ -301,7 +335,7 @@ const handlePaymentInitiate = (user: ReferralUser) => {
       </div>
 
       {/* Модальное окно с подробной информацией о пользователе */}
-      {showUserModal && selectedUser && (
+      {showUserModal && displayUser && (
         <div className="modal-overlay">
           <div className="user-details-modal referral-card">
             <div className="modal-header">
@@ -316,33 +350,34 @@ const handlePaymentInitiate = (user: ReferralUser) => {
                 <>
                   <div className="user-profile">
                     <div className="user-avatar">
-                      {selectedUser.name.split(' ').map(n => n[0]).join('')}
+                      {displayUser.name.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div className="user-info">
-                      <h4 className="user-name">{selectedUser.name}</h4>
-                      <p className="user-email">{selectedUser.email}</p>
-                      <p className="user-date">Зарегистрирован: {selectedUser.registration_date}</p>
-                      <span className={`referral-status ${selectedUser.status === 'active' ? 'status-active' : 'status-inactive'}`}>
-                        {selectedUser.status === 'active' ? 'Активен' : 'Неактивен'}
+                      <h4 className="user-name">{displayUser.name}</h4>
+                      <p className="user-email">{displayUser.email}</p>
+                      <p className="user-date">Зарегистрирован: {displayUser.registration_date}</p>
+                      <span className={`referral-status ${displayUser.status === 'active' ? 'status-active' : 'status-inactive'}`}>
+                        {displayUser.status === 'active' ? 'Активен' : 'Неактивен'}
                       </span>
                     </div>
                   </div>
 
                   <div className="user-stats">
                     <div className="user-stat-card">
-                      <div className="stat-value">{selectedUser.orders_count}</div>
+                      <div className="stat-value">{displayUser.orders_count}</div>
+
                       <div className="stat-label">Заказов</div>
                     </div>
                     <div className="user-stat-card">
-                      <div className="stat-value">{Number(selectedUser.total_spent).toLocaleString()} ₽</div>
+                      <div className="stat-value">{Number(displayUser.total_spent).toLocaleString()} ₽</div>
                       <div className="stat-label">Сумма покупок</div>
                     </div>
                     <div className="user-stat-card">
-                      <div className="stat-value">{Number(selectedUser.referrer_earnings).toLocaleString()} ₽</div>
+                      <div className="stat-value">{Number(displayUser.referrer_earnings).toLocaleString()} ₽</div>
                       <div className="stat-label">Заработок</div>
                     </div>
                     <div className="user-stat-card">
-                      <div className="stat-value">{Number(selectedUser.paid_amount).toLocaleString()} ₽</div>
+                      <div className="stat-value">{Number(displayUser.paid_amount).toLocaleString()} ₽</div>
                       <div className="stat-label">Выплачено</div>
                     </div>
                   </div>
@@ -354,7 +389,7 @@ const handlePaymentInitiate = (user: ReferralUser) => {
                       {userDetails?.ref_link || "Ссылка загружается..."}
                       <button 
                           className="copy-button"
-                          onClick={() => navigator.clipboard.writeText(selectedUser.ref_link)}
+                          onClick={() => navigator.clipboard.writeText(displayUser.ref_link)}
                         >
                           Копировать
                         </button>
@@ -602,12 +637,12 @@ const handlePaymentInitiate = (user: ReferralUser) => {
                   </div>
 
                   <div className="user-action-buttons">
-                    {(selectedUser.referrer_earnings - selectedUser.paid_amount) > 0 && (
+                    {(displayUser.referrer_earnings - displayUser.paid_amount) > 0 && (
                       <button 
                         className="referral-button make-payment-button"
                         onClick={() => {
                           setShowUserModal(false);
-                          handlePaymentInitiate(selectedUser);
+                          handlePaymentInitiate(displayUser);
                         }}
                       >
                         Произвести выплату

@@ -195,3 +195,19 @@ class UserSocialMedia(models.Model):
         
     def __str__(self):
         return f"Соцсети пользователя {self.user.username}"
+
+
+class UserBankDetails(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='bank_details')
+    bank = models.CharField(max_length=100, blank=True, null=True, verbose_name="Банк")
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Номер телефона")
+    
+    created_dt = models.DateTimeField(auto_now_add=True)
+    updated_dt = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Банковские данные пользователя'
+        verbose_name_plural = 'Банковские данные пользователей'
+        
+    def __str__(self):
+        return f"Банковские данные пользователя {self.user.username}"

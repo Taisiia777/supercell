@@ -35,6 +35,7 @@ from .serializers import ReferralUserSerializer  # Добавьте этот и�
 from core.models import ReferralPayment
 from core.models import UserSocialMedia
 from decimal import Decimal
+from core.models import UserBankDetails
 
 User = get_user_model()
 Order = get_model("order", "Order")
@@ -187,20 +188,7 @@ class OrderLoginDataView(generics.GenericAPIView):
         context["order"] = self.get_object()
         return context
 
-    # @staticmethod
-    # def perform_create(serializer):
-    #     now = timezone.now()
-    #     login_data = [
-    #         OrderLoginData(
-    #             order_line_id=data["order_line"],
-    #             account_id=data["account_id"],
-    #             code=data["code"],
-    #             created_dt=now,
-    #         )
-    #         for data in serializer.validated_data
-    #     ]
-    #     OrderLoginData.objects.bulk_create(login_data)
-    # В api.customer.views.OrderLoginDataView.perform_create
+
     @staticmethod
     def perform_create(serializer):
         now = timezone.now()
@@ -560,18 +548,19 @@ class OrderReviewView(generics.ListCreateAPIView):
     """
     Создание и получение отзывов к заказам
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = []
     
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return serializers.CreateOrderReviewSerializer
         return serializers.OrderReviewListSerializer  # Нужно создать этот сериализатор
     
-    def get_queryset(self):
-        return OrderReview.objects.filter(
-            order__user=self.request.user
-        ).select_related('order').order_by('-created_dt')
-    
+    # def get_queryset(self):
+    #     return OrderReview.objects.filter(
+    #         order__user=self.request.user
+    #     ).select_related('order').order_by('-created_dt')
+    def get_queryset(self):  
+        return OrderReview.objects.all().select_related('order').order_by('-created_dt') 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         reviews_data = []
@@ -749,55 +738,7 @@ class ReferralUsersView(generics.ListAPIView):
         return Response(response_data)
 
 
-# class ReferralPaymentView(APIView):
-#     permission_classes = [IsAuthenticated]
-    
-#     def post(self, request):
-#         user_id = request.data.get('userId')
-#         amount = request.data.get('amount')
-#         comment = request.data.get('comment', '')
-        
-#         try:
-#             # Проверяем, существует ли пользователь
-#             user = User.objects.get(id=user_id)
-            
-#             # Вычисляем общую сумму заработка с рефералов
-#             referrals = User.objects.filter(referred_by=user)
-#             total_spent = sum(order.total_incl_tax for order in Order.objects.filter(user__in=referrals))
-#             total_earnings = total_spent * Decimal('0.05')
-            
-#             # Вычисляем сумму уже выплаченных средств
-#             total_paid = sum(payment.amount for payment in ReferralPayment.objects.filter(referrer=user))
-            
-#             # Проверяем, что запрошенная сумма не превышает доступный остаток
-#             available_amount = total_earnings - total_paid
-#             if Decimal(str(amount)) > available_amount:
-#                 return Response(
-#                     {"status": False, "error": f"Запрошенная сумма {amount} превышает доступный баланс {available_amount}"},
-#                     status=400
-#                 )
-            
-#             # Создаем запись о выплате
-#             ReferralPayment.objects.create(
-#                 referrer=user,
-#                 amount=Decimal(str(amount)),
-#                 comment=comment,
-#                 created_dt=timezone.now()
-#             )
-            
-#             return Response({"status": True})
-            
-#         except User.DoesNotExist:
-#             return Response(
-#                 {"status": False, "error": "Пользователь не найден"},
-#                 status=404
-#             )
-#         except Exception as e:
-#             logger.exception(f"Ошибка при выполнении выплаты: {str(e)}")
-#             return Response(
-#                 {"status": False, "error": f"Ошибка сервера: {str(e)}"},
-#                 status=500
-#             )
+
 class ReferralPaymentView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -851,70 +792,7 @@ class ReferralPaymentView(APIView):
                 {"status": False, "error": f"Ошибка сервера: {str(e)}"},
                 status=500
             )
-# class ReferralUserDetailsView(APIView):
-#     permission_classes = [IsAuthenticated]
-    
-#     def get(self, request, user_id):
-#         try:
-#             user = User.objects.get(id=user_id)
-            
-#             # Получаем рефералов пользователя
-#             referrals = User.objects.filter(referred_by=user)
-            
-#             # Получаем заказы пользователя и его рефералов
-#             user_orders = Order.objects.filter(user=user).order_by('-date_placed')
-            
-#             # Получаем историю выплат
-#             payments = ReferralPayment.objects.filter(referrer=user).order_by('-created_dt')
-            
-#             # Формируем ответ
-#             response_data = {
-#                 # Базовая информация пользователя
-#                 'id': user.id,
-#                 'name': f"{user.first_name} {user.last_name}" if user.first_name and user.last_name else user.username,
-#                 'email': user.username,
-#                 'registration_date': user.date_joined.strftime("%d.%m.%Y"),
-#                 'total_spent': float(sum(order.total_incl_tax for order in user_orders)),
-#                 'orders_count': user_orders.count(),
-#                 'status': 'active' if user_orders.exists() else 'inactive',
-                
-#                 # Информация о рефералах
-#                 'referrer_earnings': float(sum(order.total_incl_tax for order in Order.objects.filter(user__in=referrals)) * Decimal('0.05')),
-#                 'paid_amount': float(sum(payment.amount for payment in payments)),
-#                 'ref_link': user.get_referral_link(),
-                
-#                 # Списки детальной информации
-#                 'referrals': [
-#                     {
-#                         'id': ref.id,
-#                         'name': f"{ref.first_name} {ref.last_name}" if ref.first_name and ref.last_name else ref.username,
-#                         'email': ref.username,
-#                         'registration_date': ref.date_joined.strftime("%d.%m.%Y"),
-#                         'total_spent': float(sum(order.total_incl_tax for order in ref.orders.all())),
-#                         'status': 'active' if ref.orders.exists() else 'inactive',
-#                     } for ref in referrals
-#                 ],
-#                 'orders': [
-#                     {
-#                         'order_number': order.number,
-#                         'date': order.date_placed.strftime("%d.%m.%Y"),
-#                         'amount': float(order.total_incl_tax),
-#                         'commission': float(order.total_incl_tax * Decimal('0.05')),
-#                         'status': order.status
-#                     } for order in user_orders
-#                 ],
-#                 'payments': [
-#                     {
-#                         'date': payment.created_dt.strftime("%d.%m.%Y"),
-#                         'amount': float(payment.amount),
-#                         'comment': payment.comment or ""
-#                     } for payment in payments
-#                 ]
-#             }
-            
-#             return Response(response_data)
-#         except User.DoesNotExist:
-#             return Response({"error": "Пользователь не найден"}, status=404)
+
 class ReferralUserDetailsView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -948,12 +826,15 @@ class ReferralUserDetailsView(APIView):
             
             # Получаем банковские данные из последней выплаты
             bank_details = {}
-            latest_payment = payments.first()
-            if latest_payment:
-                bank_details = {
-                    'bank': latest_payment.bank,
-                    'phone': latest_payment.phone
-                }
+            try:
+                if hasattr(user, 'bank_details'):
+                    bd = user.bank_details
+                    bank_details = {
+                        'bank': bd.bank,
+                        'phone': bd.phone
+                    }
+            except Exception as e:
+                logger.warning(f"Ошибка при получении банковских данных пользователя: {e}")
             
             # Формируем ответ
             response_data = {
@@ -1051,4 +932,55 @@ class UserSocialMediaView(APIView):
             return Response({"status": True})
         except Exception as e:
             logger.exception(f"Ошибка при обновлении социальных сетей: {str(e)}")
+            return Response({"status": False, "error": str(e)}, status=500)
+
+
+class ReferralUserUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, user_id):
+        """Обновление данных о социальных сетях и платежных реквизитах пользователя"""
+        try:
+            # Проверяем, что пользователь имеет доступ к редактированию
+            user = User.objects.get(id=user_id)
+            if request.user.id != user_id and not request.user.is_staff:
+                return Response({"status": False, "error": "Недостаточно прав"}, status=403)
+                
+            # Обрабатываем социальные сети
+            if 'social_media' in request.data:
+                social_media, created = UserSocialMedia.objects.get_or_create(user=user)
+                social_data = request.data['social_media']
+                
+                # Обновляем существующие поля в модели
+                if 'tiktok' in social_data:
+                    social_media.tiktok = social_data['tiktok']
+                if 'instagram' in social_data:
+                    social_media.instagram = social_data['instagram']
+                if 'youtube' in social_data:
+                    social_media.youtube = social_data['youtube']
+                if 'vk' in social_data:
+                    social_media.vk = social_data['vk']
+                if 'telegram' in social_data:
+                    social_media.telegram = social_data['telegram']
+                
+                social_media.save()
+            
+            # Сохраняем банковские данные
+            if 'bank_details' in request.data:
+                bank_details, created = UserBankDetails.objects.get_or_create(user=user)
+                bank_data = request.data['bank_details']
+                
+                if 'bank' in bank_data:
+                    bank_details.bank = bank_data['bank']
+                if 'phone' in bank_data:
+                    bank_details.phone = bank_data['phone']
+                    
+                bank_details.save()
+            
+            return Response({"status": True})
+            
+        except User.DoesNotExist:
+            return Response({"status": False, "error": "Пользователь не найден"}, status=404)
+        except Exception as e:
+            logger.exception(f"Ошибка при обновлении данных пользователя: {str(e)}")
             return Response({"status": False, "error": str(e)}, status=500)
