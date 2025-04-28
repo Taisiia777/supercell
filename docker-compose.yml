@@ -19,7 +19,7 @@ x-common-envs: &common-env
 services:
   webapp_frontend:
     build:
-      context: ./webapp_frontend_test_4
+      context: ./webapp_frontend_test_6
       args:
         - API_URL=https://api.mamostore.ru/api/
     restart: unless-stopped
@@ -28,7 +28,7 @@ services:
 
   webapp_frontend_test:
     build:
-      context: ./webapp_frontend_test_5
+      context: ./webapp_frontend_test_7
       args:
         - API_URL=https://api.mamostore.ru/api/
         - BASE_PATH=/test
@@ -58,7 +58,7 @@ services:
   celery_worker:
     image: davdam/backend
     platform: linux/amd64
-    command: celery -A celery_app:app worker -Q default,celery --concurrency=${CELERY_WORKERS_COUNT:-4} -l INFO
+    command: celery -A celery_app:app worker -Q default,celery --concurrency=${CELERY_WORKERS_COUNT:-8} -l INFO
     restart: unless-stopped
     depends_on:
       - postgres

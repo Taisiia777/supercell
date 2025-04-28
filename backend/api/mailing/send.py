@@ -253,49 +253,84 @@ from celery import shared_task
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from core.models import ScheduledMailing
+import aiohttp
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
 # Константы для тестового режима
-TEST_MODE = True  # Всегда включен тестовый режим
-MESSAGE_RATE = 30  # Сообщений в секунду
+TEST_MODE = False  # Всегда включен тестовый режим
+MESSAGE_RATE = 20  # Сообщений в секунду
 WORKER_COUNT = 4   # Количество параллельных воркеров
 
+
 async def send_message_to_user(chat_id: int, message: str, image=None) -> bool:
-    """Имитирует отправку сообщения пользователю в тестовом режиме"""
+    """Отправляет сообщение пользователю"""
     if TEST_MODE:
-        # Имитируем задержку сети (от 0.01 до 0.1 секунды)
         await asyncio.sleep(random.uniform(0.01, 0.1))
-        
-        # Имитируем случайные ошибки (5% шанс ошибки)
         success = random.random() > 0.05
-        
-        # Вместо реальной отправки, просто возвращаем результат
         return success
     else:
-        # В реальном режиме здесь была бы настоящая отправка
-        # Но мы всегда работаем в тестовом режиме
-        logger.warning("Функция вызвана в реальном режиме, но реализовано только тестирование")
-        return False
-
+        try:
+            from aiogram import Bot, types
+            
+            bot = Bot(token=settings.BOT_TOKEN)
+            
+            try:
+                keyboard = types.InlineKeyboardMarkup(
+                    inline_keyboard=[[
+                        types.InlineKeyboardButton(
+                            text="В магазин",
+                            web_app=types.WebAppInfo(url="https://shop.mamostore.ru")
+                        )
+                    ]]
+                )
+                
+                if image:
+                    image_input = types.BufferedInputFile(
+                        file=image,
+                        filename='mailing_image.jpg'
+                    )
+                    
+                    await bot.send_photo(
+                        chat_id=chat_id,
+                        photo=image_input,
+                        caption=message,
+                        reply_markup=keyboard
+                    )
+                else:
+                    await bot.send_message(
+                        chat_id=chat_id,
+                        text=message,
+                        reply_markup=keyboard
+                    )
+                return True
+            finally:
+                # Закрываем сессию бота
+                await bot.session.close()
+        except Exception:
+            return False
+            
 @shared_task(name="api.mailing.process_batch", queue="mailing")
-def process_batch_mailing(batch_id, user_ids, message, scheduled_time=None, mailing_id=None):
+def process_batch_mailing(batch_id, user_ids, message, image_content=None, scheduled_time=None, mailing_id=None):
     """Обрабатывает одну партию пользователей в тестовом режиме"""
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     
     try:
         return loop.run_until_complete(
-            process_batch_async(batch_id, user_ids, message, scheduled_time, mailing_id)
+            process_batch_async(batch_id, user_ids, message, image_content, scheduled_time, mailing_id)
         )
     finally:
         loop.close()
 
-async def process_batch_async(batch_id, user_ids, message, scheduled_time=None, mailing_id=None):
+async def process_batch_async(batch_id, user_ids, message, image_content=None, scheduled_time=None, mailing_id=None):
     """Асинхронно обрабатывает одну партию пользователей"""
     # Выводим информацию о начале обработки партии
     logger.info(f"[Партия {batch_id}] Начало обработки. Пользователей: {len(user_ids)}")
+    
+    from aiogram import Bot, types
+    bot = None if TEST_MODE else Bot(token=settings.BOT_TOKEN)
     
     # Инициализируем счетчики
     total_users = len(user_ids)
@@ -350,14 +385,24 @@ async def process_batch_async(batch_id, user_ids, message, scheduled_time=None, 
         tasks = []
         
         for user in batch:
-            # Создаем задачу отправки сообщения
-            task = asyncio.create_task(
-                send_message_to_user(
-                    chat_id=user["chat_id"],
-                    message=message,
-                    image=None  # В тестовом режиме изображения не обрабатываем
+            if TEST_MODE:
+                # Имитация отправки в тестовом режиме
+                task = asyncio.create_task(
+                    send_message_to_user(
+                        chat_id=user["chat_id"],
+                        message=message,
+                        image=None
+                    )
                 )
-            )
+            else:
+                # Реальная отправка в рабочем режиме
+                task = asyncio.create_task(
+                    send_message_to_user(
+                        chat_id=user["chat_id"],
+                        message=message,
+                        image=image_content
+                    )
+                )
             tasks.append(task)
         
         # Ожидаем выполнения всех задач в текущей мини-пачке
@@ -413,26 +458,52 @@ async def process_batch_async(batch_id, user_ids, message, scheduled_time=None, 
 
 @shared_task(bind=True, name="api.mailing.process_immediate", queue="mailing")
 def process_immediate_mailing_task(self, message, image_content=None, mailing_id=None):
-    """Запускает немедленную тестовую рассылку в 4 потоках"""
+    """Запускает немедленную рассылку в рабочем или тестовом режиме"""
     start_time = time.time()
-    logger.info("Запуск тестовой рассылки в режиме имитации")
+    
+    if TEST_MODE:
+        logger.info("Запуск тестовой рассылки в режиме имитации")
+    else:
+        logger.info("Запуск боевой рассылки в рабочем режиме")
     
     # Получаем ID пользователей для рассылки
     if TEST_MODE:
         # В тестовом режиме создаем фиктивные ID пользователей
-        user_count = 25000  # Или берем реальное количество из БД
+        user_count = 25000
         user_ids = list(range(1, user_count + 1))
         logger.info(f"Создано {user_count} фиктивных пользователей для тестовой рассылки")
     else:
-        # В реальном режиме получаем ID из базы данных
-        user_ids = list(User.objects.exclude(telegram_chat_id__isnull=True)
-                        .values_list('id', flat=True))
+        # В реальном режиме получаем пользователей из базы данных
+        users = list(User.objects.exclude(telegram_chat_id__isnull=True))
+        user_ids = [user.telegram_chat_id for user in users]
         user_count = len(user_ids)
         logger.info(f"Найдено {user_count} пользователей для рассылки")
     
     if not user_ids:
         logger.warning("Нет пользователей для рассылки")
+        
+        # Обновляем статус рассылки, если это запланированная рассылка
+        if mailing_id:
+            try:
+                mailing = ScheduledMailing.objects.get(id=mailing_id)
+                mailing.is_sent = True
+                mailing.in_progress = False
+                mailing.save()
+                logger.info(f"Рассылка {mailing_id} помечена как завершенная (нет пользователей)")
+            except Exception as e:
+                logger.error(f"Ошибка обновления статуса рассылки {mailing_id}: {e}")
+                
         return {"status": "completed", "message": "Нет пользователей для рассылки"}
+    
+    # Обработка изображения для запланированной рассылки
+    if mailing_id and not TEST_MODE and not image_content:
+        try:
+            mailing = ScheduledMailing.objects.get(id=mailing_id)
+            if mailing.image:
+                image_content = mailing.image.read()
+                logger.info(f"Загружено изображение для рассылки {mailing_id}")
+        except Exception as e:
+            logger.error(f"Ошибка загрузки изображения для рассылки {mailing_id}: {e}")
     
     # Разделяем пользователей на партии для параллельной обработки
     users_per_batch = ceil(len(user_ids) / WORKER_COUNT)
@@ -450,22 +521,37 @@ def process_immediate_mailing_task(self, message, image_content=None, mailing_id
     
     # Запускаем обработку каждой партии в отдельной задаче
     for i, batch in enumerate(batches):
-        process_batch_mailing.delay(
-            batch_id=i+1, 
-            user_ids=batch,
-            message=message,
-            mailing_id=mailing_id if i == 0 else None  # Только первая задача обновит статус
-        )
+        # Передаем изображение только если оно есть и мы в рабочем режиме
+        if image_content and not TEST_MODE:
+            process_batch_mailing.delay(
+                batch_id=i+1, 
+                user_ids=batch,
+                message=message,
+                image_content=image_content,
+                scheduled_time=None,
+                mailing_id=mailing_id if i == 0 else None
+            )
+        else:
+            process_batch_mailing.delay(
+                batch_id=i+1, 
+                user_ids=batch,
+                message=message,
+                scheduled_time=None,
+                mailing_id=mailing_id if i == 0 else None
+            )
     
+    total_time = time.time() - start_time
     logger.info(
-        f"Запущено {len(batches)} параллельных задач. "
-        f"Подготовка заняла {time.time() - start_time:.2f} сек."
+        f"Запущено {len(batches)} параллельных задач для {len(user_ids)} пользователей. "
+        f"Подготовка заняла {total_time:.2f} сек."
     )
     
     return {
         "status": "started", 
         "batches": len(batches),
-        "total_users": len(user_ids)
+        "total_users": len(user_ids),
+        "preparation_time": total_time,
+        "has_image": image_content is not None
     }
 
 @shared_task(name="api.mailing.process_scheduled", queue="mailing")

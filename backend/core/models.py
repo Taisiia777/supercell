@@ -33,6 +33,9 @@ class Role(models.Model):
 
 class User(AbstractUser):
     telegram_chat_id = models.BigIntegerField(null=True, blank=True, unique=True)
+    
+    telegram_avatar_url = models.URLField(null=True, blank=True)
+
     roles = models.ManyToManyField(Role, related_name='users')
 
     receiver_name = models.CharField(
@@ -149,9 +152,27 @@ class OrderLoginData(models.Model):
         verbose_name_plural = "Данные для входа"
         ordering = ["-created_dt"]
 
+# class OrderReview(models.Model):
+#     order = models.ForeignKey(
+#         "order.Order", on_delete=models.CASCADE, related_name="reviews"
+#     )
+#     rating = models.PositiveSmallIntegerField(
+#         verbose_name="Оценка", choices=[(i, str(i)) for i in range(1, 6)]
+#     )
+#     comment = models.TextField(verbose_name="Комментарий", blank=True)
+#     created_dt = models.DateTimeField(auto_now_add=True)
+
+#     class Meta:
+#         verbose_name = "Отзыв к заказу"
+#         verbose_name_plural = "Отзывы к заказам"
+#         ordering = ["-created_dt"]
 class OrderReview(models.Model):
     order = models.ForeignKey(
         "order.Order", on_delete=models.CASCADE, related_name="reviews"
+    )
+    # Добавляем связь с пользователем
+    user = models.ForeignKey(
+        "User", on_delete=models.CASCADE, related_name="reviews"
     )
     rating = models.PositiveSmallIntegerField(
         verbose_name="Оценка", choices=[(i, str(i)) for i in range(1, 6)]
@@ -163,7 +184,13 @@ class OrderReview(models.Model):
         verbose_name = "Отзыв к заказу"
         verbose_name_plural = "Отзывы к заказам"
         ordering = ["-created_dt"]
-
+        
+    def get_avatar_url(self):
+        """Возвращает URL аватарки пользователя"""
+        if self.user and self.user.telegram_avatar_url:
+            return self.user.telegram_avatar_url
+        # URL аватарки по умолчанию
+        return '/static/images/default-avatar.png'
 
 class ReferralPayment(models.Model):
     referrer = models.ForeignKey(

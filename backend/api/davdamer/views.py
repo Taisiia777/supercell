@@ -384,12 +384,20 @@ class ToggleProductVisibilityView(APIView):
         request=None,
         responses=ResponseStatusSerializer
     )
+    # def post(self, request, product_id):
+    #     try:
+    #         product = Product.objects.get(pk=product_id)
+    #         product.is_public = not product.is_public
+    #         product.save(update_fields=['is_public'])
+    #         return Response({'status': True})
+    #     except Product.DoesNotExist:
+    #         return Response({'status': False}, status=404)
+
     def post(self, request, product_id):
         try:
             product = Product.objects.get(pk=product_id)
             product.is_public = not product.is_public
             product.save(update_fields=['is_public'])
-            return Response({'status': True})
+            return Response({'status': True, 'is_public': product.is_public})
         except Product.DoesNotExist:
             return Response({'status': False}, status=404)
-

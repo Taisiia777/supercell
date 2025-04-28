@@ -1,34 +1,11 @@
-# import os
-# import sys
-# from pathlib import Path
 
-# from celery import Celery
-# from dotenv import load_dotenv
-
-
-# base_dir = Path(__file__).resolve().parent.parent
-
-# if sys.argv[0].endswith("celery"):
-#     load_dotenv(base_dir / ".env")
-#     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-
-# app = Celery("davdam")
-# app.conf.timezone = "UTC"
-# app.conf.enable_utc = True
-# app.conf.broker_url = os.environ["CELERY_BROKER_URL"]
-# app.conf.broker_connection_retry_on_startup = True
-
-# app.conf.task_track_started = True
-# app.conf.task_time_limit = 3000
-# app.conf.include = [
-#     "core.tasks",
-# ]
 import os
 import sys
 from pathlib import Path
 
 from celery import Celery
 from dotenv import load_dotenv
+from celery.schedules import crontab
 
 
 base_dir = Path(__file__).resolve().parent.parent
@@ -77,7 +54,7 @@ app.conf.task_routes = {
 
 # Настройка параллельного выполнения
 app.conf.worker_prefetch_multiplier = 1  # Воркер берет только по одной задаче
-app.conf.worker_concurrency = 4          # Число параллельных исполнителей
+app.conf.worker_concurrency = 8          # Число параллельных исполнителей
 
 # Включаем поддержку приоритетов
 app.conf.task_default_priority = 5       # Средний приоритет по умолчанию
@@ -89,3 +66,14 @@ app.conf.task_acks_late = True
 
 # Не доставлять задачи повторно если воркер умер
 app.conf.task_reject_on_worker_lost = True
+
+# app.conf.beat_schedule = {
+#     'update-telegram-avatars-daily': {
+#         'task': 'core.update_telegram_avatar',
+#         'schedule': crontab(hour=3, minute=0),  # Запуск каждый день в 3:00 утра
+#         'options': {
+#             'queue': 'default',
+#             'priority': 3  # Низкий приоритет
+#         }
+#     },
+# }

@@ -267,54 +267,6 @@ class UpdateLoginDataView(APIView):
             return Response({"status": False})
 
 
-# class OrderWebhookView(APIView):
-#     def post(self, request):
-#         ip = self.get_client_ip(request)
-#         if not SecurityHelper().is_ip_trusted(ip):
-#             return Response(status=status.HTTP_403_FORBIDDEN)
-
-#         try:
-#             event_json = json.loads(request.body)
-#             notification = WebhookNotificationFactory().create(event_json)
-#             response_obj = notification.object
-#         except Exception as error:
-#             logger.exception("Could not parse notification: %s", error)
-#             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-#         try:
-#             if notification.event == WebhookNotificationEventType.PAYMENT_SUCCEEDED:
-#                 self.payment_successful(response_obj.id)
-#             elif notification.event == WebhookNotificationEventType.PAYMENT_CANCELED:
-#                 self.payment_canceled(response_obj.id)
-#         except Exception as error:
-#             logger.warning("Could not process notification: %s", error)
-
-#         return Response(status=status.HTTP_200_OK)
-
-#     @staticmethod
-#     def get_client_ip(request) -> str:
-#         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-#         if x_forwarded_for:
-#             ip = x_forwarded_for.split(",")[0]
-#         else:
-#             ip = request.META.get("REMOTE_ADDR")
-#         return ip
-
-#     @staticmethod
-#     def payment_successful(payment_id: str) -> None:
-#         order = Order.objects.get(payment_id=payment_id)
-#         order.status = OrderStatus.PAID
-#         order.save()
-
-#         celery_app.send_task("api.shop.success_payment", args=[order.number])
-
-#     @staticmethod
-#     def payment_canceled(payment_id: str) -> None:
-#         order = Order.objects.get(payment_id=payment_id)
-#         order.status = OrderStatus.CANCELLED
-#         order.save()
-
-#         celery_app.send_task("api.davdamer.order_status_updated", args=[order.pk])
 class OrderWebhookView(APIView):
     def post(self, request):
         ip = self.get_client_ip(request)
@@ -365,60 +317,6 @@ class OrderWebhookView(APIView):
         except Order.DoesNotExist:
             logger.warning(f"Order with payment_id={payment_id} not found")
 
-
-# class ProcessReferralView(APIView):
-#     """Обрабатывает присоединение пользователя через реферальную ссылку"""
-#     def post(self, request):
-#         serializer = ProcessReferralSerializer(data=request.data)
-#         if not serializer.is_valid():
-#             return Response({"status": False, "errors": serializer.errors})
-        
-#         data = serializer.validated_data
-#         telegram_id = data['telegram_id']
-#         username = data.get('username', '')
-#         full_name = data.get('full_name', '')
-#         referral_code = data['referral_code']
-        
-#         try:
-#             # Найти или создать пользователя
-#             user, created = User.objects.get_or_create(
-#                 telegram_chat_id=telegram_id,
-#                 defaults={
-#                     'username': f"tg_{telegram_id}" if not username else username,
-#                     'first_name': full_name.split(' ')[0] if full_name else '',
-#                     'last_name': ' '.join(full_name.split(' ')[1:]) if full_name and len(full_name.split(' ')) > 1 else '',
-#                 }
-#             )
-            
-#             # Если пользователь уже привязан к реферальному коду
-#             if user.referred_by is not None:
-#                 return Response({"status": False, "error": "Пользователь уже имеет реферера"})
-            
-#             # Найти пользователя с таким реферальным кодом
-#             try:
-#                 referrer = User.objects.get(referral_code=referral_code)
-                
-#                 # Нельзя быть своим собственным рефералом
-#                 if referrer.id == user.id:
-#                     return Response({"status": False, "error": "Нельзя использовать свой собственный код"})
-                    
-#                 # Создание связи
-#                 user.referred_by = referrer
-#                 user.save(update_fields=['referred_by'])
-                
-#                 # Создание реферального кода для нового пользователя, если его нет
-#                 if not user.referral_code:
-#                     user.referral_code = user.generate_unique_code()
-#                     user.save(update_fields=['referral_code'])
-                
-#                 return Response({"status": True})
-                
-#             except User.DoesNotExist:
-#                 return Response({"status": False, "error": "Неверный реферальный код"})
-                
-#         except Exception as e:
-#             logger.exception(f"Ошибка обработки реферала: {str(e)}")
-#             return Response({"status": False, "error": "Ошибка сервера"})
 
 
 class ProcessReferralView(APIView):
@@ -534,16 +432,6 @@ class GetReferralLinkView(APIView):
             return Response({"status": False, "error": "Ошибка сервера"})
 
 
-# class OrderReviewView(generics.CreateAPIView):
-#     """
-#     Создание отзыва к заказу
-#     """
-#     permission_classes = [IsAuthenticated]
-#     serializer_class = serializers.CreateOrderReviewSerializer
-    
-#     def get_serializer_context(self):
-#         context = super().get_serializer_context()
-#         return context
 class OrderReviewView(generics.ListCreateAPIView):
     """
     Создание и получение отзывов к заказам
@@ -553,21 +441,30 @@ class OrderReviewView(generics.ListCreateAPIView):
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return serializers.CreateOrderReviewSerializer
-        return serializers.OrderReviewListSerializer  # Нужно создать этот сериализатор
-    
-    # def get_queryset(self):
-    #     return OrderReview.objects.filter(
-    #         order__user=self.request.user
-    #     ).select_related('order').order_by('-created_dt')
+        return serializers.OrderReviewListSerializer
+
     def get_queryset(self):  
         return OrderReview.objects.all().select_related('order').order_by('-created_dt') 
+
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         reviews_data = []
         
+        # Список пользователей, для которых нужно обновить аватарки
+        users_without_avatar = []
+        
         for review in queryset:
             line = review.order.lines.first()
             product = line.product if line else None
+            user = review.order.user
+            
+            # Проверяем наличие аватарки
+            avatar_url = None
+            if user.telegram_chat_id and not user.telegram_avatar_url:
+                users_without_avatar.append(user.id)
+            
+            # Если аватарка уже есть, используем ее
+            avatar_url = user.telegram_avatar_url
             
             review_data = {
                 'id': review.id,
@@ -576,8 +473,8 @@ class OrderReviewView(generics.ListCreateAPIView):
                 'rating': review.rating,
                 'comment': review.comment,
                 'created_dt': review.created_dt.isoformat(),
-                # 'user_name': request.user.first_name or request.user.username or 'Покупатель',
-                'user_name': review.order.user.first_name or review.order.user.username or 'Покупатель',
+                'user_name': user.first_name or user.username or 'Покупатель',
+                'user_avatar': avatar_url,  # Используем аватарку пользователя
             }
             
             if product:
@@ -589,7 +486,100 @@ class OrderReviewView(generics.ListCreateAPIView):
             
             reviews_data.append(review_data)
         
+        # Если есть пользователи без аватарок, запускаем задачу на их обновление
+        if users_without_avatar:
+            from celery_app import app as celery_app
+            for user_id in users_without_avatar:
+                celery_app.send_task("core.update_telegram_avatar", args=[user_id])
+        
         return Response({'reviews': reviews_data})
+
+    def perform_create(self, serializer):
+        """
+        Переопределяем метод создания отзыва для автоматического обновления аватарки
+        """
+        review = serializer.save()
+        
+        # Проверяем наличие аватарки у пользователя
+        user = review.order.user
+        if user.telegram_chat_id and not user.telegram_avatar_url:
+            from celery_app import app as celery_app
+            celery_app.send_task("core.update_telegram_avatar", args=[user.id])
+        
+        return review
+# class OrderReviewView(generics.ListCreateAPIView):
+#     """
+#     Создание и получение отзывов к заказам
+#     """
+#     permission_classes = []
+    
+#     def get_serializer_class(self):
+#         if self.request.method == 'POST':
+#             return serializers.CreateOrderReviewSerializer
+#         return serializers.OrderReviewListSerializer  # Нужно создать этот сериализатор
+
+#     def get_queryset(self):  
+#         return OrderReview.objects.all().select_related('order').order_by('-created_dt') 
+#     # def list(self, request, *args, **kwargs):
+#     #     queryset = self.get_queryset()
+#     #     reviews_data = []
+        
+#     #     for review in queryset:
+#     #         line = review.order.lines.first()
+#     #         product = line.product if line else None
+            
+#     #         review_data = {
+#     #             'id': review.id,
+#     #             'order': review.order.id,
+#     #             'order_number': review.order.number,
+#     #             'rating': review.rating,
+#     #             'comment': review.comment,
+#     #             'created_dt': review.created_dt.isoformat(),
+#     #             # 'user_name': request.user.first_name or request.user.username or 'Покупатель',
+#     #             'user_name': review.order.user.first_name or review.order.user.username or 'Покупатель',
+#     #         }
+            
+#     #         if product:
+#     #             review_data.update({
+#     #                 'product_name': product.title,
+#     #                 'product_price': str(line.unit_price_incl_tax) + ' ₽',
+#     #                 'product_image': product.images.first().original.url if product.images.exists() else None
+#     #             })
+            
+#     #         reviews_data.append(review_data)
+        
+#     #     return Response({'reviews': reviews_data})
+#     # api/customer/views.py
+#     def list(self, request, *args, **kwargs):
+#         queryset = self.get_queryset()
+#         reviews_data = []
+        
+#         for review in queryset:
+#             line = review.order.lines.first()
+#             product = line.product if line else None
+#             user = review.order.user
+            
+#             review_data = {
+#                 'id': review.id,
+#                 'order': review.order.id,
+#                 'order_number': review.order.number,
+#                 'rating': review.rating,
+#                 'comment': review.comment,
+#                 'created_dt': review.created_dt.isoformat(),
+#                 'user_name': user.first_name or user.username or 'Покупатель',
+#                 'user_avatar': review.get_avatar_url(),  # Добавляем аватарку
+#             }
+            
+#             if product:
+#                 review_data.update({
+#                     'product_name': product.title,
+#                     'product_price': str(line.unit_price_incl_tax) + ' ₽',
+#                     'product_image': product.images.first().original.url if product.images.exists() else None
+#                 })
+            
+#             reviews_data.append(review_data)
+        
+#         return Response({'reviews': reviews_data})
 
 class OrderReviewForPaymentView(APIView):
     """
@@ -597,6 +587,29 @@ class OrderReviewForPaymentView(APIView):
     """
     permission_classes = [IsAuthenticated]
     
+    # @extend_schema(
+    #     request=serializers.OrderReviewSerializer,
+    #     responses={
+    #         200: serializers.ResponseStatusSerializer,
+    #         400: None,
+    #     },
+    # )
+    # def post(self, request, order_number, *args, **kwargs):
+    #     try:
+    #         order = Order.objects.get(number=order_number, user=request.user)
+    #     except Order.DoesNotExist:
+    #         return Response({"status": False, "message": "Заказ не найден"}, status=status.HTTP_404_NOT_FOUND)
+            
+    #     serializer = serializers.OrderReviewSerializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+        
+    #     OrderReview.objects.create(
+    #         order=order,
+    #         rating=serializer.validated_data["rating"],
+    #         comment=serializer.validated_data.get("comment", "")
+    #     )
+        
+    #     return Response({"status": True})
     @extend_schema(
         request=serializers.OrderReviewSerializer,
         responses={
@@ -619,8 +632,12 @@ class OrderReviewForPaymentView(APIView):
             comment=serializer.validated_data.get("comment", "")
         )
         
+        # Проверяем наличие аватарки и запускаем задачу при необходимости
+        if request.user.telegram_chat_id and not request.user.telegram_avatar_url:
+            from celery_app import app as celery_app
+            celery_app.send_task("core.update_telegram_avatar", args=[request.user.id])
+        
         return Response({"status": True})
-
 
 
 class ReferralStatsView(APIView):

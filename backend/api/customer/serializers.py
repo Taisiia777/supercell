@@ -65,17 +65,7 @@ class GameEmailSerializer(serializers.ModelSerializer):
         source="hay_day_email", allow_blank=True, allow_null=True
     )
 
-    # def validate(self, attrs):
-    #     attrs = super().validate(attrs)
-    #     if "brawl_stars_email" in attrs and not attrs["brawl_stars_email"]:
-    #         attrs.pop("brawl_stars_email")
-    #     if "clash_of_clans_email" in attrs and not attrs["clash_of_clans_email"]:
-    #         attrs.pop("clash_of_clans_email")
-    #     if "clash_royale_email" in attrs and not attrs["clash_royale_email"]:
-    #         attrs.pop("clash_royale_email")
-    #     if "hay_day_email" in attrs and not attrs["hay_day_email"]:
-    #         attrs.pop("hay_day_email")
-    #     return attrs
+
 
     class Meta:
         model = User
@@ -116,10 +106,7 @@ class ProductSerializer(CoreProductSerializer):
         fields = ["id", "title", "images", "categories", "login_type", "game", "filters_type", "friend_url"]
 
 
-# class OrderLoginDataSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = OrderLoginData
-#         fields = ["account_id", "code"]
+
 class OrderLoginDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderLoginData
@@ -231,9 +218,21 @@ class CreateOrderReviewSerializer(OrderReviewSerializer):
         except Order.DoesNotExist:
             raise serializers.ValidationError("Заказ не найден")
 
+    # def create(self, validated_data):
+    #     order = validated_data.pop("order_number")
+    #     return OrderReview.objects.create(order=order, **validated_data)
+    # api/customer/serializers.py
     def create(self, validated_data):
         order = validated_data.pop("order_number")
-        return OrderReview.objects.create(order=order, **validated_data)
+        review = OrderReview.objects.create(order=order, **validated_data)
+        
+        # Проверяем наличие аватарки и запускаем задачу при необходимости
+        user = self.context['request'].user
+        if user.telegram_chat_id and not user.telegram_avatar_url:
+            from celery_app import app as celery_app
+            celery_app.send_task("core.update_telegram_avatar", args=[user.id])
+        
+        return review
 
 class ResponseStatusSerializer(serializers.Serializer):
     status = serializers.BooleanField(default=True)
