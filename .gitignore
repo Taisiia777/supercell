@@ -3,7 +3,7 @@ __pycache__
 *.pyc
 .ruff_cache
 
-*.txt
+
 api_data/
 *.env
 dump*.sql

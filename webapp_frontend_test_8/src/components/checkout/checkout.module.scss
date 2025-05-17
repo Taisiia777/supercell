@@ -1,0 +1,102 @@
+.checkout {
+  padding: 0 19px;
+  margin-top: 32px;
+  .form {
+    display: flex;
+    flex-direction: column;
+    grid-gap: 22px;
+    
+
+    .code {
+      display: flex;
+      flex-direction: column;
+      grid-gap: 12px;
+      .instruction {
+        margin: 1rem auto;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        border: 1px solid #e9ecef;
+        // Размер соответствует .code
+        width: 100%; // Занимает всю доступную ширину
+        max-width: none; // Убираем ограничение в 300px
+      }
+      
+      .instruction_title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 1rem;
+      }
+      
+      .instruction_steps {
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+        
+        li {
+          margin-bottom: 0.75rem;
+          line-height: 1.5; // Увеличено для лучшей читаемости
+          font-size: 0.75rem;
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+      
+      .instruction_link {
+        color: #0d6efd;
+        word-break: break-all;
+        text-decoration: underline;
+        // Добавляем атрибут target="_blank" в HTML:
+        // <a href="..." target="_blank" rel="noopener noreferrer" className={styles.instruction_link}>
+      }
+      
+      .instruction_warning {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 0.75rem 1rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+        
+        p {
+          color: #664d03;
+          margin: 0;
+          font-size: 0.6rem;
+          
+          strong {
+            font-weight: 600;
+          }
+        }
+      }
+      .large_image_container {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        max-width: 600px;
+      }
+      
+      .large_image {
+        border-radius: 10px;
+      }
+      .error {
+        color: #ae0000;
+        font-weight: 700;
+        font-size: 12px;
+        letter-spacing: -0.01em;
+      }
+      p {
+        font-weight: 700;
+        font-size: 12px;
+        letter-spacing: -0.01em;
+        color: #fff;
+
+        span {
+          font-weight: 700;
+          font-size: 12px;
+          letter-spacing: -0.01em;
+          color: #ffc567;
+        }
+      }
+    }
+  }
+}

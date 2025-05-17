@@ -1,0 +1,66 @@
+$base-margin: 0px;
+$increment: 10px;
+$img: 10px;
+
+@mixin set-margins($count) {
+  @for $i from 1 through $count {
+    $delay: 0.1s * ($i - 1);
+    .item:nth-child(#{$count - $i + 1}) {
+      margin-top: $base-margin + ($i - 1) * $increment;
+      animation: up 0.7s ease-in-out 1 $delay;
+      animation-fill-mode: forwards;
+      .img {
+        margin-bottom: $base-margin + ($i - 1) * $increment;
+        // img {
+        //   margin-top: 10px;
+        // }
+      }
+    }
+  }
+}
+
+
+.categories {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 19px;
+  .item {
+    position: relative;
+
+    .img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      border-radius: 10px;
+      img {
+        position: relative;
+        border-radius: 10px;
+
+      }
+      .icon {
+        margin-top: 15px;
+        border-radius: 10px;
+
+      }
+    }
+
+  }
+
+  @include set-margins(5);
+}
+
+@keyframes up {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}

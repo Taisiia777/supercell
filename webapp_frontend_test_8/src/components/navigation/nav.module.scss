@@ -1,0 +1,62 @@
+@import "../../app/var";
+
+.nav {
+  border-radius: 24px 24px 0 0;
+  background: $navbar_bg;
+  backdrop-filter: blur(8px);
+  width: 100%;
+  position: fixed;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: flex-start;
+  padding: 6px 10px 20px 10px;
+  max-width: 1024px;
+  margin-left: auto;
+  margin-right: auto;
+  .item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    grid-gap: 1.69px;
+    position: relative;
+    .active {
+      svg {
+        fill: #F0AB55;
+      }
+    }
+    .name {
+      position: relative;
+      p {
+        color: $navbar_color;
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 12px; /* 100% */
+      }
+      .hide {
+        display: none;
+      }
+    }
+    .bg {
+      position: absolute;
+      z-index: -1;
+    }
+  }
+  .animation {
+    animation: up 0.5s ease-in-out 1;
+    animation-fill-mode: forwards;
+  }
+}
+@keyframes up {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-5px);
+  }
+}

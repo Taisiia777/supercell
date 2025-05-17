@@ -1,0 +1,249 @@
+
+
+// .popular {
+//   display: grid;
+//   grid-template-columns: repeat(2, 165px);
+//   padding: 0 19px;
+//   justify-content: space-between;
+//   grid-row-gap: 20px;
+//   margin-top: 25px;
+//     .item {
+//       position: relative;
+//       height: 265px; /* Возвращаем фиксированную высоту */
+//       width: 100%;
+//       transition: transform 0.5s ease;
+//       min-height: 265px;
+//       overflow: hidden; /* Скрываем всё, что выходит за рамки */
+//       &:hover {
+//         transform: translateY(-10px);
+//       }
+//       .type {
+//         position: absolute;
+//         z-index: 1;
+//         top: 18px;
+//         margin-left: auto;
+//         right: 13px;
+//       }
+//       .content {
+//         padding: 30px 13px 13px 13px;
+//         height: 100%;
+//         display: flex;
+//         flex-direction: column;
+//         .img {
+//           position: relative;
+//           width: 100%;
+//           padding-top: 56.25%; /* Соотношение сторон 16:9 */
+         
+//           img {
+//             position: absolute;
+//             top: 0;
+//             left: 0;
+//             width: 100%;
+//             height: 100%;
+//             object-fit: contain;
+//           }
+//         }
+//         .container {
+//           display: flex;
+//           flex-direction: column;
+//           justify-content: space-between;
+//           height: 100%;
+//           .name {
+//             display: grid;
+//             grid-template-columns: repeat(1fr, 1fr);
+//             margin-top: 5px;
+//             align-content: start;
+//             h3 {
+//               font-weight: 500;
+//               font-size: 13px;
+//               letter-spacing: -0.02em;
+//               color: rgba(255, 255, 255, 0.6);
+//               align-self: start;
+//             }
+//             h4{
+//               font-weight: 700;
+//               font-size: 15px;
+//               letter-spacing: -0.02em;
+//               color: #fff;
+//               word-break: break-word;
+//               align-self: start;
+//               /* Ограничиваем текст до 2 строк и добавляем многоточие */
+//               display: -webkit-box;
+//               -webkit-line-clamp: 2;
+//               -webkit-box-orient: vertical;
+//               overflow: hidden;
+//               text-overflow: ellipsis;
+//               max-height: 45px; /* ~2 строки * высота строки */
+//             }
+//           }
+//           .actions {
+//             display: flex;
+//             flex-direction: column;
+//             grid-gap: 14px;
+//             width: 100%;
+//             p {
+//               font-weight: 500;
+//               font-size: 13px;
+//               letter-spacing: -0.02em;
+//               color: rgba(255, 255, 255, 0.6);
+//               align-self: start;
+//             }
+//             .cart_action {
+//               display: flex;
+//               justify-content: center;
+//               width: 100%;
+//             }
+//           }
+//         }
+//       }
+//       .bg {
+//         display: flex;
+//         justify-content: center;
+//         width: 100%;
+//         min-width: 165px;
+//         position: absolute;
+//         top: 0;
+//         left: 0;
+//         z-index: -1;
+//         min-height: 300px;
+//       }
+//     }
+// }
+.popular {
+  display: grid;
+  grid-template-columns: repeat(2, 165px);
+  padding: 0 19px;
+  padding-bottom: 20px;
+  justify-content: space-between;
+  grid-row-gap: 20px;
+  margin-top: 25px;
+    .item {
+      position: relative;
+      height: 265px; /* Фиксированная высота */
+      width: 165px; /* Фиксированная ширина */
+      transition: transform 0.5s ease;
+      min-height: 265px;
+      overflow: hidden; /* Скрываем всё, что выходит за рамки */
+      &:hover {
+        transform: translateY(-10px);
+      }
+      .type {
+        position: absolute;
+        z-index: 1;
+        top: 18px;
+        margin-left: auto;
+        right: 13px;
+      }
+      .content {
+        padding: 30px 13px 13px 13px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        .img {
+          position: relative;
+          width: 100%;
+          padding-top: 56.25%; /* Соотношение сторон 16:9 */
+         
+          img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+        }
+        .container {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          height: 100%;
+          .name {
+            display: grid;
+            grid-template-columns: repeat(1fr, 1fr);
+            margin-top: 5px;
+            align-content: start;
+            h3 {
+              font-weight: 500;
+              font-size: 13px;
+              letter-spacing: -0.02em;
+              color: rgba(255, 255, 255, 0.6);
+              align-self: start;
+            }
+            h4{
+              font-weight: 700;
+              font-size: 15px;
+              letter-spacing: -0.02em;
+              color: #fff;
+              word-break: break-word;
+              align-self: start;
+              /* Ограничиваем текст до 2 строк и добавляем многоточие */
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-height: 45px; /* ~2 строки * высота строки */
+            }
+          }
+          .actions {
+            display: flex;
+            flex-direction: column;
+            grid-gap: 14px;
+            width: 100%;
+            p {
+              font-weight: 500;
+              font-size: 13px;
+              letter-spacing: -0.02em;
+              color: rgba(255, 255, 255, 0.6);
+              align-self: start;
+            }
+            .cart_action {
+              display: flex;
+              justify-content: center;
+              width: 100%;
+            }
+          }
+        }
+      }
+      .bg {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        min-width: 165px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        min-height: 300px;
+      }
+    }
+}
+@media (min-width: 600px) and (max-width: 800px) {
+  .popular {
+    grid-template-columns: repeat(3, 165px);
+    /* Центрирование сетки при 3 колонках */
+    justify-content: center;
+    grid-column-gap: 20px;
+  }
+}
+/* Медиа-запрос для планшетов: 3 колонки */
+@media (min-width: 801px) and (max-width: 1024px) {
+  .popular {
+    grid-template-columns: repeat(4, 165px);
+    /* Центрирование сетки при 3 колонках */
+    justify-content: center;
+    grid-column-gap: 20px;
+  }
+}
+
+/* Медиа-запрос для десктопов: 4 колонки */
+@media (min-width: 1025px) {
+  .popular {
+    grid-template-columns: repeat(5, 165px);
+    /* Центрирование сетки при 4 колонках */
+    justify-content: center;
+    grid-column-gap: 30px;
+  }
+}
+

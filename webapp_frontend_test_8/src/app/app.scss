@@ -1,0 +1,107 @@
+@import "./_var.scss";
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  text-decoration: none;
+
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-touch-callout: none;
+  user-select: none;
+
+}
+input,
+textarea,
+select,
+button {
+  font-size: 16px !important; 
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: text; 
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+button {
+  background: transparent;
+  border: unset;
+  cursor: pointer;
+}
+
+h2 {
+  color: #131313;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+}
+body {
+  position: relative;
+  display: flex; 
+  flex-direction: column;
+  background-color: $bg;
+  margin: 0 auto;
+  min-height: 100vh;
+  -webkit-overflow-scrolling: touch;
+  max-width: 1024px;
+
+}
+
+main {
+  flex: 1;
+  position: relative;
+  padding-bottom: 73px;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+
+.toast_delete {
+  display: flex;
+  align-items: center;
+  .btn3d {
+    .btn {
+      background: linear-gradient(142deg, #2a3b67 0%, #375aab 100%);
+      padding: 12px 2px;
+      display: flex;
+      justify-content: center;
+      border-radius: 10px;
+      position: relative;
+      height: 40px;
+      width: 117px;
+      cursor: pointer;
+      span {
+        font-weight: 700;
+        font-size: 13px;
+        letter-spacing: -0.01em;
+        color: #fff;
+      }
+
+      &:after {
+        content: '';
+        height: 44px;
+        width: 122px;
+        border-radius: 10px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin-top: -2px;
+        margin-left: -2px;
+        z-index: -1;
+        background: linear-gradient(312deg, #223975 0%, #3a4c75 100%);
+      }
+    }
+  }
+}

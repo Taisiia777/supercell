@@ -1,0 +1,205 @@
+// src/components/pending-order/pending-order-banner.module.scss
+@keyframes slideIn {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(55, 90, 171, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(55, 90, 171, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(55, 90, 171, 0);
+    }
+  }
+  
+  .bannerContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 0 16px;
+    animation: slideIn 0.5s ease-out forwards;
+  }
+  
+  .banner {
+    background: linear-gradient(145deg, rgba(55, 90, 171, 0.95), rgba(42, 59, 103, 0.95));
+    backdrop-filter: blur(10px);
+    border-radius: 0 0 16px 16px;
+    padding: 14px 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #6AEC3D, #FFC567);
+      opacity: 0.8;
+    }
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .title {
+    font-weight: 700;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    .icon {
+      color: #6AEC3D;
+      font-size: 18px;
+      animation: pulse 2s infinite;
+    }
+  }
+  
+  .timer {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .summary {
+    flex: 1;
+    
+    .orderInfo {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      
+      .count {
+        font-weight: 600;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.9);
+      }
+      
+      .price {
+        font-weight: 700;
+        font-size: 14px;
+        color: #FFC567;
+      }
+    }
+    
+    .products {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+  }
+  
+  .thumbnails {
+    display: flex;
+    margin-left: auto;
+    
+    .thumbnail {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(328deg, #363e51 0%, #4c5770 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-left: -10px;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      
+      &:first-child {
+        margin-left: 0;
+        z-index: 3;
+      }
+      
+      &:nth-child(2) {
+        z-index: 2;
+      }
+      
+      &:nth-child(3) {
+        z-index: 1;
+      }
+      
+      .more {
+        font-size: 10px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+  }
+  
+  .action {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    
+    .button {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-weight: 500;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.9);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.18);
+      }
+      
+      &.primary {
+        background: #6AEC3D;
+        color: #2a3b67;
+        font-weight: 600;
+        
+        &:hover {
+          background: #7cff4f;
+        }
+      }
+    }
+  }
+  
+  .progressBar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.3);
+    transition: width 1s linear;
+  }

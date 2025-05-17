@@ -1,0 +1,118 @@
+// .container {
+//     position: relative;
+//     width: 100%;
+//   }
+  
+//   .inputWrapper {
+//     display: flex;
+//     align-items: center;
+//     padding: 1rem;
+//     border-radius: 0.75rem;
+//     cursor: pointer;
+//     transition: all 0.2s ease;
+  
+//     &:hover {
+//       opacity: 0.8;
+//     }
+  
+//     &.withBackground {
+//       background-color: #242C3B;
+//     }
+//   }
+  
+//   .input {
+//     width: 100%;
+//     background-color: transparent;
+//     color: white;
+//     font-size: 1rem;
+//     font-weight: 500;
+//     outline: none;
+//     cursor: pointer;
+  
+//     &::placeholder {
+//       color: rgba(255, 255, 255, 0.6);
+//     }
+//   }
+  
+//   .icon {
+//     margin-left: 0.5rem;
+//     cursor: pointer;
+//   }
+.input_container {
+    width: 100%;
+    
+    .title {
+      display: flex;
+      flex-direction: column;
+      grid-gap: 12px;
+      width: 100%;
+  
+      .el {
+        position: relative;
+        display: flex;
+        width: 100%;
+        
+        .copy {
+          position: absolute;
+          right: 0;
+          padding: 9px 14px 0 0;
+          cursor: pointer;
+  
+          &:hover {
+            opacity: 0.8;
+          }
+        }
+  
+        .input_content {
+          width: 100%;
+          position: relative;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+      
+          .input {
+            flex: 1;
+            height: 44px;
+            border-radius: 8px;
+            box-shadow: #191e29 4px 10px 30px 0 inset;
+            -webkit-appearance: none;
+            background: #242c3b;
+            border: unset;
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 15px;
+            padding: 0 10px;
+            cursor: pointer;
+  
+            &:disabled {
+              opacity: 0.5;
+              cursor: not-allowed;
+            }
+  
+            &::placeholder {
+              color: rgba(255, 255, 255, 0.6);
+            }
+          }
+        }
+      }
+  
+      .title_container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+  
+        .name {
+          display: flex;
+          grid-gap: 5px;
+          align-items: center;
+          
+          span {
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: -0.02em;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: sans-serif;
+          }
+        }
+      }
+    }
+  }

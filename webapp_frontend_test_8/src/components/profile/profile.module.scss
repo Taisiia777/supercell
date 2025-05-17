@@ -1,0 +1,532 @@
+
+.profile {
+  padding: 0 12px;
+  margin-top: 32px;
+  
+  .tabs_container {
+    width: 100%;
+    background: #242C3B;
+    border-radius: 16px;
+    padding: 0px;
+    margin-bottom: 22px;
+
+    .tabs {
+      display: flex;
+      width: 100%;
+      position: relative;
+
+      .tab {
+        flex: 1;
+        padding: 14px 0;
+        background: transparent;
+        border: none;
+        font-weight: 600;
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.65);
+        text-align: center;
+        border-radius: 12px;
+        position: relative;
+        z-index: 2;
+        transition: all 0.25s ease;
+
+        &.active {
+          color: #ffffff;
+        }
+      }
+
+      .tab_slider {
+        position: absolute;
+        width: 50%;
+        height: calc(100% - 6px);
+        background: linear-gradient(142deg, #2a3b67 0%, #375aab 100%);
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+        top: 3px;
+        left: 3px;
+        
+        &.slide_right {
+          transform: translateX(100%);
+        }
+      }
+    }
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    grid-gap: 13px;
+    margin-top: 22px;
+
+    p {
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+      color: rgba(255, 255, 255, 0.6);
+      font-family: sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  .support {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 14px;
+    grid-gap: 10px;
+    background: linear-gradient(142deg, #2a3b67 0%, #375aab 100%);
+    border-radius: 12px;
+    
+    span {
+      font-weight: 600;
+      font-size: 16px;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+
+  .referral_container {
+    margin-top: 10px;
+
+    .section_title {
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 12px;
+      margin-top: 25px;
+    }
+
+    .referral_balance {
+      margin-bottom: 20px;
+
+      .balance_card {
+        background: linear-gradient(142deg, #2a3b67 0%, #375aab 100%);
+        border-radius: 16px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+        .balance_title {
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.8);
+          margin-top: 5px;
+        }
+
+        .balance_amount {
+          font-size: 36px;
+          font-weight: 700;
+          color: white;
+          margin-bottom: 2px;
+        }
+      }
+    }
+
+    .referral_link_section {
+      margin-bottom: 15px;
+
+      .referral_link_container {
+        margin-bottom: 5px;
+
+        .link_wrapper {
+          display: flex;
+          width: 100%;
+          background: #242C3B;
+          border-radius: 10px;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          
+          .link_input {
+            flex: 1;
+            padding: 12px 15px;
+            background: transparent;
+            color: white;
+            font-size: 14px;
+            border: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          
+          .copy_button {
+            background: #375aab;
+            padding: 0 12px;
+            color: white;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 100px;
+            text-align: center;
+            transition: background 0.2s;
+            
+            &:active {
+              background: #2a3b67;
+            }
+          }
+        }
+
+        .link_description {
+          font-size: 13px;
+          color: rgba(255, 255, 255, 0.6);
+          margin-top: 8px;
+          line-height: 1.4;
+        }
+      }
+    }
+
+    .payment_form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 20px;
+
+      .form_group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .form_label {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 5px;
+      }
+
+      .select_bank {
+        background: #242C3B;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: white;
+        font-size: 15px;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1L6 6L11 1' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        width: 100%;
+
+        option {
+          background: #242C3B;
+        }
+      }
+    }
+
+    .social_links_form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .referrals_list_section {
+      margin-bottom: 25px;
+
+      .referrals_list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        .referral_item {
+          background: #242C3B;
+          border-radius: 12px;
+          padding: 14px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+
+          .referral_info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+
+          .referral_username {
+            font-weight: 600;
+            font-size: 15px;
+            color: white;
+          }
+
+          .referral_date {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+          }
+
+          .referral_profit {
+            font-weight: 700;
+            font-size: 16px;
+            color: #6AEC3D;
+          }
+        }
+      }
+
+      .empty_referrals {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.6);
+        padding: 20px;
+        background: #242C3B;
+        border-radius: 12px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+    }
+  }
+}
+
+.error_message {
+  display: flex;
+  color: #ff4444 !important;
+  font-size: 12px !important;
+  margin-top: 4px;
+  font-weight: 500 !important;
+}
+
+.gameIcon {
+  opacity: 1 !important;
+  transition: opacity 0.2s ease;
+  border-radius: 5px;
+}
+// Добавьте эти стили в ваш файл profile.module.scss
+
+.social_links_section {
+  margin-bottom: 25px;
+  
+  .social_links_form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    
+    .social_input_container {
+      overflow: hidden;
+      animation: slideDown 0.3s ease forwards;
+      
+      .social_input_row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        
+        /* Добавьте эти стили в profile.module.scss */
+
+        .social_select {
+          width: 40px;
+          height: 40px;
+          flex-shrink: 0;
+          border-radius: 10px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          background-color: rgba(36, 44, 59, 0.7);
+          color: transparent; /* Скрываем текст */
+          cursor: pointer;
+          transition: all 0.2s ease;
+          padding: 0;
+          appearance: none; /* Скрываем стандартную стрелку */
+          position: relative;
+          background-position: center;
+          background-repeat: no-repeat;
+          background-size: 20px;
+          
+          &:hover {
+            background-color: rgba(36, 44, 59, 0.9);
+            border-color: rgba(255, 255, 255, 0.2);
+          }
+          
+          &:focus {
+            outline: none;
+            background-color: #1E2633;
+            border-color: rgba(55, 90, 171, 0.5);
+            box-shadow: 0 0 0 2px rgba(55, 90, 171, 0.2);
+          }
+          
+          /* Отображаем текст только в раскрытом списке */
+          option {
+            color: white;
+            background-color: #1E2633;
+            padding: 8px 10px;
+            font-size: 13px;
+            font-weight: 500;
+          }
+          
+          /* Иконки для разных соцсетей */
+          &[value="tiktok"] {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='white' d='M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z'/%3E%3C/svg%3E");
+          }
+          
+          &[value="telegram"] {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 496 512'%3E%3Cpath fill='white' d='M248,8C111.033,8,0,119.033,0,256S111.033,504,248,504,496,392.967,496,256,384.967,8,248,8ZM362.952,176.66c-3.732,39.215-19.881,134.378-28.1,178.3-3.476,18.584-10.322,24.816-16.948,25.425-14.4,1.326-25.338-9.517-39.287-18.661-21.827-14.308-34.158-23.215-55.346-37.177-24.485-16.135-8.612-25,5.342-39.5,3.652-3.793,67.107-61.51,68.335-66.746.153-.655.3-3.1-1.154-4.384s-3.59-.849-5.135-.5q-3.283.746-104.608,69.142-14.845,10.194-26.894,9.934c-8.855-.191-25.888-5.006-38.551-9.123-15.531-5.048-27.875-7.717-26.8-16.291q.84-6.7,18.45-13.7,108.446-47.248,144.628-62.3c68.872-28.647,83.183-33.623,92.511-33.789,2.052-.034,6.639.474,9.61,2.885a10.452,10.452,0,0,1,3.53,6.716A43.765,43.765,0,0,1,362.952,176.66Z'/%3E%3C/svg%3E");
+          }
+          
+          &[value="youtube"] {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512'%3E%3Cpath fill='white' d='M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z'/%3E%3C/svg%3E");
+          }
+          
+          &[value="instagram"] {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='white' d='M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z'/%3E%3C/svg%3E");
+          }
+          
+          &[value="vk"] {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512'%3E%3Cpath fill='white' d='M545 117.7c3.7-12.5 0-21.7-17.8-21.7h-58.9c-15 0-21.9 7.9-25.6 16.7 0 0-30 73.1-72.4 120.5-13.7 13.7-20 18.1-27.5 18.1-3.7 0-9.4-4.4-9.4-16.9V117.7c0-15-4.2-21.7-16.6-21.7h-92.6c-9.4 0-15 7-15 13.5 0 14.2 21.2 17.5 23.4 57.5v86.8c0 19-3.4 22.5-10.9 22.5-20 0-68.6-73.4-97.4-157.4-5.8-16.3-11.5-22.9-26.6-22.9H38.8c-16.8 0-20.2 7.9-20.2 16.7 0 15.6 20 93.1 93.1 195.5C160.4 378.1 229 416 291.4 416c37.5 0 42.1-8.4 42.1-22.9 0-66.8-3.4-73.1 15.4-73.1 8.7 0 23.7 4.4 58.7 38.1 40 40 46.6 57.9 69 57.9h58.9c16.8 0 25.3-8.4 20.4-25-11.2-34.9-86.9-106.7-90.3-111.5-8.7-11.2-6.2-16.2 0-26.2.1-.1 72-101.3 79.4-135.6z'/%3E%3C/svg%3E");
+          }
+          
+          &[value=""] {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='white' d='M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z'/%3E%3C/svg%3E");
+          }
+        }
+
+        /* Стилизация выпадающего меню с помощью кастомных свойств */
+        .social_select_container {
+          position: relative;
+          
+          /* При фокусе на селект, показываем выпадающий список */
+          &:focus-within::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 90;
+          }
+        }
+
+        /* Чтобы применить стили к выпадающему списку, нужно использовать JavaScript */
+        /* Но мы можем добавить стили для :focus, чтобы селектор выглядел лучше при фокусе */
+        .social_select:focus {
+          border-color: rgba(55, 90, 171, 0.6);
+        }
+
+        /* Для мобильных устройств, когда открывается нативный селектор */
+        @media (max-width: 768px) {
+          .social_select {
+            background-size: 18px;
+          }
+        }
+
+        /* Анимация для добавления новых социальных инпутов */
+        .social_input_container {
+          animation: slideDown 0.3s ease forwards;
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        // .social_select {
+        //   flex: 0 0 15%;
+        //   background: #242C3B;
+        //   border: 1px solid rgba(255, 255, 255, 0.1);
+        //   border-radius: 10px;
+        //   padding: 12px;
+        //   color: white;
+        //   font-size: 14px;
+        //   appearance: none;
+        //   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1L6 6L11 1' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        //   background-repeat: no-repeat;
+        //   background-position: right 10px center;
+          
+        //   option {
+        //     background: #242C3B;
+        //   }
+        // }
+        
+        .social_link_input {
+          flex: 1;
+          background: #242C3B;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+          padding: 12px;
+          color: white;
+          font-size: 14px;
+        }
+        
+        .remove_social_btn {
+          background: rgba(255, 74, 74, 0.2);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
+          transition: background 0.2s;
+          
+          &:hover {
+            background: rgba(255, 74, 74, 0.3);
+          }
+          
+          svg {
+            opacity: 0.9;
+          }
+        }
+      }
+    }
+    
+    .add_social_btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(55, 90, 171, 0.2);
+      border: 1px solid rgba(55, 90, 171, 0.4);
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 5px;
+      color: white;
+      font-size: 14px;
+      width: 100%;
+      cursor: pointer;
+      transition: background 0.2s;
+      
+      &:hover {
+        background: rgba(55, 90, 171, 0.3);
+      }
+      
+      svg {
+        opacity: 0.9;
+      }
+      
+      span {
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 60px;
+  }
+}
+.support {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(142deg, #2a3b67 0%, #375aab 100%);
+  border-radius: 12px;
+  padding: 16px;
+  grid-gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  span {
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.8);
+  }
+}

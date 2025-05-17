@@ -1,0 +1,33 @@
+{
+  "name": "supercell",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@twa-dev/sdk": "^7.0.0",
+    "next": "14.1.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-hook-form": "^7.51.1",
+    "react-hot-toast": "^2.4.1",
+    "react-shimmer": "^3.2.0",
+    "react18-json-view": "^0.2.7",
+    "telegram-webapps-types": "^1.0.5",
+    "uuid": "^9.0.1",
+    "zustand": "^4.5.2"
+    
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/uuid": "^9.0.8",
+    "sass": "^1.72.0",
+    "typescript": "^5"
+  }
+}

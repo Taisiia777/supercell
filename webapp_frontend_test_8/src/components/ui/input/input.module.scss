@@ -1,0 +1,172 @@
+.input_container {
+  width: 100%;
+  .title {
+    display: flex;
+    flex-direction: column;
+    grid-gap: 12px;
+    width: 100%;
+
+    .el {
+      position: relative;
+      display: flex;
+      width: 100%;
+      .copy {
+        position: absolute;
+        right: 0;
+        padding: 9px 14px 0 0;
+      }
+      .input_content {
+        width: 100%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    
+        .input {
+          flex: 1;
+          height: 44px;
+          border-radius: 8px;
+          box-shadow: #191e29 4px 10px 30px 0 inset;
+          -webkit-appearance: none;
+          background: #242c3b;
+          border: unset;
+          color: rgba(255, 255, 255, 0.82);
+          font-size: 15px;
+          padding: 0 10px;
+        }
+    
+        .buttons {
+          display: flex;
+          gap: 8px;
+          margin-left: 8px;
+        }
+    
+        .edit {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: linear-gradient(142deg, #2a3b67 0%, #375aab 100%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          border: none;
+          padding: 0;
+    
+          &.save {
+            background: linear-gradient(142deg, #2a673b 0%, #37ab4f 100%);
+          }
+    
+          svg {
+            width: 16px;
+            height: 16px;
+          }
+    
+          &:hover {
+            opacity: 0.9;
+          }
+        }
+    
+        .clear {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          background: linear-gradient(142deg, #672a2a 0%, #ab3737 100%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          border: none;
+          padding: 0;
+    
+          svg {
+            width: 16px;
+            height: 16px;
+          }
+    
+          &:hover {
+            opacity: 0.9;
+          }
+        }
+      }
+
+
+    }
+    .error_code {
+      color: #ae0000;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: -0.01em;
+    }
+    .title_container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .error {
+        display: flex;
+        font-size: 12px;
+        color: red;
+      }
+
+      .request {
+        cursor: pointer;
+        span {
+          font-weight: 700;
+          font-size: 15px;
+          letter-spacing: -0.02em;
+          color: rgba(255, 255, 255, 0.6);
+        }
+      }
+
+      .name {
+        display: flex;
+        grid-gap: 5px;
+        align-items: center;
+        span {
+          font-weight: 700;
+          font-size: 15px;
+          letter-spacing: -0.02em;
+          color: rgba(255, 255, 255, 0.6);
+
+          font-family: sans-serif;
+        }
+      }
+    }
+  }
+}
+.error_message {
+  display: flex;
+  position: absolute;
+  top: 40px;
+  left: 0;
+  color: #ff4444 !important;
+  font-size: 12px !important;
+  margin-top: 4px;
+  font-weight: 500 !important;
+}
+
+.input {
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.copied_indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #4CAF50;
+}
+
+.copied_indicator span {
+  font-size: 12px;
+  font-weight: 500;
+}

@@ -1,0 +1,209 @@
+// src/components/review/review.module.scss
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    color: white;
+    font-weight: 500;
+    font-size: 16px;
+  }
+  
+  .review_container {
+    width: 100%;
+    padding: 0 19px;
+    margin-top: 30px;
+    
+    .review_form {
+      background: linear-gradient(142deg, #2a3b67 0%, #375aab 100%);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 10px 23px 0 rgba(0, 0, 0, 0.25);
+      animation: slideUp 0.8s ease;
+      
+      h3 {
+        font-weight: 700;
+        font-size: 18px;
+        color: #fff;
+        margin-bottom: 20px;
+        text-align: center;
+        position: relative;
+        
+        &:after {
+          content: '';
+          position: absolute;
+          bottom: -8px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 50px;
+          height: 2px;
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 2px;
+        }
+      }
+      
+      .input_group {
+        margin-bottom: 18px;
+        
+        label {
+          display: block;
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.8);
+          margin-bottom: 8px;
+          font-weight: 600;
+        }
+        
+        input, textarea {
+          width: 100%;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+          padding: 12px 15px;
+          color: white;
+          font-size: 14px;
+          
+          &:focus {
+            border-color: #375AAB;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(55, 90, 171, 0.3);
+          }
+          
+          &::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+          }
+        }
+        
+        textarea {
+          min-height: 100px;
+          resize: vertical;
+        }
+      }
+      
+      .rating_select {
+        margin-bottom: 18px;
+        
+        label {
+          display: block;
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.8);
+          margin-bottom: 8px;
+          font-weight: 600;
+        }
+        
+        .stars {
+          display: flex;
+          flex-direction: row-reverse;
+          justify-content: flex-end;
+          
+          input {
+            display: none;
+            
+            &:checked ~ label {
+              color: #FFC567;
+            }
+          }
+          
+          label {
+            cursor: pointer;
+            font-size: 30px;
+            color: rgba(255, 255, 255, 0.3);
+            margin: 0 3px;
+            transition: color 0.2s ease, transform 0.2s ease;
+            
+            &:hover,
+            &:hover ~ label {
+              color: #FFC567;
+              transform: scale(1.1);
+            }
+          }
+        }
+      }
+      
+      .submit_btn {
+        width: 100%;
+        margin-top: 15px;
+        
+        button {
+          transition: transform 0.2s ease;
+          
+          &:active {
+            transform: scale(0.98);
+          }
+        }
+      }
+      
+      .thank_you {
+        text-align: center;
+        padding: 25px 0;
+        animation: fadeIn 0.8s ease;
+        
+        h3 {
+          margin-top: 15px;
+          
+          &:after {
+            display: none;
+          }
+        }
+        
+        p {
+          margin-top: 10px;
+          color: rgba(255, 255, 255, 0.8);
+          line-height: 1.4;
+        }
+        
+        .check_icon {
+          width: 70px;
+          height: 70px;
+          margin: 0 auto 15px;
+          background: linear-gradient(142deg, #6AEC3D 0%, #4dbb25 100%);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 5px 15px rgba(106, 236, 61, 0.3);
+          animation: scaleIn 0.5s ease;
+          
+          svg {
+            width: 40px;
+            height: 40px;
+          }
+        }
+  
+        .go_profile {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+          margin-top: 20px;
+        }
+      }
+    }
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      transform: scale(0);
+    }
+    to {
+      transform: scale(1);
+    }
+  }

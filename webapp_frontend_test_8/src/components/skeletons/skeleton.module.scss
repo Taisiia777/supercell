@@ -1,0 +1,336 @@
+// skeleton.module.scss
+
+.skeleton {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  
+    &_product {
+      position: relative;
+      width: 100%;
+      height: 265px;
+      background: linear-gradient(142deg, #2a3b67 0%, #375aab 100%);
+      border-radius: 18px;
+      padding: 18px 13px 15px 13px;
+  
+      .type {
+        position: absolute;
+        right: 13px;
+        top: 18px;
+        width: 20px;
+        height: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+      }
+  
+      .content {
+        margin-top: 59px;
+        display: flex;
+        flex-direction: column;
+  
+        .img {
+          width: 139px;
+          height: 82px;
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 10px;
+        }
+  
+        .container {
+          margin-top: 11px;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+  
+          .info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+  
+            .category {
+              height: 16px;
+              width: 96px;
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 4px;
+            }
+  
+            .name {
+              height: 20px;
+              width: 128px;
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 4px;
+            }
+          }
+  
+          .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+  
+            .price {
+              height: 16px;
+              width: 64px;
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 4px;
+            }
+  
+            .button {
+              height: 31px;
+              width: 120px;
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 5px;
+              margin: 0 auto;
+            }
+          }
+        }
+      }
+    }
+
+  
+    &_cart {
+      padding: 0 19px;
+      margin-top: 32px;
+  
+      .item {
+        padding: 16px 0;
+        border-bottom: 0.5px solid rgba(255, 255, 255, 0.11);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+  
+        .content {
+          display: flex;
+          gap: 16px;
+  
+          .img {
+            width: 100px;
+            height: 90px;
+            background: linear-gradient(328deg, #363e51 0%, #4c5770 100%);
+            border-radius: 10px;
+          }
+  
+          .info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+  
+            .name {
+              height: 20px;
+              width: 75%;
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 4px;
+            }
+  
+            .category {
+              height: 16px;
+              width: 50%;
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 4px;
+            }
+  
+            .actions {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+  
+              .price {
+                height: 16px;
+                width: 64px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 4px;
+              }
+  
+              .counter {
+                height: 31px;
+                width: 100px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 5px;
+              }
+            }
+          }
+        }
+  
+        .input {
+          height: 48px;
+          width: 100%;
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 5px;
+        }
+      }
+    }
+  
+    &_profile {
+      padding: 0 19px;
+      margin-top: 32px;
+  
+      .form {
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+        margin-top: 22px;
+  
+        .header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+  
+          .icon {
+            width: 32px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+          }
+  
+          .text {
+            height: 15px;
+            width: 200px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+          }
+        }
+  
+        .inputs {
+          display: flex;
+          flex-direction: column;
+          gap: 13px;
+  
+          .input_container {
+            position: relative;
+            
+            .label {
+              height: 15px;
+              width: 120px;
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 4px;
+              margin-bottom: 8px;
+            }
+  
+            .input {
+              height: 48px;
+              width: 100%;
+              background: linear-gradient(315deg, #335094 0%, #242c3b 100%);
+              border-radius: 10px;
+              display: flex;
+              align-items: center;
+              padding: 0 16px;
+              gap: 12px;
+  
+              .game_icon {
+                width: 35px;
+                height: 35px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 5px;
+              }
+  
+              .field {
+                height: 16px;
+                flex: 1;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 4px;
+              }
+            }
+          }
+        }
+      }
+    }
+    &_catalog {
+      padding: 0 19px;
+    
+      .items {
+        margin-top: 29px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        grid-gap: 12px;
+        width: 100%;
+    
+        .item {
+          box-shadow: 0 20px 60px 0 rgba(0, 0, 0, 0.25);
+          background: linear-gradient(180deg, #375aab 0%, #2a3b67 100%);
+          border-radius: 18px;
+          padding: 18px 13px 15px 13px;
+          display: flex;
+          flex-direction: column;
+          min-height: 300px;
+          width: 160px;
+          max-width: 160px;
+          .types {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+    
+            .type {
+              display: flex;
+              gap: 8px;
+              align-items: center;
+    
+              .badge {
+                height: 12px;
+                width: 70px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 4px;
+              }
+            }
+          }
+    
+          .content {
+            display: flex;
+            flex-direction: column;
+            margin-top: 18px;
+            height: 100%;
+            justify-content: space-between;
+    
+            .img {
+              position: relative;
+              width: 100%;
+              padding-top: 75%;
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 10px;
+            }
+    
+            .container {
+              margin-top: 11px;
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+    
+              .title {
+                height: 12px;
+                width: 80%;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 4px;
+              }
+    
+              .actions {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+    
+                .price {
+                  height: 14px;
+                  width: 60px;
+                  background: rgba(255, 255, 255, 0.2);
+                  border-radius: 4px;
+                }
+    
+                .button {
+                  height: 31px;
+                  width: 100%;
+                  background: rgba(255, 255, 255, 0.2);
+                  border-radius: 5px;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: .5;
+    }
+  }

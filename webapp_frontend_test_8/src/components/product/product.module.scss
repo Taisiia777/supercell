@@ -1,0 +1,102 @@
+.product {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  
+  .img {
+    position: relative;
+    height: 283px;
+    width: 100%;
+    max-width: 249px;
+    margin: 0 auto;
+  }
+
+  // .card {
+  //   margin-top: 100px;
+  //   padding: 19px 16px 41px 16px;
+  //   width: 100%;
+  //   z-index: 1; // Уменьшаем z-index чтобы карточка была под навигацией
+  //   box-shadow: 0 -4px 20px 2px rgba(0, 0, 0, 0.25);
+  //   background: linear-gradient(225deg, #2a3b67 0%, #375aab 100%);
+  //   border-top-left-radius: 30px;
+  //   border-top-right-radius: 30px;
+  //   display: flex;
+  //   flex-direction: column;
+  //   grid-gap: 16px;
+  //   margin-bottom: -73px; // Компенсируем высоту навигации
+.card {
+    margin-top: 32px; // Уменьшил отступ, чтобы информация начиналась с верха
+    padding: 19px 16px 41px 16px;
+    width: 100%;
+    z-index: 1; // Уменьшаем z-index чтобы карточка была под навигацией
+    box-shadow: 0 -4px 20px 2px rgba(0, 0, 0, 0.25);
+    background: linear-gradient(225deg, #2a3b67 0%, #375aab 100%);
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    grid-gap: 16px;
+    margin-bottom: 73px; // Добавляем отступ снизу для нормального скроллинга
+    .name {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      .title {
+        display: flex;
+        grid-gap: 11px;
+        align-items: center;
+        span {
+          font-weight: 500;
+          font-size: 16px;
+          letter-spacing: 0.07em;
+          color: #fff;
+        }
+      }
+      .type {
+        display: flex;
+        align-items: center;
+        grid-gap: 7px;
+        span {
+          font-weight: 500;
+          font-size: 10px;
+          letter-spacing: 0.1em;
+          color: #fff;
+        }
+      }
+    }
+    .product_name {
+      font-weight: 500;
+      font-size: 24px;
+      letter-spacing: 0.05em;
+      color: #fff;
+    }
+    .price {
+      font-weight: 600;
+      font-size: 24px;
+      letter-spacing: 0.05em;
+      color: #fff;
+    }
+    .desc {
+      font-weight: 400;
+      font-size: 17px;
+      letter-spacing: 0.05em;
+      color: #fff;
+      margin-bottom: 120px;
+    }
+  }
+
+  .add {
+    position: fixed;
+    bottom: 73px; // Отступ для навигации
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    z-index: 2; // Больше чем у карточки, но меньше чем у навигации
+    max-width: 1000px;
+  }
+}

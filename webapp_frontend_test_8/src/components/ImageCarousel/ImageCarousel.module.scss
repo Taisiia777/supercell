@@ -1,0 +1,202 @@
+// // ImageCarousel.module.scss
+// .carousel {
+//     position: relative;
+//     width: 100%;
+//     max-width: 249px;
+//     height: 283px;
+//     margin: 0 auto;
+//   }
+  
+//   .container {
+//     position: relative;
+//     width: 100%;
+//     height: 100%;
+//     overflow: hidden;
+//   }
+  
+//   .image {
+//     transition: transform 0.3s ease;
+//   }
+  
+//   .pagination {
+//     position: absolute;
+//     bottom: -16px;
+//     left: 0;
+//     right: 0;
+//     display: flex;
+//     justify-content: center;
+//     gap: 8px;
+//   }
+  
+//   .dot {
+//     width: 8px;
+//     height: 8px;
+//     border-radius: 50%;
+//     background: rgba(255, 255, 255, 0.5);
+//     border: none;
+//     padding: 0;
+//     cursor: pointer;
+//     transition: background-color 0.3s ease;
+  
+//     &.active {
+//       background: rgba(255, 255, 255, 1);
+//     }
+//   }
+
+
+
+.carousel {
+  position: relative;
+  width: 100%;
+  max-width: 249px;
+  height: 283px;
+  margin: 0 auto;
+  touch-action: pan-y; /* Разрешаем вертикальный скролл страницы */
+}
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  -webkit-user-select: none; /* Предотвращаем выделение текста при свайпе */
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s ease;
+  will-change: transform, opacity; /* Оптимизация производительности */
+  pointer-events: none; /* Предотвращаем события мыши на скрытых слайдах */
+  
+  &.active {
+    pointer-events: auto;
+  }
+}
+
+.image {
+  object-fit: contain;
+  opacity: 1;
+  backface-visibility: hidden; /* Предотвращаем мерцание во время анимации */
+  -webkit-tap-highlight-color: transparent; /* Убираем подсветку при тапе на мобильных */
+}
+
+.pagination {
+  position: absolute;
+  bottom: -16px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 10;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+  outline: none;
+  
+  &:hover {
+    transform: scale(1.2);
+  }
+  
+  &.active {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.2);
+  }
+}
+
+/* Добавляем анимацию плавного появления при первоначальной загрузке */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.carousel {
+  animation: fadeIn 0.5s ease;
+}
+
+/* Добавляем индикатор загрузки */
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top: 3px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Стили для навигационных кнопок (опционально) */
+.arrowButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.3);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.3s ease, transform 0.2s ease;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.5);
+    transform: translateY(-50%) scale(1.1);
+  }
+  
+  &.prev {
+    left: 10px;
+  }
+  
+  &.next {
+    right: 10px;
+  }
+}
+
+/* Добавляем стиль для активных и неактивных слайдов */
+.slide {
+  &.prev {
+    z-index: 1;
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  
+  &.active {
+    z-index: 2;
+    transform: translateX(0);
+    opacity: 1;
+  }
+  
+  &.next {
+    z-index: 1;
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}

@@ -1,0 +1,87 @@
+
+.nav {
+  position: relative;
+  // width: 100%;
+  overflow-x: scroll;
+  height: 90px;
+  margin: 0 -19px; // Отрицательный отступ слева
+  padding: 0 19px;
+  
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+
+  .items {
+    position: absolute;
+    width: max-content;
+    display: flex;
+    grid-gap: 0px;
+    left: 19px;
+    top: 0;
+    padding-right: 38px; // Увеличиваем правый отступ, чтобы последний элемент не обрезался
+    margin-right: 19px; // Добавляем дополнительный отступ справа
+
+    .item {
+      display: flex;
+      position: relative;
+      flex-direction: column;
+      align-items: center;
+      min-width: 70px;
+      justify-content: space-between;
+      padding: 0 10px;
+
+      img {
+        display: flex;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 4px;
+        border-radius: 10px;
+        object-fit: cover;
+        z-index: 10;
+
+      }
+      svg{
+        display: flex;
+        position: absolute;
+        top: 0;
+        left: 10px;
+      }
+      .icon {
+        display: flex;
+        margin-bottom: 4px;
+        z-index: 10;
+        svg {
+          position: absolute;
+          top: 12.5px;
+          left: 22.5px;
+          width: 24px;
+          height: 24px;
+        }
+      }
+
+      p {
+        font-weight: 600;
+        font-size: 11px;
+        line-height: 1.2;
+        color: #fff;
+        text-align: center;
+        margin: 0;
+        white-space: pre-wrap;
+      }
+    }
+
+    .active {
+      p {
+        color: #375aab;
+      }
+    }
+  }
+}

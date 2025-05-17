@@ -1,0 +1,852 @@
+
+@font-face {
+  font-family: 'KZSupercell-Magic';
+  src: url('./KZSupercell-Magic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+.reviews {
+  margin: 30px 0;
+  padding: 0 19px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  min-height: 300px;
+  
+  .reviews_title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #fff;
+  }
+
+  .verified {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    
+    span {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+  
+  .filter_bar {
+    margin-bottom: 15px;
+    
+    .filter_options {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      
+      .filter_btn {
+        background: rgba(24, 26, 32, 0.5);
+        border: none;
+        border-radius: 20px;
+        padding: 6px 12px;
+        color: white;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        
+        &:hover {
+          background: rgba(24, 26, 32, 0.8);
+        }
+      }
+      
+      .option {
+        background: rgba(24, 26, 32, 0.5);
+        border: none;
+        border-radius: 20px;
+        padding: 6px 12px;
+        color: white;
+        font-size: 13px;
+        white-space: nowrap;
+        cursor: pointer;
+        
+        &:hover {
+          background: rgba(24, 26, 32, 0.8);
+        }
+      }
+    }
+    
+    .sort {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 5px;
+      
+      span {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+      }
+    }
+  }
+  
+  .slider_container {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    user-select: none;
+    touch-action: pan-y; /* Разрешаем вертикальный скроллинг */
+  }
+  
+  .slider {
+    display: flex;
+    transition: transform 0.3s ease;
+    
+    .slide {
+      min-width: 100%;
+      padding: 0 3px;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+      
+      &.inactive {
+        opacity: 0;
+      }
+    }
+  }
+  
+  .review_card {
+    background: #1f2937;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 5px 0;
+    position: relative;
+    animation: fadeIn 0.5s ease-out;
+    
+    .review_header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      
+      .avatar_container {
+        margin-right: 12px;
+      }
+      
+      .avatar {
+        width: 44px;
+        height: 44px;
+        background: #374151;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        font-weight: 700;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      .user_info {
+        display: flex;
+        flex-direction: column;
+        
+        .user_name {
+          font-weight: 700;
+          font-size: 16px;
+          color: #fff;
+          margin-bottom: 4px;
+        }
+        
+        .rating {
+          display: flex;
+          margin-bottom: 4px;
+          
+          .star, .star_filled {
+            font-size: 16px;
+            margin-right: 2px;
+          }
+          
+          .star {
+            color: rgba(255, 255, 255, 0.3);
+          }
+          
+          .star_filled {
+            color: #3b82f6;
+          }
+        }
+        
+        .date {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.6);
+        }
+      }
+    }
+    
+    .review_text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #fff;
+      margin-bottom: 14px;
+    }
+    
+    .product_info {
+      display: flex;
+      align-items: center;
+      background: rgba(14, 16, 20, 0.5);
+      border-radius: 8px;
+      padding: 8px;
+      
+      .product_image {
+        height: 70px;
+        width: 70px;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-right: 10px;
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+      
+      .product_details {
+        .price {
+          font-weight: 700;
+          font-size: 16px;
+          margin-bottom: 4px;
+        }
+        
+        .product_name {
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.8);
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          
+          .fire {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+  }
+  
+  /* Скелетон стили */
+  .skeleton_card {
+    background: #1f2937;
+  }
+  
+  .skeleton_element {
+    background: linear-gradient(90deg, #2c3440 25%, #374151 50%, #2c3440 75%);
+    background-size: 200% 100%;
+    animation: pulse 1.5s ease-in-out infinite;
+    border-radius: 4px;
+    height: 16px;
+    
+    &.avatar {
+      height: 44px;
+      border-radius: 50%;
+    }
+    
+    &.user_name {
+      width: 120px;
+      height: 18px;
+      margin-bottom: 8px;
+    }
+    
+    &.rating {
+      width: 80px;
+      height: 16px;
+      margin-bottom: 8px;
+    }
+    
+    &.date {
+      width: 100px;
+      height: 12px;
+    }
+    
+    &.review_text {
+      height: 60px;
+      margin-top: 10px;
+      margin-bottom: 14px;
+    }
+    
+    &.product_info {
+      height: 80px;
+    }
+  }
+
+  /* Социальные сети в стиле из картинки */
+  .social_links_container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    margin-top: 25px;
+    padding: 0 10px;
+    
+    .social_item {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: white;
+      padding: 5px;
+      border-radius: 8px;
+      transition: transform 0.2s ease;
+      
+      &:hover {
+        transform: translateX(5px);
+      }
+      
+      .social_icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        
+        &.twitch {
+          background-color: #9146FF;
+        }
+        
+        &.youtube {
+          background-color: transparent;
+        }
+        
+        &.telegram {
+          background-color: transparent;
+        }
+      }
+      
+      .social_text {
+        font-size: 24px;
+        font-family: 'KZSupercell-Magic', sans-serif; // Применяем шрифт здесь
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      
+      &.skeleton_element {
+        width: 180px;
+        height: 40px;
+        border-radius: 8px;
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+// Адаптация для разных размеров экрана
+@media (max-width: 768px) {
+  .reviews {
+    .reviews_title {
+      font-size: 20px;
+    }
+    
+    .review_card {
+      padding: 14px;
+      
+      .review_header {
+        .avatar {
+          width: 40px;
+          height: 40px;
+          font-size: 16px;
+        }
+        
+        .user_info {
+          .user_name {
+            font-size: 15px;
+          }
+          
+          .rating {
+            .star, .star_filled {
+              font-size: 14px;
+            }
+          }
+        }
+      }
+      
+      .review_text {
+        font-size: 13px;
+      }
+    }
+    
+    .social_links_container {
+      .social_item {
+        .social_text {
+          font-size: 20px;
+        }
+      }
+    }
+  }
+}
+
+
+@font-face {
+  font-family: 'KZSupercell-Magic';
+  src: url('./KZSupercell-Magic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+.reviews {
+  margin: 30px 0;
+  padding: 0 19px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  min-height: 300px;
+  
+  .reviews_title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #fff;
+  }
+
+  .verified {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    
+    span {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+  
+  .filter_bar {
+    margin-bottom: 15px;
+    
+    .filter_options {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      
+      &::-webkit-scrollbar {
+        display: none;
+      }
+      
+      .filter_btn {
+        background: rgba(24, 26, 32, 0.5);
+        border: none;
+        border-radius: 20px;
+        padding: 6px 12px;
+        color: white;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        
+        &:hover {
+          background: rgba(24, 26, 32, 0.8);
+        }
+      }
+      
+      .option {
+        background: rgba(24, 26, 32, 0.5);
+        border: none;
+        border-radius: 20px;
+        padding: 6px 12px;
+        color: white;
+        font-size: 13px;
+        white-space: nowrap;
+        cursor: pointer;
+        
+        &:hover {
+          background: rgba(24, 26, 32, 0.8);
+        }
+      }
+    }
+    
+    .sort {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 5px;
+      
+      span {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+      }
+    }
+  }
+  
+  .slider_container {
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    user-select: none;
+    touch-action: pan-y; /* Разрешаем вертикальный скроллинг */
+  }
+  
+  .slider {
+    display: flex;
+    transition: transform 0.3s ease;
+    flex-wrap: nowrap;
+    
+    .slide {
+      min-width: 100%;
+      padding: 0 3px;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+      
+      &.inactive {
+        opacity: 0;
+      }
+    }
+  }
+  
+  .review_card {
+    background: #1f2937;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 5px 0;
+    position: relative;
+    animation: fadeIn 0.5s ease-out;
+    
+    .review_header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      
+      .avatar_container {
+        margin-right: 12px;
+      }
+      
+      .avatar {
+        width: 44px;
+        height: 44px;
+        background: #374151;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        font-weight: 700;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      .user_info {
+        display: flex;
+        flex-direction: column;
+        
+        .user_name {
+          font-weight: 700;
+          font-size: 16px;
+          color: #fff;
+          margin-bottom: 4px;
+        }
+        
+        .rating {
+          display: flex;
+          margin-bottom: 4px;
+          
+          .star, .star_filled {
+            font-size: 16px;
+            margin-right: 2px;
+          }
+          
+          .star {
+            color: rgba(255, 255, 255, 0.3);
+          }
+          
+          .star_filled {
+            color: #3b82f6;
+          }
+        }
+        
+        .date {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.6);
+        }
+      }
+    }
+    
+    .review_text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #fff;
+      margin-bottom: 14px;
+    }
+    
+    .product_info {
+      display: flex;
+      align-items: center;
+      background: rgba(14, 16, 20, 0.5);
+      border-radius: 8px;
+      padding: 8px;
+      
+      .product_image {
+        height: 70px;
+        width: 70px;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-right: 10px;
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+      
+      .product_details {
+        .price {
+          font-weight: 700;
+          font-size: 16px;
+          margin-bottom: 4px;
+        }
+        
+        .product_name {
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.8);
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          
+          .fire {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+  }
+  
+  /* Скелетон стили */
+  .skeleton_card {
+    background: #1f2937;
+  }
+  
+  .skeleton_element {
+    background: linear-gradient(90deg, #2c3440 25%, #374151 50%, #2c3440 75%);
+    background-size: 200% 100%;
+    animation: pulse 1.5s ease-in-out infinite;
+    border-radius: 4px;
+    height: 16px;
+    
+    &.avatar {
+      height: 44px;
+      border-radius: 50%;
+    }
+    
+    &.user_name {
+      width: 120px;
+      height: 18px;
+      margin-bottom: 8px;
+    }
+    
+    &.rating {
+      width: 80px;
+      height: 16px;
+      margin-bottom: 8px;
+    }
+    
+    &.date {
+      width: 100px;
+      height: 12px;
+    }
+    
+    &.review_text {
+      height: 60px;
+      margin-top: 10px;
+      margin-bottom: 14px;
+    }
+    
+    &.product_info {
+      height: 80px;
+    }
+  }
+
+  /* Социальные сети в стиле из картинки */
+  .social_links_container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    margin-top: 25px;
+    padding: 0 10px;
+    
+    .social_item {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: white;
+      padding: 5px;
+      border-radius: 8px;
+      transition: transform 0.2s ease;
+      
+      &:hover {
+        transform: translateX(5px);
+      }
+      
+      .social_icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        
+        &.twitch {
+          background-color: #9146FF;
+        }
+        
+        &.youtube {
+          background-color: transparent;
+        }
+        
+        &.telegram {
+          background-color: transparent;
+        }
+      }
+      
+      .social_text {
+        font-size: 24px;
+        font-family: 'KZSupercell-Magic', sans-serif; // Применяем шрифт здесь
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      
+      &.skeleton_element {
+        width: 180px;
+        height: 40px;
+        border-radius: 8px;
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+// Мобильные устройства (по умолчанию 1 отзыв)
+@media (min-width: 320px) {
+  .reviews {
+    .slider {
+      .slide {
+        min-width: 100%; // 1 отзыв на мобильных
+      }
+    }
+  }
+}
+
+// Планшеты (2 отзыва)
+@media (min-width: 768px) and (max-width: 1199px) {
+  .reviews {
+    .slider {
+      .slide {
+        min-width: 50%; // 2 отзыва на планшетах
+        padding: 0 5px;
+      }
+    }
+    
+    .reviews_title {
+      font-size: 20px;
+    }
+    
+    .review_card {
+      padding: 14px;
+      
+      .review_header {
+        .avatar {
+          width: 40px;
+          height: 40px;
+          font-size: 16px;
+        }
+        
+        .user_info {
+          .user_name {
+            font-size: 15px;
+          }
+          
+          .rating {
+            .star, .star_filled {
+              font-size: 14px;
+            }
+          }
+        }
+      }
+      
+      .review_text {
+        font-size: 13px;
+      }
+    }
+    
+    .social_links_container {
+      .social_item {
+        .social_text {
+          font-size: 20px;
+        }
+      }
+    }
+  }
+}
+
+// Десктопы (3 отзыва)
+@media (min-width: 1200px) {
+  .reviews {
+    .slider {
+      .slide {
+        min-width: 33.333%; // 3 отзыва на десктопах
+        padding: 0 8px;
+      }
+    }
+    
+    .review_card {
+      padding: 16px;
+    }
+  }
+}
